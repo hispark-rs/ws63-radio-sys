@@ -1,0 +1,14 @@
+[package]
+name = "hisi-rf-link"
+version = "0.1.0-alpha.1"
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Host-side linker and post-link transforms for HiSilicon radio blobs"
+license = "MIT"
+publish = false
+
+[[bin]]
+name = "hisi-rf-link"
+path = "src/main.rs"
+
