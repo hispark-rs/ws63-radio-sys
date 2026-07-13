@@ -21,7 +21,10 @@ fn main() {
             root.join("rom/ws63_acore_rom_callbacks.txt"),
         ),
         ("rom_patches", root.join("rom/ws63_acore_wifi_patches.txt")),
-        ("rom_callback_archive", lib.join("librom_callback.a")),
+        // This archive is an ABI veneer/data payload, not an input to the
+        // relocation transform. A patched `WS63_RF_LIB_DIR` therefore must not
+        // redirect it away from the canonical delivery.
+        ("rom_callback_archive", root.join("lib/librom_callback.a")),
     ] {
         if !path.exists() {
             panic!("WS63 radio payload is incomplete: {}", path.display());
