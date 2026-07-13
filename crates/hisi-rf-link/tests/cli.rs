@@ -1,5 +1,16 @@
 use std::process::Command;
 
+fn binary() -> std::path::PathBuf {
+    let path = std::path::PathBuf::from(env!("CARGO_BIN_EXE_hisi-rf-link"));
+    if path.is_absolute() {
+        path
+    } else {
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join(path)
+    }
+}
+
 #[test]
 fn embedded_tools_expose_help() {
     for command in [
@@ -8,7 +19,7 @@ fn embedded_tools_expose_help() {
         "generate-rom-patch",
         "patch-from-oracle",
     ] {
-        let output = Command::new(env!("CARGO_BIN_EXE_hisi-rf-link"))
+        let output = Command::new(binary())
             .args([command, "--help"])
             .output()
             .expect("run embedded post-link tool");
@@ -23,7 +34,7 @@ fn embedded_tools_expose_help() {
 #[test]
 fn machine_profile_resolves_wifi_archives() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../ws63-RF");
-    let output = Command::new(env!("CARGO_BIN_EXE_hisi-rf-link"))
+    let output = Command::new(binary())
         .arg("archive-paths")
         .arg("wifi")
         .arg(root)

@@ -35,6 +35,7 @@ fn main() {
         .map(PathBuf::from)
         .unwrap_or_else(|| root.join("lib"));
     let profile_path = manifest.join("../hisi-rf-link/profiles/ws63.toml");
+    let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
@@ -58,6 +59,7 @@ fn main() {
         // redirect it away from the canonical delivery.
         ("rom_callback_archive", root.join("lib/librom_callback.a")),
         ("archive_profile", profile_path),
+        ("nvs_linker", nvs_linker),
     ] {
         if !path.exists() {
             panic!("WS63 radio payload is incomplete: {}", path.display());
