@@ -1,0 +1,72 @@
+revision = "ws63-rf-2026-07-13"
+
+wifi_root_symbols = ["alg_anti_intf_init", "alg_cca_opt_init", "alg_edca_opt_init", "alg_temp_protect_init", "alg_hmac_txbf_init", "dmac_psm_process_tim_elm_patch", "hh503_dispatch_trig_event_encap_patch"]
+rom_callback_root_symbols = ["__wrap_log_event_wifi_print1", "g_systick_clock"]
+
+[[wifi_archives]]
+name = "wifi_driver_hmac"
+link_order = 60
+transform_order = 10
+[[wifi_archives]]
+name = "wifi_driver_dmac"
+link_order = 70
+transform_order = 20
+[[wifi_archives]]
+name = "wifi_driver_tcm"
+link_order = 80
+transform_order = 30
+[[wifi_archives]]
+name = "bg_common"
+link_order = 90
+transform_order = 40
+[[wifi_archives]]
+name = "wifi_alg_anti_interference"
+link_order = 10
+transform_order = 50
+[[wifi_archives]]
+name = "wifi_alg_cca_opt"
+link_order = 20
+transform_order = 60
+[[wifi_archives]]
+name = "wifi_alg_edca_opt"
+link_order = 30
+transform_order = 70
+[[wifi_archives]]
+name = "wifi_alg_temp_protect"
+link_order = 40
+transform_order = 80
+[[wifi_archives]]
+name = "wifi_alg_txbf"
+link_order = 50
+transform_order = 90
+[[wifi_archives]]
+name = "wifi_rom_data"
+whole_archive = true
+link_order = 100
+transform_order = 100
+
+[[wpa_archives]]
+name = "wpa_supplicant"
+source = "override"
+relative = ""
+order = 10
+[[wpa_archives]]
+name = "drv_security_unified"
+source = "sdk"
+relative = "driver/security_unified/libdrv_security_unified.a"
+order = 20
+[[wpa_archives]]
+name = "hal_security_unified"
+source = "sdk"
+relative = "hal/security_unified/libhal_security_unified.a"
+order = 30
+[[wpa_archives]]
+name = "c"
+source = "sdk"
+relative = "liteos/libs/libc.a"
+order = 40
+[[wpa_archives]]
+name = "m"
+source = "sdk"
+relative = "liteos/libs/libm.a"
+order = 50

@@ -6,7 +6,7 @@ authors.workspace = true
 repository.workspace = true
 description = "Host-side linker and post-link transforms for HiSilicon radio blobs"
 license = "MIT"
-include = ["src/**", "python/**", "Cargo.toml", "README.md"]
+include = ["src/**", "python/**", "profiles/**", "tests/**", "Cargo.toml", "README.md"]
 
 [[bin]]
 name = "hisi-rf-link"
@@ -14,4 +14,5 @@ path = "src/main.rs"
 
 [dependencies]
 tempfile = "3"
-
+serde = { version = "1", features = ["derive"] }
+toml = "0.9"
