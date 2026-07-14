@@ -94,6 +94,11 @@ size_t hisi_wpa_context_size(void)
     return sizeof(struct hisi_wpa_context);
 }
 
+size_t hisi_wpa_context_align(void)
+{
+    return _Alignof(struct hisi_wpa_context);
+}
+
 struct hisi_wpa_context *hisi_wpa_create(void *storage, size_t storage_len,
     const struct hisi_wpa_driver_hooks *hooks)
 {

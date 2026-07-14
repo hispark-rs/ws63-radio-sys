@@ -144,6 +144,7 @@ uint64_t hisi_wpa_eloop_next_deadline_us(void);
 void hisi_wpa_eloop_wake(void);
 
 size_t hisi_wpa_context_size(void);
+size_t hisi_wpa_context_align(void);
 struct hisi_wpa_context *hisi_wpa_create(void *storage, size_t storage_len,
     const struct hisi_wpa_driver_hooks *hooks);
 int32_t hisi_wpa_init(struct hisi_wpa_context *context);

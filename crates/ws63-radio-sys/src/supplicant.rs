@@ -184,6 +184,7 @@ unsafe extern "C" {
     pub fn hisi_wpa_driver_install(hooks: *const DriverHooks) -> c_int;
     pub fn hisi_wpa_driver_uninstall(driver: *mut c_void) -> c_int;
     pub fn hisi_wpa_context_size() -> usize;
+    pub fn hisi_wpa_context_align() -> usize;
     pub fn hisi_wpa_create(
         storage: *mut c_void,
         storage_len: usize,
