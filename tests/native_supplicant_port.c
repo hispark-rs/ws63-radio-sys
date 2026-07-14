@@ -201,6 +201,8 @@ static int32_t remove_key(void *driver, const struct hisi_wpa_key *key)
 }
 
 static const struct hisi_wpa_driver_hooks driver_hooks = {
+    .abi_version = HISI_WPA_ABI_VERSION,
+    .reserved = 0,
     .driver = (void *) 0x4567u,
     .get_own_address = get_own_address,
     .send_eapol = send_eapol,
@@ -412,6 +414,12 @@ static void test_ws63_driver_bridge(void)
 int main(void)
 {
     struct hisi_wpa_os_hooks conflicting_hooks = hooks;
+    struct hisi_wpa_driver_hooks invalid_driver_hooks = driver_hooks;
+    invalid_driver_hooks.abi_version++;
+    assert(hisi_wpa_driver_install(&invalid_driver_hooks) == -1);
+    invalid_driver_hooks = driver_hooks;
+    invalid_driver_hooks.reserved = 1;
+    assert(hisi_wpa_driver_install(&invalid_driver_hooks) == -1);
     assert(hisi_wpa_os_install(&hooks) == 0);
     assert(hisi_wpa_os_install(&hooks) == 0);
     conflicting_hooks.sleep_ms = NULL;

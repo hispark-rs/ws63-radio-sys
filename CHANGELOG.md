@@ -16,3 +16,5 @@
 - Added native `os_hisi_rtos`/`eloop_hisi_rtos`, an EAPOL-only L2 path, and the
   first upstream `wpa_driver_ops` subset for MAC, management TX, and key
   install/remove, with host/RV32 and object-symbol drift gates.
+- Versioned the WS63 driver hook table and exposed its raw install lifecycle so
+  the Rust integration can own registration without relying on private C state.

@@ -41,7 +41,8 @@ layer:
   delivered only when `RadioRunner` drains a bounded vendor-event queue, and
   the driver registration cannot be removed while an RX endpoint is alive;
 - `hisi_wpa_driver_port.c` owns the narrow WS63 driver hook lifetime without
-  exposing hostap internal structures to Rust;
+  exposing hostap internal structures to Rust; its public raw install contract
+  validates the same ABI version prefix as the OS hook table;
 - `driver_ws63.c` now consumes upstream hostap 2.11's real `wpa_driver_ops` and
   implements the first fail-closed subset: init/deinit, MAC address, management
   TX, and key install/remove. The key ABI preserves peer presence, RX/TX and

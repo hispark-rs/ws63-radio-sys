@@ -6,7 +6,7 @@
 
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 4;
+pub const ABI_VERSION: u16 = 5;
 pub const MAX_SSID_LEN: usize = 32;
 pub const EVENT_DATA_LEN: usize = 128;
 pub const KEY_SEQUENCE_LEN: usize = 16;
@@ -165,6 +165,8 @@ pub type InstallKey = unsafe extern "C" fn(
 pub type RemoveKey = unsafe extern "C" fn(driver: *mut c_void, key: *const Key) -> c_int;
 #[repr(C)]
 pub struct DriverHooks {
+    pub abi_version: u16,
+    pub reserved: u16,
     pub driver: *mut c_void,
     pub get_own_address: Option<GetOwnAddress>,
     pub send_eapol: Option<SendEapol>,
@@ -179,6 +181,8 @@ unsafe extern "C" {
     pub fn hisi_wpa_eloop_run_once(work_budget: u32) -> u32;
     pub fn hisi_wpa_eloop_next_deadline_us() -> u64;
     pub fn hisi_wpa_eloop_wake();
+    pub fn hisi_wpa_driver_install(hooks: *const DriverHooks) -> c_int;
+    pub fn hisi_wpa_driver_uninstall(driver: *mut c_void) -> c_int;
     pub fn hisi_wpa_context_size() -> usize;
     pub fn hisi_wpa_create(
         storage: *mut c_void,
@@ -221,5 +225,6 @@ const _: () = {
     assert!(core::mem::size_of::<PollResult>() == 16);
     assert!(core::mem::offset_of!(OsHooks, context) == core::mem::size_of::<usize>());
     assert!(core::mem::size_of::<OsHooks>() == 11 * core::mem::size_of::<usize>());
-    assert!(core::mem::size_of::<DriverHooks>() == 6 * core::mem::size_of::<usize>());
+    assert!(core::mem::offset_of!(DriverHooks, driver) == core::mem::size_of::<usize>());
+    assert!(core::mem::size_of::<DriverHooks>() == 7 * core::mem::size_of::<usize>());
 };
