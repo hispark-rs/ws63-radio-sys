@@ -9,6 +9,10 @@ struct ws63_driver_data {
     void *supplicant_context;
     struct hisi_wpa_driver_hooks hooks;
     uint8_t own_address[ETH_ALEN];
+    uint8_t current_bssid[ETH_ALEN];
+    uint8_t current_ssid[HISI_WPA_MAX_SSID_LEN];
+    size_t current_ssid_len;
+    int associated;
     struct wpa_scan_res *scan_results[WS63_MAX_SCAN_RESULTS];
     size_t scan_result_count;
 };
@@ -232,6 +236,8 @@ static int ws63_associate(void *private_data,
     request.abi_version = HISI_WPA_ABI_VERSION;
     request.ssid_len = (uint8_t) params->ssid_len;
     os_memcpy(request.ssid, params->ssid, params->ssid_len);
+    os_memcpy(driver->current_ssid, params->ssid, params->ssid_len);
+    driver->current_ssid_len = params->ssid_len;
     if (params->bssid != NULL) {
         os_memcpy(request.bssid, params->bssid, sizeof(request.bssid));
         request.bssid_present = 1;
@@ -275,7 +281,29 @@ static int ws63_deauthenticate(void *private_data, const uint8_t *address,
     (void) address;
     if (driver == NULL)
         return -1;
-    return driver->hooks.deauthenticate(driver->hooks.driver, reason);
+    if (driver->hooks.deauthenticate(driver->hooks.driver, reason) != 0)
+        return -1;
+    driver->associated = 0;
+    return 0;
+}
+
+static int ws63_get_bssid(void *private_data, uint8_t *bssid)
+{
+    struct ws63_driver_data *driver = private_data;
+    if (driver == NULL || bssid == NULL || !driver->associated)
+        return -1;
+    os_memcpy(bssid, driver->current_bssid, ETH_ALEN);
+    return 0;
+}
+
+static int ws63_get_ssid(void *private_data, uint8_t *ssid)
+{
+    struct ws63_driver_data *driver = private_data;
+    if (driver == NULL || ssid == NULL || !driver->associated ||
+        driver->current_ssid_len == 0)
+        return -1;
+    os_memcpy(ssid, driver->current_ssid, driver->current_ssid_len);
+    return (int) driver->current_ssid_len;
 }
 
 int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
@@ -333,11 +361,15 @@ int32_t hisi_wpa_driver_feed_associate_result(void *private_data,
         return -1;
     os_memset(&event, 0, sizeof(event));
     if (result->status != 0) {
+        driver->associated = 0;
         event.assoc_reject.status_code = result->status;
         wpa_supplicant_event(driver->supplicant_context,
             EVENT_ASSOC_REJECT, &event);
         return 0;
     }
+    os_memcpy(driver->current_bssid, result->bssid,
+        sizeof(driver->current_bssid));
+    driver->associated = 1;
     event.assoc_info.req_ies = result->request_ies;
     event.assoc_info.req_ies_len = result->request_ies_len;
     event.assoc_info.resp_ies = result->response_ies;
@@ -358,6 +390,7 @@ int32_t hisi_wpa_driver_feed_disconnect(void *private_data,
         (disconnect->ies_len != 0 && disconnect->ies == NULL))
         return -1;
     os_memset(&event, 0, sizeof(event));
+    driver->associated = 0;
     event.disassoc_info.reason_code = disconnect->reason;
     event.disassoc_info.ie = disconnect->ies;
     event.disassoc_info.ie_len = disconnect->ies_len;
@@ -423,6 +456,8 @@ const struct wpa_driver_ops wpa_driver_ws63_ops = {
     .set_key = ws63_set_key,
     .init = ws63_init,
     .deinit = ws63_deinit,
+    .get_bssid = ws63_get_bssid,
+    .get_ssid = ws63_get_ssid,
     .get_mac_addr = ws63_get_mac_addr,
     .send_mlme = ws63_send_mlme,
     .scan2 = ws63_scan,
