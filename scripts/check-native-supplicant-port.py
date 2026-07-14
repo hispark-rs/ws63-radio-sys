@@ -30,11 +30,8 @@ COMMON = [
     "-Wall",
     "-Wextra",
     "-Werror",
-    "-Wpedantic",
     "-Wno-unused-parameter",
     "-Wno-variadic-macros",
-    "-Wno-zero-length-array",
-    "-Wno-flexible-array-extensions",
     "-DOS_NO_C_LIB_DEFINES",
     f"-I{INCLUDE}",
     f"-I{PORT}",
@@ -205,10 +202,11 @@ def main() -> None:
         objects: dict[str, pathlib.Path] = {}
         all_objects: list[pathlib.Path] = []
         cross_flags = [
-            flag for flag in COMMON
-            if flag != "-Wpedantic" and flag != "-DOS_NO_C_LIB_DEFINES"
+            flag for flag in COMMON if flag != "-DOS_NO_C_LIB_DEFINES"
         ]
         cross_flags.extend([
+            "-Wno-zero-length-array",
+            "-Wno-flexible-array-extensions",
             "-Wno-unused-but-set-variable",
             "-Wno-unused-variable",
             "-include",
