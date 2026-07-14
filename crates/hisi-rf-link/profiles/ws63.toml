@@ -50,23 +50,34 @@ name = "wpa_supplicant"
 source = "override"
 relative = ""
 order = 10
+profiles = ["wpa2-personal", "wpa3-personal"]
 [[wpa_archives]]
 name = "drv_security_unified"
 source = "sdk"
 relative = "driver/security_unified/libdrv_security_unified.a"
 order = 20
+profiles = ["wpa2-personal", "wpa3-personal"]
 [[wpa_archives]]
 name = "hal_security_unified"
 source = "sdk"
 relative = "hal/security_unified/libhal_security_unified.a"
 order = 30
+profiles = ["wpa2-personal", "wpa3-personal"]
+[[wpa_archives]]
+name = "mbedtls_v3.6.0"
+source = "sdk"
+relative = "libmbedtls_v3.6.0.a"
+order = 35
+profiles = ["wpa3-personal"]
 [[wpa_archives]]
 name = "c"
 source = "sdk"
 relative = "liteos/libs/libc.a"
 order = 40
+profiles = ["wpa2-personal", "wpa3-personal"]
 [[wpa_archives]]
 name = "m"
 source = "sdk"
 relative = "liteos/libs/libm.a"
 order = 50
+profiles = ["wpa2-personal", "wpa3-personal"]

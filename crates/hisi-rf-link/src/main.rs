@@ -22,6 +22,7 @@ struct WpaArchive {
     source: String,
     relative: String,
     order: u16,
+    profiles: Vec<String>,
 }
 
 const COMMANDS: &[(&str, &str)] = &[
@@ -78,17 +79,32 @@ fn archive_paths(mut args: impl Iterator<Item = std::ffi::OsString>) {
         Some("wpa") => {
             let sdk = args.next().map(PathBuf::from).unwrap_or_else(|| usage());
             let override_archive = args.next().map(PathBuf::from).unwrap_or_else(|| usage());
+            let selected_profile = args
+                .next()
+                .and_then(|argument| argument.into_string().ok())
+                .unwrap_or_else(|| "wpa2-personal".to_owned());
             if args.next().is_some() {
                 usage();
             }
             let mut archives = profile.wpa_archives;
             archives.sort_by_key(|archive| archive.order);
-            for archive in archives {
+            let mut selected = 0;
+            for archive in archives.into_iter().filter(|archive| {
+                archive
+                    .profiles
+                    .iter()
+                    .any(|name| name == &selected_profile)
+            }) {
+                selected += 1;
                 match archive.source.as_str() {
                     "override" => print_path(override_archive.clone()),
                     "sdk" => print_path(sdk.join(archive.relative)),
                     source => panic!("unsupported archive source {source}"),
                 }
+            }
+            if selected == 0 {
+                eprintln!("unsupported WS63 WPA archive profile: {selected_profile}");
+                std::process::exit(2);
             }
         }
         _ => usage(),

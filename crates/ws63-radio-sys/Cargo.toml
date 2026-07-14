@@ -19,5 +19,6 @@ toml = "0.9"
 default = ["wifi"]
 wifi = []
 wpa2-personal = ["wifi"]
+wpa3-personal = ["wifi"]
 ble = []
 sle = []

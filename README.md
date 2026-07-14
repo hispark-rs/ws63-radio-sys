@@ -16,3 +16,8 @@ not packaged on crates.io; consult the original SDK license before redistributio
 symbols and vendor priorities to exact archive or ROM hashes. It records
 classification evidence, not runtime policy: unmatched entries remain `unknown`,
 and a consuming firmware must verify an external archive before using its rows.
+
+The WPA archive profile is explicit. `wpa2-personal` preserves the verified
+supplicant/security/libc closure; `wpa3-personal` additionally selects the vendor
+mbedTLS 3.6.0 oracle required by the current SAE/P-256 implementation. The latter
+is a link candidate until its controlled-AP HIL gate passes.

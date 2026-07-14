@@ -65,3 +65,46 @@ fn machine_profile_resolves_wifi_archives() {
             .ends_with("libwifi_driver_hmac.a")
     );
 }
+
+#[test]
+fn machine_profile_adds_mbedtls_only_for_wpa3_personal() {
+    let directory = tempfile::tempdir().unwrap();
+    let sdk = directory.path().join("sdk");
+    for relative in [
+        "driver/security_unified/libdrv_security_unified.a",
+        "hal/security_unified/libhal_security_unified.a",
+        "libmbedtls_v3.6.0.a",
+        "liteos/libs/libc.a",
+        "liteos/libs/libm.a",
+    ] {
+        let path = sdk.join(relative);
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(path, []).unwrap();
+    }
+    let supplicant = directory.path().join("libwpa_supplicant.a");
+    std::fs::write(&supplicant, []).unwrap();
+
+    let resolve = |profile: &str| {
+        let output = Command::new(binary())
+            .args(["archive-paths", "wpa"])
+            .arg(&sdk)
+            .arg(&supplicant)
+            .arg(profile)
+            .output()
+            .expect("resolve WPA archive profile");
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        String::from_utf8(output.stdout).unwrap()
+    };
+
+    let wpa2 = resolve("wpa2-personal");
+    assert_eq!(wpa2.lines().count(), 5);
+    assert!(!wpa2.contains("libmbedtls_v3.6.0.a"));
+
+    let wpa3 = resolve("wpa3-personal");
+    assert_eq!(wpa3.lines().count(), 6);
+    assert!(wpa3.contains("libmbedtls_v3.6.0.a"));
+}

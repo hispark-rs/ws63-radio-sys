@@ -23,6 +23,7 @@ struct WifiArchive {
 struct WpaArchive {
     name: String,
     order: u16,
+    profiles: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -138,7 +139,24 @@ fn main() {
             .expect("parse WS63 archive profile");
     let mut wifi = profile.wifi_archives;
     wifi.sort_by_key(|archive| archive.link_order);
-    let mut wpa = profile.wpa_archives;
+    let wpa2 = env::var_os("CARGO_FEATURE_WPA2_PERSONAL").is_some();
+    let wpa3 = env::var_os("CARGO_FEATURE_WPA3_PERSONAL").is_some();
+    assert!(!(wpa2 && wpa3), "select exactly one WS63 WPA profile");
+    let selected_wpa_profile = if wpa3 {
+        Some("wpa3-personal")
+    } else if wpa2 {
+        Some("wpa2-personal")
+    } else {
+        None
+    };
+    let mut wpa = profile
+        .wpa_archives
+        .into_iter()
+        .filter(|archive| {
+            selected_wpa_profile
+                .is_some_and(|selected| archive.profiles.iter().any(|profile| profile == selected))
+        })
+        .collect::<Vec<_>>();
     wpa.sort_by_key(|archive| archive.order);
     let scheduling_profile: SchedulingProfile = toml::from_str(
         &fs::read_to_string(&scheduling_profile_path).expect("read WS63 task scheduling profile"),
@@ -211,4 +229,6 @@ fn main() {
     );
     println!("cargo:rerun-if-env-changed=WS63_RF_ROOT");
     println!("cargo:rerun-if-env-changed=WS63_RF_LIB_DIR");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA2_PERSONAL");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
 }
