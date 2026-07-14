@@ -1,25 +1,4 @@
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
-
-typedef struct hisi_wpa_file FILE;
-
-#if !defined(__APPLE__) && !defined(__linux__) && !defined(__GLIBC__) && \
-    !defined(__FreeBSD__) && !defined(__NetBSD__) && \
-    !defined(__DragonFly__) && !defined(__OpenBSD__)
-#ifndef __LITTLE_ENDIAN
-#define __LITTLE_ENDIAN 1234
-#endif
-#ifndef __BIG_ENDIAN
-#define __BIG_ENDIAN 4321
-#endif
-#ifndef __BYTE_ORDER
-#define __BYTE_ORDER __LITTLE_ENDIAN
-#endif
-#endif
-
-#define OS_NO_C_LIB_DEFINES
-#include "common.h"
+#include "hisi_wpa_hostap_compat.h"
 #include "l2_packet/l2_packet.h"
 
 #include "hisi_wpa_driver_port.h"
@@ -48,19 +27,26 @@ struct l2_packet_data *l2_packet_init(const char *ifname,
         const uint8_t *frame, size_t frame_len),
     void *receive_context, int include_l2_header)
 {
-    const struct hisi_wpa_driver_hooks *hooks = hisi_wpa_driver_current();
+    const struct hisi_wpa_driver_hooks *hooks = hisi_wpa_driver_acquire();
     struct l2_packet_data *l2;
     (void) ifname;
-    if (hooks == NULL || protocol != HISI_WPA_EAPOL_ETHERTYPE ||
-        (receive != NULL && g_receive_endpoint != NULL))
+    if (hooks == NULL)
         return NULL;
+    if (protocol != HISI_WPA_EAPOL_ETHERTYPE ||
+        (receive != NULL && g_receive_endpoint != NULL)) {
+        hisi_wpa_driver_release();
+        return NULL;
+    }
     l2 = os_zalloc(sizeof(*l2));
-    if (l2 == NULL)
+    if (l2 == NULL) {
+        hisi_wpa_driver_release();
         return NULL;
+    }
     if (own_address != NULL) {
         os_memcpy(l2->own_address, own_address, ETH_ALEN);
     } else if (hooks->get_own_address(hooks->driver, l2->own_address) != 0) {
         os_free(l2);
+        hisi_wpa_driver_release();
         return NULL;
     }
     l2->protocol = protocol;
@@ -91,6 +77,7 @@ void l2_packet_deinit(struct l2_packet_data *l2)
         g_receive_endpoint = NULL;
     os_memset(l2, 0, sizeof(*l2));
     os_free(l2);
+    hisi_wpa_driver_release();
 }
 
 int l2_packet_get_own_addr(struct l2_packet_data *l2, uint8_t *address)

@@ -10,8 +10,11 @@ typedef struct hisi_wpa_file FILE;
 #include "hisi_wpa_supplicant.h"
 #include "hisi_wpa_driver_port.h"
 #include "common.h"
+#include "drivers/driver.h"
 #include "eloop.h"
 #include "l2_packet/l2_packet.h"
+
+extern const struct wpa_driver_ops wpa_driver_ws63_ops;
 
 struct allocation {
     size_t size;
@@ -28,6 +31,13 @@ static size_t sent_frame_len;
 static uint8_t received_source[6];
 static uint8_t received_frame[64];
 static size_t received_frame_len;
+static struct hisi_wpa_key installed_key;
+static uint8_t installed_material[32];
+static size_t installed_material_len;
+static struct hisi_wpa_key removed_key;
+static uint8_t sent_mgmt[64];
+static size_t sent_mgmt_len;
+static uint32_t sent_mgmt_frequency;
 
 static void *allocate_zeroed(void *context, size_t size, size_t alignment)
 {
@@ -162,21 +172,32 @@ static int32_t send_eapol(void *driver, const uint8_t destination[6],
 static int32_t send_mgmt(void *driver, uint32_t frequency_mhz,
     const uint8_t *frame, size_t frame_len)
 {
-    (void) driver; (void) frequency_mhz; (void) frame; (void) frame_len;
-    return -1;
+    assert(driver == (void *) 0x4567u);
+    assert(frame_len <= sizeof(sent_mgmt));
+    memcpy(sent_mgmt, frame, frame_len);
+    sent_mgmt_len = frame_len;
+    sent_mgmt_frequency = frequency_mhz;
+    return 0;
 }
 
 static int32_t install_key(void *driver, const struct hisi_wpa_key *key,
     const uint8_t *material, size_t material_len)
 {
-    (void) driver; (void) key; (void) material; (void) material_len;
-    return -1;
+    assert(driver == (void *) 0x4567u);
+    assert(key != NULL && key->abi_version == HISI_WPA_ABI_VERSION);
+    assert(material_len <= sizeof(installed_material));
+    installed_key = *key;
+    memcpy(installed_material, material, material_len);
+    installed_material_len = material_len;
+    return 0;
 }
 
 static int32_t remove_key(void *driver, const struct hisi_wpa_key *key)
 {
-    (void) driver; (void) key;
-    return -1;
+    assert(driver == (void *) 0x4567u);
+    assert(key != NULL && key->abi_version == HISI_WPA_ABI_VERSION);
+    removed_key = *key;
+    return 0;
 }
 
 static const struct hisi_wpa_driver_hooks driver_hooks = {
@@ -325,6 +346,69 @@ static void test_l2_packet_bridge(void)
     assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == 0);
 }
 
+static void test_ws63_driver_bridge(void)
+{
+    static const uint8_t peer[6] = { 0x02, 0xaa, 0xbb, 0xcc, 0xdd, 0xee };
+    static const uint8_t sequence[6] = { 1, 2, 3, 4, 5, 6 };
+    static const uint8_t material[16] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+    };
+    static const uint8_t management[4] = { 0xb0, 0, 0, 0 };
+    struct wpa_driver_set_key_params params = { 0 };
+    const uint8_t *own;
+    void *driver;
+
+    assert(hisi_wpa_driver_install(&driver_hooks) == 0);
+    driver = wpa_driver_ws63_ops.init((void *) 0x789au, "wlan0");
+    assert(driver != NULL);
+    assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == -2);
+    own = wpa_driver_ws63_ops.get_mac_addr(driver);
+    assert(own != NULL && own[0] == 0x02 && own[5] == 0x33);
+
+    params.alg = WPA_ALG_CCMP;
+    params.addr = peer;
+    params.key_idx = 0;
+    params.seq = sequence;
+    params.seq_len = sizeof(sequence);
+    params.key = material;
+    params.key_len = sizeof(material);
+    params.key_flag = KEY_FLAG_PAIRWISE_RX_TX;
+    assert(wpa_driver_ws63_ops.set_key(driver, &params) == 0);
+    assert(installed_key.cipher == HISI_WPA_CIPHER_CCMP);
+    assert(installed_key.peer_present == 1);
+    assert(installed_key.sequence_len == sizeof(sequence));
+    assert(installed_key.flags == (HISI_WPA_KEY_FLAG_PAIRWISE |
+        HISI_WPA_KEY_FLAG_RX | HISI_WPA_KEY_FLAG_TX));
+    assert(memcmp(installed_key.peer, peer, sizeof(peer)) == 0);
+    assert(memcmp(installed_key.sequence, sequence, sizeof(sequence)) == 0);
+    assert(installed_material_len == sizeof(material));
+    assert(memcmp(installed_material, material, sizeof(material)) == 0);
+
+    params.key_flag = KEY_FLAG_PMK;
+    assert(wpa_driver_ws63_ops.set_key(driver, &params) == -1);
+    params.key_flag = KEY_FLAG_PAIRWISE_RX_TX;
+    params.seq_len = HISI_WPA_KEY_SEQUENCE_LEN + 1;
+    assert(wpa_driver_ws63_ops.set_key(driver, &params) == -1);
+    params.seq_len = sizeof(sequence);
+
+    params.alg = WPA_ALG_NONE;
+    params.key = NULL;
+    params.key_len = 0;
+    assert(wpa_driver_ws63_ops.set_key(driver, &params) == 0);
+    assert(removed_key.cipher == HISI_WPA_CIPHER_NONE);
+
+    assert(wpa_driver_ws63_ops.send_mlme(driver, management,
+        sizeof(management), 0, 2412, NULL, 0, 0, 0, -1) == 0);
+    assert(sent_mgmt_frequency == 2412);
+    assert(sent_mgmt_len == sizeof(management));
+    assert(memcmp(sent_mgmt, management, sizeof(management)) == 0);
+    assert(wpa_driver_ws63_ops.send_mlme(driver, management,
+        sizeof(management), 0, 2412, NULL, 0, 0, 0, 0) == -1);
+
+    wpa_driver_ws63_ops.deinit(driver);
+    assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == 0);
+}
+
 int main(void)
 {
     struct hisi_wpa_os_hooks conflicting_hooks = hooks;
@@ -342,6 +426,7 @@ int main(void)
     test_timeout_order_and_cancellation();
     test_runner_waits_until_deadline();
     test_l2_packet_bridge();
+    test_ws63_driver_bridge();
     assert(hisi_wpa_os_uninstall(hooks.context) == 0);
     return 0;
 }

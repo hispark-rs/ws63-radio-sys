@@ -255,6 +255,7 @@ fn main() {
                 native_port.join("eloop_hisi_rtos.c"),
                 native_port.join("hisi_wpa_driver_port.c"),
                 native_port.join("l2_packet_ws63.c"),
+                native_port.join("driver_ws63.c"),
             ])
             .include(manifest.join("../../include"))
             .include(&native_port)
@@ -265,6 +266,8 @@ fn main() {
             .flag_if_supported("-fno-builtin")
             .flag_if_supported("-Wno-unused-parameter")
             .flag_if_supported("-Wno-variadic-macros")
+            .flag_if_supported("-Wno-zero-length-array")
+            .flag_if_supported("-Wno-flexible-array-extensions")
             .warnings_into_errors(true)
             .compile("hisi_wpa_native_port");
     }

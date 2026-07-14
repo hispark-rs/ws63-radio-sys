@@ -41,11 +41,16 @@ layer:
   delivered only when `RadioRunner` drains a bounded vendor-event queue, and
   the driver registration cannot be removed while an RX endpoint is alive;
 - `hisi_wpa_driver_port.c` owns the narrow WS63 driver hook lifetime without
-  exposing hostap internal structures to Rust.
+  exposing hostap internal structures to Rust;
+- `driver_ws63.c` now consumes upstream hostap 2.11's real `wpa_driver_ops` and
+  implements the first fail-closed subset: init/deinit, MAC address, management
+  TX, and key install/remove. The key ABI preserves peer presence, RX/TX and
+  pairwise/group flags, and a bounded replay sequence instead of exposing
+  hostap's internal key structure.
 
 This closes the W2C runtime seam and the EAPOL subpart of W2D, not a complete
 supplicant build. The full hostap object closure, production formatting support,
-and WS63 scan/auth/assoc/management/key-install driver bridge remain W2D work.
-Host behavior tests and freestanding RV32 compilation are enforced by
-`scripts/check-native-supplicant-port.py` so this partial boundary cannot be
-mistaken for a silicon parity claim.
+and WS63 scan/auth/assoc/event bridge remain W2D work. Host behavior tests,
+freestanding RV32 compilation, ABI size/offset assertions, and an exact global
+symbol manifest are enforced by `scripts/check-native-supplicant-port.py` so
+this partial boundary cannot be mistaken for a silicon parity claim.

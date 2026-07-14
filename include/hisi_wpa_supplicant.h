@@ -8,9 +8,30 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_ABI_VERSION 3u
+#define HISI_WPA_ABI_VERSION 4u
 #define HISI_WPA_MAX_SSID_LEN 32u
 #define HISI_WPA_EVENT_DATA_LEN 128u
+#define HISI_WPA_KEY_SEQUENCE_LEN 16u
+
+#define HISI_WPA_CIPHER_NONE 0u
+#define HISI_WPA_CIPHER_WEP 1u
+#define HISI_WPA_CIPHER_TKIP 2u
+#define HISI_WPA_CIPHER_CCMP 3u
+#define HISI_WPA_CIPHER_BIP_CMAC_128 4u
+#define HISI_WPA_CIPHER_GCMP 5u
+#define HISI_WPA_CIPHER_GCMP_256 6u
+#define HISI_WPA_CIPHER_CCMP_256 7u
+#define HISI_WPA_CIPHER_BIP_GMAC_128 8u
+#define HISI_WPA_CIPHER_BIP_GMAC_256 9u
+#define HISI_WPA_CIPHER_BIP_CMAC_256 10u
+
+#define HISI_WPA_KEY_FLAG_MODIFY (1u << 0)
+#define HISI_WPA_KEY_FLAG_DEFAULT (1u << 1)
+#define HISI_WPA_KEY_FLAG_RX (1u << 2)
+#define HISI_WPA_KEY_FLAG_TX (1u << 3)
+#define HISI_WPA_KEY_FLAG_GROUP (1u << 4)
+#define HISI_WPA_KEY_FLAG_PAIRWISE (1u << 5)
+#define HISI_WPA_KEY_FLAG_PMK (1u << 6)
 
 struct hisi_wpa_context;
 
@@ -54,13 +75,14 @@ struct hisi_wpa_network_config {
 };
 
 struct hisi_wpa_key {
+    uint16_t abi_version;
     uint8_t cipher;
     uint8_t key_index;
-    uint8_t pairwise;
-    uint8_t transmit;
+    uint32_t flags;
     uint8_t peer[6];
-    uint8_t reserved[2];
-    uint64_t receive_sequence;
+    uint8_t peer_present;
+    uint8_t sequence_len;
+    uint8_t sequence[HISI_WPA_KEY_SEQUENCE_LEN];
 };
 
 struct hisi_wpa_event {
@@ -137,8 +159,12 @@ void hisi_wpa_destroy(struct hisi_wpa_context *context);
 
 _Static_assert(sizeof(struct hisi_wpa_network_config) == 48,
     "hisi_wpa_network_config ABI drift");
-_Static_assert(sizeof(struct hisi_wpa_key) == 24,
+_Static_assert(sizeof(struct hisi_wpa_key) == 32,
     "hisi_wpa_key ABI drift");
+_Static_assert(offsetof(struct hisi_wpa_key, flags) == 4,
+    "hisi_wpa_key flags offset drift");
+_Static_assert(offsetof(struct hisi_wpa_key, sequence) == 16,
+    "hisi_wpa_key sequence offset drift");
 _Static_assert(sizeof(struct hisi_wpa_event) == 144,
     "hisi_wpa_event ABI drift");
 _Static_assert(sizeof(struct hisi_wpa_poll_result) == 16,

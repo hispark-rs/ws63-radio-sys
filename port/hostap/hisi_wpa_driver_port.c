@@ -2,6 +2,7 @@
 
 static struct hisi_wpa_driver_hooks g_hooks;
 static int g_installed;
+static size_t g_users;
 
 static int hooks_valid(const struct hisi_wpa_driver_hooks *hooks)
 {
@@ -37,7 +38,7 @@ int32_t hisi_wpa_driver_uninstall(void *driver)
 {
     if (!g_installed || g_hooks.driver != driver)
         return -1;
-    if (hisi_wpa_l2_is_active())
+    if (g_users != 0 || hisi_wpa_l2_is_active())
         return -2;
     g_hooks = (struct hisi_wpa_driver_hooks) { 0 };
     g_installed = 0;
@@ -47,4 +48,18 @@ int32_t hisi_wpa_driver_uninstall(void *driver)
 const struct hisi_wpa_driver_hooks *hisi_wpa_driver_current(void)
 {
     return g_installed ? &g_hooks : NULL;
+}
+
+const struct hisi_wpa_driver_hooks *hisi_wpa_driver_acquire(void)
+{
+    if (!g_installed)
+        return NULL;
+    g_users++;
+    return &g_hooks;
+}
+
+void hisi_wpa_driver_release(void)
+{
+    if (g_users != 0)
+        g_users--;
 }

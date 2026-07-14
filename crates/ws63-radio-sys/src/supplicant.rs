@@ -6,9 +6,34 @@
 
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 3;
+pub const ABI_VERSION: u16 = 4;
 pub const MAX_SSID_LEN: usize = 32;
 pub const EVENT_DATA_LEN: usize = 128;
+pub const KEY_SEQUENCE_LEN: usize = 16;
+
+pub mod cipher {
+    pub const NONE: u8 = 0;
+    pub const WEP: u8 = 1;
+    pub const TKIP: u8 = 2;
+    pub const CCMP: u8 = 3;
+    pub const BIP_CMAC_128: u8 = 4;
+    pub const GCMP: u8 = 5;
+    pub const GCMP_256: u8 = 6;
+    pub const CCMP_256: u8 = 7;
+    pub const BIP_GMAC_128: u8 = 8;
+    pub const BIP_GMAC_256: u8 = 9;
+    pub const BIP_CMAC_256: u8 = 10;
+}
+
+pub mod key_flag {
+    pub const MODIFY: u32 = 1 << 0;
+    pub const DEFAULT: u32 = 1 << 1;
+    pub const RX: u32 = 1 << 2;
+    pub const TX: u32 = 1 << 3;
+    pub const GROUP: u32 = 1 << 4;
+    pub const PAIRWISE: u32 = 1 << 5;
+    pub const PMK: u32 = 1 << 6;
+}
 
 #[repr(C)]
 pub struct Context {
@@ -56,13 +81,14 @@ pub struct NetworkConfig {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct Key {
+    pub abi_version: u16,
     pub cipher: u8,
     pub key_index: u8,
-    pub pairwise: u8,
-    pub transmit: u8,
+    pub flags: u32,
     pub peer: [u8; 6],
-    pub reserved: [u8; 2],
-    pub receive_sequence: u64,
+    pub peer_present: u8,
+    pub sequence_len: u8,
+    pub sequence: [u8; KEY_SEQUENCE_LEN],
 }
 
 #[derive(Clone, Copy)]
@@ -188,7 +214,9 @@ unsafe extern "C" {
 
 const _: () = {
     assert!(core::mem::size_of::<NetworkConfig>() == 48);
-    assert!(core::mem::size_of::<Key>() == 24);
+    assert!(core::mem::size_of::<Key>() == 32);
+    assert!(core::mem::offset_of!(Key, flags) == 4);
+    assert!(core::mem::offset_of!(Key, sequence) == 16);
     assert!(core::mem::size_of::<Event>() == 144);
     assert!(core::mem::size_of::<PollResult>() == 16);
     assert!(core::mem::offset_of!(OsHooks, context) == core::mem::size_of::<usize>());

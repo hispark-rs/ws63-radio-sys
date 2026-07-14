@@ -1,0 +1,8 @@
+# Global symbol contract for the freestanding RV32 driver_ws63 object.
+defined wpa_driver_ws63_ops
+undefined hisi_wpa_driver_acquire
+undefined hisi_wpa_driver_release
+undefined os_free
+undefined os_memcpy
+undefined os_memset
+undefined os_zalloc
