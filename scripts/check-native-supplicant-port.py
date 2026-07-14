@@ -10,11 +10,14 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PORT = ROOT / "port" / "hostap"
 HOSTAP_UTILS = ROOT / "third-party" / "hostap" / "src" / "utils"
+HOSTAP_SRC = ROOT / "third-party" / "hostap" / "src"
 INCLUDE = ROOT / "include"
 SOURCES = [
     PORT / "hisi_wpa_port.c",
     PORT / "os_hisi_rtos.c",
     PORT / "eloop_hisi_rtos.c",
+    PORT / "hisi_wpa_driver_port.c",
+    PORT / "l2_packet_ws63.c",
 ]
 COMMON = [
     "-std=c11",
@@ -23,9 +26,11 @@ COMMON = [
     "-Werror",
     "-Wpedantic",
     "-Wno-unused-parameter",
+    "-Wno-variadic-macros",
     f"-I{INCLUDE}",
     f"-I{PORT}",
     f"-I{HOSTAP_UTILS}",
+    f"-I{HOSTAP_SRC}",
 ]
 
 

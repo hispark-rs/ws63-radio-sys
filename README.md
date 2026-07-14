@@ -36,10 +36,16 @@ layer:
 - `eloop_hisi_rtos.c` provides a bounded single-runner timeout loop without
   POSIX sockets, threads or LiteOS symbols;
 - `hisi_wpa_port.c` owns hook installation and rejects ABI drift or conflicting
-  runtime registrations.
+  runtime registrations;
+- `l2_packet_ws63.c` implements the EAPOL-only hostap L2 boundary. RX is
+  delivered only when `RadioRunner` drains a bounded vendor-event queue, and
+  the driver registration cannot be removed while an RX endpoint is alive;
+- `hisi_wpa_driver_port.c` owns the narrow WS63 driver hook lifetime without
+  exposing hostap internal structures to Rust.
 
-This is a W2C integration seam, not yet a complete supplicant build. In
-particular, the full hostap object closure, production formatting support,
-`driver_ws63` and `l2_packet_ws63` remain W2D work. Host and freestanding RV32
-compilation are enforced by `scripts/check-native-supplicant-port.py` so this
-partial boundary cannot be mistaken for a silicon parity claim.
+This closes the W2C runtime seam and the EAPOL subpart of W2D, not a complete
+supplicant build. The full hostap object closure, production formatting support,
+and WS63 scan/auth/assoc/management/key-install driver bridge remain W2D work.
+Host behavior tests and freestanding RV32 compilation are enforced by
+`scripts/check-native-supplicant-port.py` so this partial boundary cannot be
+mistaken for a silicon parity claim.

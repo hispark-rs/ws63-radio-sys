@@ -253,14 +253,18 @@ fn main() {
                 native_port.join("hisi_wpa_port.c"),
                 native_port.join("os_hisi_rtos.c"),
                 native_port.join("eloop_hisi_rtos.c"),
+                native_port.join("hisi_wpa_driver_port.c"),
+                native_port.join("l2_packet_ws63.c"),
             ])
             .include(manifest.join("../../include"))
             .include(&native_port)
             .include(manifest.join("../../third-party/hostap/src/utils"))
+            .include(manifest.join("../../third-party/hostap/src"))
             .flag_if_supported("-std=c11")
             .flag_if_supported("-ffreestanding")
             .flag_if_supported("-fno-builtin")
             .flag_if_supported("-Wno-unused-parameter")
+            .flag_if_supported("-Wno-variadic-macros")
             .warnings_into_errors(true)
             .compile("hisi_wpa_native_port");
     }

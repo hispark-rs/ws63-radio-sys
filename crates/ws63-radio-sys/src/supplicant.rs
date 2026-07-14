@@ -6,7 +6,7 @@
 
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 2;
+pub const ABI_VERSION: u16 = 3;
 pub const MAX_SSID_LEN: usize = 32;
 pub const EVENT_DATA_LEN: usize = 128;
 
@@ -123,6 +123,7 @@ pub type SendEapol = unsafe extern "C" fn(
     frame: *const u8,
     frame_len: usize,
 ) -> c_int;
+pub type GetOwnAddress = unsafe extern "C" fn(driver: *mut c_void, address: *mut u8) -> c_int;
 pub type SendMgmt = unsafe extern "C" fn(
     driver: *mut c_void,
     frequency_mhz: u32,
@@ -139,6 +140,7 @@ pub type RemoveKey = unsafe extern "C" fn(driver: *mut c_void, key: *const Key) 
 #[repr(C)]
 pub struct DriverHooks {
     pub driver: *mut c_void,
+    pub get_own_address: Option<GetOwnAddress>,
     pub send_eapol: Option<SendEapol>,
     pub send_mgmt: Option<SendMgmt>,
     pub install_key: Option<InstallKey>,
@@ -191,5 +193,5 @@ const _: () = {
     assert!(core::mem::size_of::<PollResult>() == 16);
     assert!(core::mem::offset_of!(OsHooks, context) == core::mem::size_of::<usize>());
     assert!(core::mem::size_of::<OsHooks>() == 11 * core::mem::size_of::<usize>());
-    assert!(core::mem::size_of::<DriverHooks>() == 5 * core::mem::size_of::<usize>());
+    assert!(core::mem::size_of::<DriverHooks>() == 6 * core::mem::size_of::<usize>());
 };

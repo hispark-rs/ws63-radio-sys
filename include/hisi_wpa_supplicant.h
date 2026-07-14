@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_ABI_VERSION 2u
+#define HISI_WPA_ABI_VERSION 3u
 #define HISI_WPA_MAX_SSID_LEN 32u
 #define HISI_WPA_EVENT_DATA_LEN 128u
 
@@ -97,6 +97,8 @@ struct hisi_wpa_os_hooks {
 
 struct hisi_wpa_driver_hooks {
     void *driver;
+    int32_t (*get_own_address)(void *driver, uint8_t address[6]);
+    /* The frame follows the l2_packet include_l2_header mode selected by hostap. */
     int32_t (*send_eapol)(void *driver, const uint8_t dst[6],
         const uint8_t *frame, size_t frame_len);
     int32_t (*send_mgmt)(void *driver, uint32_t frequency_mhz,
@@ -145,7 +147,7 @@ _Static_assert(offsetof(struct hisi_wpa_os_hooks, context) == sizeof(void *),
     "hisi_wpa_os_hooks prefix drift");
 _Static_assert(sizeof(struct hisi_wpa_os_hooks) == 11 * sizeof(void *),
     "hisi_wpa_os_hooks ABI drift");
-_Static_assert(sizeof(struct hisi_wpa_driver_hooks) == 5 * sizeof(void *),
+_Static_assert(sizeof(struct hisi_wpa_driver_hooks) == 6 * sizeof(void *),
     "hisi_wpa_driver_hooks ABI drift");
 
 #ifdef __cplusplus
