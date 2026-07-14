@@ -27,6 +27,7 @@ vendor_priority = 4
 
 [[tasks]]
 entry_symbol = "frw_task_thread"
+entry_address = 0x00128d80
 source = "ws63-mask-rom-map"
 role = "critical"
 vendor_priority = 5

@@ -32,6 +32,20 @@ fn embedded_tools_expose_help() {
 }
 
 #[test]
+fn task_profile_exposes_help() {
+    let output = Command::new(binary())
+        .args(["task-profile", "--help"])
+        .output()
+        .expect("run task-profile --help");
+    assert!(output.status.success());
+    assert!(
+        String::from_utf8(output.stdout)
+            .unwrap()
+            .contains("hash-bound scheduling profile")
+    );
+}
+
+#[test]
 fn machine_profile_resolves_wifi_archives() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../ws63-RF");
     let output = Command::new(binary())

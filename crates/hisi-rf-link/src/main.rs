@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use std::{env, fs, path::PathBuf, process::Command};
 
+mod task_profile;
+
 const PROFILE: &str = include_str!("../profiles/ws63.toml");
 
 #[derive(Deserialize)]
@@ -37,7 +39,7 @@ const COMMANDS: &[(&str, &str)] = &[
 
 fn usage() -> ! {
     eprintln!(
-        "usage: hisi-rf-link <archive-paths|{}> [arguments...]",
+        "usage: hisi-rf-link <archive-paths|task-profile|{}> [arguments...]",
         COMMANDS
             .iter()
             .map(|(name, _)| *name)
@@ -101,6 +103,10 @@ fn main() {
     };
     if command == "archive-paths" {
         archive_paths(args);
+        return;
+    }
+    if command == "task-profile" {
+        task_profile::run(args);
         return;
     }
     let Some((_, script)) = COMMANDS.iter().find(|(name, _)| *name == command) else {
