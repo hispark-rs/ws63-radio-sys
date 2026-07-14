@@ -16,10 +16,10 @@ jobs:
         with:
           toolchain: nightly-2026-07-09
           components: clippy,rustfmt,rust-src
-      - name: Install RISC-V C toolchain
+      - name: Install native and RISC-V C toolchains
         run: |
           sudo apt-get update
-          sudo apt-get install --yes gcc-riscv64-unknown-elf
+          sudo apt-get install --yes gcc-riscv64-unknown-elf libssl-dev pkg-config
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
@@ -29,6 +29,8 @@ jobs:
           printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
             cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-abi.o -
       - run: python3 scripts/check-native-supplicant-port.py
+      - name: Replay upstream WPA Personal protocol vectors
+        run: python3 scripts/check-upstream-personal-vectors.py
       - name: Build native supplicant archive for WS63
         run: |
           cargo check -Zbuild-std=core,alloc \
