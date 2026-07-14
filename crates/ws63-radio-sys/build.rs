@@ -248,7 +248,8 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
 
     if env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT").is_some() {
-        cc::Build::new()
+        let mut build = cc::Build::new();
+        build
             .files([
                 native_port.join("hisi_wpa_port.c"),
                 native_port.join("os_hisi_rtos.c"),
@@ -268,8 +269,14 @@ fn main() {
             .flag_if_supported("-Wno-variadic-macros")
             .flag_if_supported("-Wno-zero-length-array")
             .flag_if_supported("-Wno-flexible-array-extensions")
-            .warnings_into_errors(true)
-            .compile("hisi_wpa_native_port");
+            .warnings_into_errors(true);
+        if env::var("TARGET").is_ok_and(|target| target.starts_with("riscv32imfc-")) {
+            // Rust's official target is hardware-single-float ILP32F. Clang's
+            // generic RISC-V default is soft-float ILP32, which produces ELF
+            // attributes that rust-lld correctly refuses to mix with Rust.
+            build.flag("-march=rv32imfc").flag("-mabi=ilp32f");
+        }
+        build.compile("hisi_wpa_native_port");
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
 }
