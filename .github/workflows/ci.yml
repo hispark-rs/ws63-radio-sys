@@ -23,5 +23,7 @@ jobs:
         run: |
           printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
             cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-abi.o -
+      - run: python3 scripts/check-native-supplicant-port.py
+      - run: cargo check -p ws63-radio-sys --features upstream-supplicant-port --locked
       - run: python3 crates/hisi-rf-link/python/test_relocations.py
       - run: cargo package -p hisi-rf-link --locked

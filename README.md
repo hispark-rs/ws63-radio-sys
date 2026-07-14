@@ -27,3 +27,19 @@ The replacement path is pinned upstream hostap 2.11, not the SDK's LiteOS-derive
 define the same narrow, versioned ABI for a single runner-owned context. The
 vendor archive remains a behavior and silicon-parity oracle while the upstream
 port is brought up; it is not the long-term runtime architecture.
+
+The optional `upstream-supplicant-port` feature compiles the first native port
+layer:
+
+- `os_hisi_rtos.c` delegates allocation, clocks, sleeping, entropy and runner
+  wakeups through the versioned OS hook table;
+- `eloop_hisi_rtos.c` provides a bounded single-runner timeout loop without
+  POSIX sockets, threads or LiteOS symbols;
+- `hisi_wpa_port.c` owns hook installation and rejects ABI drift or conflicting
+  runtime registrations.
+
+This is a W2C integration seam, not yet a complete supplicant build. In
+particular, the full hostap object closure, production formatting support,
+`driver_ws63` and `l2_packet_ws63` remain W2D work. Host and freestanding RV32
+compilation are enforced by `scripts/check-native-supplicant-port.py` so this
+partial boundary cannot be mistaken for a silicon parity claim.

@@ -144,6 +144,7 @@ fn main() {
     let supplicant_header = manifest.join("../../include/hisi_wpa_supplicant.h");
     let supplicant_source = manifest.join("../../upstream/hostap-2.11.json");
     let upstream_hostap = manifest.join("../../third-party/hostap");
+    let native_port = manifest.join("../../port/hostap");
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
@@ -194,6 +195,7 @@ fn main() {
         ("supplicant_header", supplicant_header),
         ("supplicant_source", supplicant_source),
         ("upstream_hostap", upstream_hostap),
+        ("native_supplicant_port", native_port.clone()),
     ] {
         if !path.exists() {
             panic!("WS63 radio payload is incomplete: {}", path.display());
@@ -244,4 +246,23 @@ fn main() {
     println!("cargo:rerun-if-env-changed=WS63_RF_LIB_DIR");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA2_PERSONAL");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
+
+    if env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT").is_some() {
+        cc::Build::new()
+            .files([
+                native_port.join("hisi_wpa_port.c"),
+                native_port.join("os_hisi_rtos.c"),
+                native_port.join("eloop_hisi_rtos.c"),
+            ])
+            .include(manifest.join("../../include"))
+            .include(&native_port)
+            .include(manifest.join("../../third-party/hostap/src/utils"))
+            .flag_if_supported("-std=c11")
+            .flag_if_supported("-ffreestanding")
+            .flag_if_supported("-fno-builtin")
+            .flag_if_supported("-Wno-unused-parameter")
+            .warnings_into_errors(true)
+            .compile("hisi_wpa_native_port");
+    }
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
 }
