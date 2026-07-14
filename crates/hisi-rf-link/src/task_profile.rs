@@ -1,5 +1,6 @@
 use object::{Object, ObjectSymbol};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet},
     ffi::OsString,
@@ -41,6 +42,7 @@ struct ObservedTaskInput {
 }
 
 struct ElfSymbols {
+    sha256: String,
     by_name: BTreeMap<String, u64>,
     by_address: BTreeMap<u64, String>,
 }
@@ -51,6 +53,7 @@ struct Report {
     profile_revision: String,
     payload_revision: String,
     elf: String,
+    elf_sha256: String,
     profile_tasks: Vec<ResolvedProfileTask>,
     observed_tasks: Vec<ObservedTask>,
 }
@@ -173,6 +176,7 @@ fn elf_symbols(path: &Path) -> Result<ElfSymbols, String> {
     let bytes = fs::read(path).map_err(|error| format!("read {}: {error}", path.display()))?;
     let file = object::File::parse(bytes.as_slice())
         .map_err(|error| format!("parse {}: {error}", path.display()))?;
+    let sha256 = format!("{:x}", Sha256::digest(&bytes));
     let mut by_name = BTreeMap::new();
     let mut by_address = BTreeMap::new();
     let mut seen = BTreeSet::new();
@@ -192,6 +196,7 @@ fn elf_symbols(path: &Path) -> Result<ElfSymbols, String> {
             .or_insert_with(|| name.to_owned());
     }
     Ok(ElfSymbols {
+        sha256,
         by_name,
         by_address,
     })
@@ -268,6 +273,7 @@ fn build_report(
         profile_revision: profile.revision,
         payload_revision: profile.payload_revision,
         elf: elf.display().to_string(),
+        elf_sha256: symbols.sha256,
         profile_tasks,
         observed_tasks,
     })
