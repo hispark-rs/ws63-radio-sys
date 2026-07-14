@@ -141,6 +141,9 @@ fn main() {
     let profile_path = manifest.join("../hisi-rf-link/profiles/ws63.toml");
     let scheduling_profile_path = manifest.join("../hisi-rf-link/profiles/ws63-scheduling.toml");
     let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
+    let supplicant_header = manifest.join("../../include/hisi_wpa_supplicant.h");
+    let supplicant_source = manifest.join("../../upstream/hostap-2.11.json");
+    let upstream_hostap = manifest.join("../../third-party/hostap");
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
@@ -188,6 +191,9 @@ fn main() {
         ("archive_profile", profile_path),
         ("task_profile", scheduling_profile_path),
         ("nvs_linker", nvs_linker),
+        ("supplicant_header", supplicant_header),
+        ("supplicant_source", supplicant_source),
+        ("upstream_hostap", upstream_hostap),
     ] {
         if !path.exists() {
             panic!("WS63 radio payload is incomplete: {}", path.display());

@@ -1,0 +1,23 @@
+{
+  "schema": "hispark-rs/upstream-hostap/v1",
+  "project": "hostap",
+  "version": "2.11",
+  "repository": "https://git.w1.fi/hostap.git",
+  "tag": "hostap_2_11",
+  "commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+  "submodule": "third-party/hostap",
+  "release_archive": {
+    "url": "https://w1.fi/releases/wpa_supplicant-2.11.tar.gz",
+    "sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
+  },
+  "vendor_oracle": {
+    "version": "2.10-derived",
+    "sdk": "fbb_ws63 1.10.106",
+    "role": "behavior, WS63 driver ABI, and silicon parity only"
+  },
+  "port": {
+    "runtime": "hisi-rtos",
+    "driver": "WS63 management/EAPOL/key-install adapter",
+    "forbidden_dependencies": ["LiteOS", "LOS_*", "osal_*", "vendor eloop_rtos"]
+  }
+}

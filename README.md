@@ -21,3 +21,9 @@ The WPA archive profile is explicit. `wpa2-personal` preserves the verified
 supplicant/security/libc closure; `wpa3-personal` additionally selects the vendor
 mbedTLS 3.6.0 oracle required by the current SAE/P-256 implementation. The latter
 is a link candidate until its controlled-AP HIL gate passes.
+
+The replacement path is pinned upstream hostap 2.11, not the SDK's LiteOS-derived
+2.10 fork. `include/hisi_wpa_supplicant.h` and `ws63_radio_sys::supplicant`
+define the same narrow, versioned ABI for a single runner-owned context. The
+vendor archive remains a behavior and silicon-parity oracle while the upstream
+port is brought up; it is not the long-term runtime architecture.

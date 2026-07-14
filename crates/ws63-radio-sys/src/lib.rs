@@ -6,5 +6,7 @@
 //! payload paths and the machine-owned archive profile. This crate contains no
 //! safe radio API, scheduler policy, or duplicate archive inventory.
 
+pub mod supplicant;
+
 /// Marker type for the Cargo links contract.
 pub struct RadioAbi;
