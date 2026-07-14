@@ -12,3 +12,7 @@ This repository owns two release units:
 The language-neutral vendor payload remains the nested `ws63-RF` submodule. It is
 not packaged on crates.io; consult the original SDK license before redistribution.
 
+`crates/hisi-rf-link/profiles/ws63-scheduling.toml` binds observed RF task entry
+symbols and vendor priorities to exact archive or ROM hashes. It records
+classification evidence, not runtime policy: unmatched entries remain `unknown`,
+and a consuming firmware must verify an external archive before using its rows.

@@ -1,5 +1,6 @@
 use serde::Deserialize;
-use std::{env, fs, path::PathBuf};
+use sha2::{Digest, Sha256};
+use std::{collections::BTreeSet, env, fs, path::PathBuf};
 
 #[derive(Deserialize)]
 struct Profile {
@@ -24,6 +25,101 @@ struct WpaArchive {
     order: u16,
 }
 
+#[derive(Deserialize)]
+struct SchedulingProfile {
+    revision: String,
+    payload_revision: String,
+    default_role: String,
+    artifacts: Vec<ProfileArtifact>,
+    tasks: Vec<TaskProfile>,
+}
+
+#[derive(Deserialize)]
+struct ProfileArtifact {
+    id: String,
+    path: Option<String>,
+    sha256: String,
+}
+
+#[derive(Deserialize)]
+struct TaskProfile {
+    entry_symbol: String,
+    source: String,
+    role: String,
+    vendor_priority: u8,
+}
+
+fn sha256(path: &std::path::Path) -> String {
+    let digest = Sha256::digest(fs::read(path).unwrap_or_else(|error| {
+        panic!(
+            "read scheduling-profile artifact {}: {error}",
+            path.display()
+        )
+    }));
+    digest.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Path) {
+    assert!(
+        !profile.revision.is_empty(),
+        "empty scheduling-profile revision"
+    );
+    assert!(
+        !profile.payload_revision.is_empty(),
+        "empty scheduling-profile payload revision"
+    );
+    assert_eq!(
+        profile.default_role, "unknown",
+        "unmatched task entries must remain unknown"
+    );
+
+    let mut artifacts = BTreeSet::new();
+    for artifact in &profile.artifacts {
+        assert!(
+            artifacts.insert(artifact.id.as_str()),
+            "duplicate artifact id"
+        );
+        assert!(
+            artifact.sha256.len() == 64
+                && artifact
+                    .sha256
+                    .bytes()
+                    .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase()),
+            "invalid SHA-256 for {}",
+            artifact.id
+        );
+        if let Some(relative) = &artifact.path {
+            let path = root.join(relative);
+            assert_eq!(
+                sha256(&path),
+                artifact.sha256,
+                "scheduling-profile artifact drift: {}",
+                path.display()
+            );
+        }
+    }
+
+    let mut symbols = BTreeSet::new();
+    for task in &profile.tasks {
+        assert!(
+            symbols.insert(task.entry_symbol.as_str()),
+            "duplicate task entry symbol"
+        );
+        assert!(
+            artifacts.contains(task.source.as_str()),
+            "unknown task source"
+        );
+        assert!(
+            matches!(
+                task.role.as_str(),
+                "critical" | "worker" | "background" | "unknown"
+            ),
+            "invalid task role"
+        );
+        assert!(task.vendor_priority < 32, "invalid vendor task priority");
+    }
+}
+
 fn main() {
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let default_root = manifest.join("../../ws63-RF");
@@ -35,6 +131,7 @@ fn main() {
         .map(PathBuf::from)
         .unwrap_or_else(|| root.join("lib"));
     let profile_path = manifest.join("../hisi-rf-link/profiles/ws63.toml");
+    let scheduling_profile_path = manifest.join("../hisi-rf-link/profiles/ws63-scheduling.toml");
     let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
@@ -43,6 +140,11 @@ fn main() {
     wifi.sort_by_key(|archive| archive.link_order);
     let mut wpa = profile.wpa_archives;
     wpa.sort_by_key(|archive| archive.order);
+    let scheduling_profile: SchedulingProfile = toml::from_str(
+        &fs::read_to_string(&scheduling_profile_path).expect("read WS63 task scheduling profile"),
+    )
+    .expect("parse WS63 task scheduling profile");
+    validate_scheduling_profile(&scheduling_profile, &root);
 
     for (key, path) in [
         ("root", root.clone()),
@@ -59,6 +161,7 @@ fn main() {
         // redirect it away from the canonical delivery.
         ("rom_callback_archive", root.join("lib/librom_callback.a")),
         ("archive_profile", profile_path),
+        ("task_profile", scheduling_profile_path),
         ("nvs_linker", nvs_linker),
     ] {
         if !path.exists() {
@@ -68,6 +171,14 @@ fn main() {
         println!("cargo:rerun-if-changed={}", path.display());
     }
     println!("cargo:revision={}", profile.revision);
+    println!(
+        "cargo:task_profile_revision={}",
+        scheduling_profile.revision
+    );
+    println!(
+        "cargo:task_profile_payload_revision={}",
+        scheduling_profile.payload_revision
+    );
     println!(
         "cargo:wifi_archives={}",
         wifi.iter()

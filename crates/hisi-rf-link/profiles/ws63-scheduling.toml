@@ -1,0 +1,38 @@
+revision = "ws63-scheduling-2026-07-14"
+payload_revision = "d01274cdd1bd42aeb417ade97eee108c1f7b9440"
+default_role = "unknown"
+
+# Canonical payloads are verified by ws63-radio-sys/build.rs. External
+# archives have no path here: the consuming firmware must select and verify one
+# of the accepted hashes before applying this profile.
+[[artifacts]]
+id = "wifi-driver-tcm"
+path = "lib/libwifi_driver_tcm.a"
+sha256 = "89a6c999c51740ea947f79573edd82a988432fa32c9fe12afb56d638b4d6de86"
+
+[[artifacts]]
+id = "ws63-mask-rom-map"
+path = "rom/ws63_acore_rom.lds"
+sha256 = "fa8f0071c07374d443db10dd2d5569a48e1e07486538b2eae701252e2188edbc"
+
+[[artifacts]]
+id = "wpa2-personal-oracle"
+sha256 = "891c195279d768ce5664e16fecac95f353fd2217c4e3590315baa4cb6e7f25a2"
+
+[[tasks]]
+entry_symbol = "frw_task_process"
+source = "wifi-driver-tcm"
+role = "worker"
+vendor_priority = 4
+
+[[tasks]]
+entry_symbol = "frw_task_thread"
+source = "ws63-mask-rom-map"
+role = "critical"
+vendor_priority = 5
+
+[[tasks]]
+entry_symbol = "wpa_supplicant_main_task"
+source = "wpa2-personal-oracle"
+role = "critical"
+vendor_priority = 4
