@@ -375,6 +375,9 @@ static void test_l2_packet_bridge(void)
     assert(sent_frame_len == sizeof(payload));
     assert(memcmp(sent_destination, destination, sizeof(destination)) == 0);
     assert(hisi_wpa_l2_feed(source, payload, sizeof(payload)) == 0);
+    assert(hisi_wpa_l2_feed(NULL, payload, sizeof(payload)) == -4);
+    assert(hisi_wpa_l2_feed(source, NULL, sizeof(payload)) == -4);
+    assert(hisi_wpa_l2_feed(source, payload, 0) == -4);
     assert(received_frame_len == sizeof(payload));
     assert(memcmp(received_source, source, sizeof(source)) == 0);
 

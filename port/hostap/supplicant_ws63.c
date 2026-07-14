@@ -221,8 +221,10 @@ int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context)
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len)
 {
-    if (context == NULL || !context->initialized)
+    if (context == NULL)
         return -1;
+    if (!context->initialized)
+        return -2;
     return hisi_wpa_l2_feed(source, frame, frame_len);
 }
 

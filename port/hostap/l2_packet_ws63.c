@@ -117,8 +117,10 @@ int32_t hisi_wpa_l2_feed(const uint8_t source[6], const uint8_t *frame,
     size_t frame_len)
 {
     struct l2_packet_data *l2 = g_receive_endpoint;
-    if (l2 == NULL || source == NULL || frame == NULL || frame_len == 0)
-        return -1;
+    if (l2 == NULL)
+        return -3;
+    if (source == NULL || frame == NULL || frame_len == 0)
+        return -4;
     l2->receive(l2->receive_context, source, frame, frame_len);
     return 0;
 }
