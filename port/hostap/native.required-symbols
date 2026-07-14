@@ -1,0 +1,22 @@
+# Exact external ABI of the merged hostap-2.11-personal-v1 RV32 archive.
+# Compiler helpers are supplied by Rust compiler_builtins; crypto symbols are
+# supplied explicitly by the selected hisi-crypto suite. memcpy/memset are the
+# conventional compiler memory builtins, not a general libc dependency.
+__floatunsidf
+__gtdf2
+__ltdf2
+__muldf3
+__udivdi3
+__umoddi3
+aes_decrypt
+aes_decrypt_deinit
+aes_decrypt_init
+aes_encrypt
+aes_encrypt_deinit
+aes_encrypt_init
+hmac_sha1
+hmac_sha1_vector
+hmac_sha256_vector
+memcpy
+memset
+pbkdf2_sha1

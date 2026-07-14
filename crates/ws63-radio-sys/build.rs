@@ -51,6 +51,14 @@ struct TaskProfile {
     wpa_profile: Option<String>,
 }
 
+#[derive(Deserialize)]
+struct NativeSupplicantProfile {
+    revision: String,
+    upstream_sources: Vec<String>,
+    port_sources: Vec<String>,
+    defines: Vec<String>,
+}
+
 fn sha256(path: &std::path::Path) -> String {
     let digest = Sha256::digest(fs::read(path).unwrap_or_else(|error| {
         panic!(
@@ -59,6 +67,10 @@ fn sha256(path: &std::path::Path) -> String {
         )
     }));
     digest.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+fn environment_override_exists(names: &[&str]) -> bool {
+    names.iter().any(|name| env::var_os(name).is_some())
 }
 
 fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Path) {
@@ -145,6 +157,7 @@ fn main() {
     let supplicant_source = manifest.join("../../upstream/hostap-2.11.json");
     let upstream_hostap = manifest.join("../../third-party/hostap");
     let native_port = manifest.join("../../port/hostap");
+    let native_profile_path = native_port.join("personal.toml");
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
@@ -194,8 +207,9 @@ fn main() {
         ("nvs_linker", nvs_linker),
         ("supplicant_header", supplicant_header),
         ("supplicant_source", supplicant_source),
-        ("upstream_hostap", upstream_hostap),
+        ("upstream_hostap", upstream_hostap.clone()),
         ("native_supplicant_port", native_port.clone()),
+        ("native_supplicant_profile", native_profile_path.clone()),
     ] {
         if !path.exists() {
             panic!("WS63 radio payload is incomplete: {}", path.display());
@@ -248,29 +262,92 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
 
     if env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT").is_some() {
+        let native_profile: NativeSupplicantProfile = toml::from_str(
+            &fs::read_to_string(&native_profile_path)
+                .expect("read native supplicant source profile"),
+        )
+        .expect("parse native supplicant source profile");
+        assert!(
+            !native_profile.revision.is_empty(),
+            "empty native supplicant profile revision"
+        );
+        let mut source_paths = Vec::new();
+        let mut unique_sources = BTreeSet::new();
+        for source in &native_profile.upstream_sources {
+            assert!(
+                unique_sources.insert(format!("upstream:{source}")),
+                "duplicate native supplicant source: {source}"
+            );
+            let path = upstream_hostap.join(source);
+            assert!(
+                path.is_file(),
+                "missing upstream source: {}",
+                path.display()
+            );
+            println!("cargo:rerun-if-changed={}", path.display());
+            source_paths.push(path);
+        }
+        for source in &native_profile.port_sources {
+            assert!(
+                unique_sources.insert(format!("port:{source}")),
+                "duplicate native supplicant source: {source}"
+            );
+            let path = native_port.join(source);
+            assert!(path.is_file(), "missing port source: {}", path.display());
+            println!("cargo:rerun-if-changed={}", path.display());
+            source_paths.push(path);
+        }
         let mut build = cc::Build::new();
         build
-            .files([
-                native_port.join("hisi_wpa_port.c"),
-                native_port.join("os_hisi_rtos.c"),
-                native_port.join("eloop_hisi_rtos.c"),
-                native_port.join("hisi_wpa_driver_port.c"),
-                native_port.join("l2_packet_ws63.c"),
-                native_port.join("driver_ws63.c"),
-            ])
+            .files(source_paths)
             .include(manifest.join("../../include"))
             .include(&native_port)
+            .include(upstream_hostap.join("wpa_supplicant"))
             .include(manifest.join("../../third-party/hostap/src/utils"))
             .include(manifest.join("../../third-party/hostap/src"))
+            .flag("-include")
+            .flag(native_port.join("hisi_wpa_hostap_compat.h"))
             .flag_if_supported("-std=c11")
             .flag_if_supported("-ffreestanding")
             .flag_if_supported("-fno-builtin")
-            .flag_if_supported("-Wno-unused-parameter")
+            .flag("-Wno-unused-parameter")
+            // CONFIG_NO_STDOUT_DEBUG compiles wpa_printf() arguments away;
+            // a few upstream notification helpers then intentionally retain
+            // values that are only consumed by logging.
+            .flag_if_supported("-Wno-unused-but-set-variable")
+            .flag_if_supported("-Wno-unused-variable")
             .flag_if_supported("-Wno-variadic-macros")
             .flag_if_supported("-Wno-zero-length-array")
             .flag_if_supported("-Wno-flexible-array-extensions")
             .warnings_into_errors(true);
+        for definition in &native_profile.defines {
+            if let Some((name, value)) = definition.split_once('=') {
+                build.define(name, value);
+            } else {
+                build.define(definition, None);
+            }
+        }
         if env::var("TARGET").is_ok_and(|target| target.starts_with("riscv32imfc-")) {
+            // cc-rs otherwise pairs an explicitly selected cross GCC with the
+            // host archiver. On macOS, host ranlib cannot index RISC-V ELF and
+            // leaves a deceptively successful empty archive. Keep compiler and
+            // archiver from one toolchain unless the caller overrides either.
+            if !environment_override_exists(&[
+                "CC_riscv32imfc_unknown_none_elf",
+                "CC_riscv32imfc-unknown-none-elf",
+                "TARGET_CC",
+                "CC",
+            ]) {
+                build.compiler("riscv64-unknown-elf-gcc");
+            }
+            if !environment_override_exists(&[
+                "AR_riscv32imfc_unknown_none_elf",
+                "AR_riscv32imfc-unknown-none-elf",
+                "TARGET_AR",
+                "AR",
+            ]) {
+                build.archiver("riscv64-unknown-elf-ar");
+            }
             // Rust's official target is hardware-single-float ILP32F. Clang's
             // generic RISC-V default is soft-float ILP32, which produces ELF
             // attributes that rust-lld correctly refuses to mix with Rust.

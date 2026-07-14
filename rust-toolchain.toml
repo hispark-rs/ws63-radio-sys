@@ -1,0 +1,7 @@
+# The upstream hostap port must use the same official RV32IMFC target and ABI
+# as the parent ecosystem. rustup does not yet ship prebuilt rust-std for this
+# target, so target builds use -Zbuild-std=core,alloc.
+[toolchain]
+channel = "nightly-2026-07-09"
+profile = "minimal"
+components = ["rust-src", "clippy", "rustfmt"]

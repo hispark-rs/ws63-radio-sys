@@ -3,14 +3,21 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct hisi_wpa_file FILE;
-
-#define OS_NO_C_LIB_DEFINES
+#include "hisi_wpa_hostap_compat.h"
 #include "os.h"
 
 #include "hisi_wpa_port.h"
 
 #define HISI_WPA_C_ALIGNMENT 8u
+
+void hisi_wpa_abort(void)
+{
+    /* A hostap internal invariant has failed. Returning would continue with
+     * memory corruption, so enter the target's normal illegal-instruction
+     * fault path without requiring a global libc abort implementation. */
+    __builtin_trap();
+    for (;;) {}
+}
 
 static int split_time(uint64_t microseconds, os_time_t *sec, os_time_t *usec)
 {
@@ -282,13 +289,15 @@ size_t os_strlcpy(char *destination, const char *source, size_t size)
     return length;
 }
 
-__attribute__((weak)) int os_snprintf(char *destination, size_t size,
+int os_snprintf(char *destination, size_t size,
     const char *format, ...)
 {
-    (void) format;
-    if (size != 0 && destination != NULL)
-        destination[0] = '\0';
-    return -1;
+    int result;
+    va_list arguments;
+    va_start(arguments, format);
+    result = hisi_wpa_vsnprintf(destination, size, format, arguments);
+    va_end(arguments);
+    return result;
 }
 
 int os_exec(const char *program, const char *argument, int wait_completion)

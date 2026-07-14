@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -6,7 +7,6 @@
 
 typedef struct hisi_wpa_file FILE;
 
-#define OS_NO_C_LIB_DEFINES
 #include "hisi_wpa_supplicant.h"
 #include "hisi_wpa_driver_port.h"
 #include "common.h"
@@ -15,6 +15,12 @@ typedef struct hisi_wpa_file FILE;
 #include "l2_packet/l2_packet.h"
 
 extern const struct wpa_driver_ops wpa_driver_ws63_ops;
+int hisi_wpa_sscanf(const char *input, const char *format, ...);
+int hisi_wpa_vsnprintf(char *buffer, size_t size, const char *format,
+    va_list arguments);
+long hisi_wpa_strtol(const char *value, char **end, int base);
+void hisi_wpa_qsort(void *base, size_t count, size_t size,
+    int (*compare)(const void *left, const void *right));
 
 struct allocation {
     size_t size;
@@ -411,6 +417,58 @@ static void test_ws63_driver_bridge(void)
     assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == 0);
 }
 
+static int native_format(char *buffer, size_t size, const char *format, ...)
+{
+    int result;
+    va_list arguments;
+    va_start(arguments, format);
+    result = hisi_wpa_vsnprintf(buffer, size, format, arguments);
+    va_end(arguments);
+    return result;
+}
+
+static int compare_ints(const void *left, const void *right)
+{
+    int a = *(const int *) left;
+    int b = *(const int *) right;
+    return (a > b) - (a < b);
+}
+
+static void test_freestanding_contract(void)
+{
+    char formatted[64];
+    char truncated[5];
+    char *end;
+    unsigned int first = 0;
+    unsigned int second = 0;
+    int values[] = { 7, -1, 9, 0, 7 };
+
+    assert(native_format(formatted, sizeof(formatted),
+        "x=%02x s=%-4.3s n=%lld z=%zu", 0xau, "hello",
+        -1234567890123ll, (size_t) 17) == 33);
+    assert(strcmp(formatted, "x=0a s=hel  n=-1234567890123 z=17") == 0);
+    assert(native_format(truncated, sizeof(truncated), "abcdef") == 6);
+    assert(strcmp(truncated, "abcd") == 0);
+    assert(native_format(NULL, 0, "%08X", 0x12u) == 8);
+    assert(native_format(formatted, sizeof(formatted), "%f", 1.0) == -1);
+
+    assert(hisi_wpa_strtol(" -0x20tail", &end, 0) == -32);
+    assert(strcmp(end, "tail") == 0);
+    assert(hisi_wpa_strtol("075", &end, 0) == 61 && *end == '\0');
+    assert(hisi_wpa_strtol("no", &end, 10) == 0 && end[0] == 'n');
+
+    assert(hisi_wpa_sscanf("15:4", "%u:%u", &first, &second) == 2);
+    assert(first == 15 && second == 4);
+    assert(hisi_wpa_sscanf("9", "%u:%u", &first, &second) == 1);
+    assert(first == 9);
+    assert(hisi_wpa_sscanf("1:2", "%d:%d", &first, &second) == -1);
+
+    hisi_wpa_qsort(values, sizeof(values) / sizeof(values[0]),
+        sizeof(values[0]), compare_ints);
+    assert(values[0] == -1 && values[1] == 0 && values[2] == 7 &&
+        values[3] == 7 && values[4] == 9);
+}
+
 int main(void)
 {
     struct hisi_wpa_os_hooks conflicting_hooks = hooks;
@@ -435,6 +493,7 @@ int main(void)
     test_runner_waits_until_deadline();
     test_l2_packet_bridge();
     test_ws63_driver_bridge();
+    test_freestanding_contract();
     assert(hisi_wpa_os_uninstall(hooks.context) == 0);
     return 0;
 }

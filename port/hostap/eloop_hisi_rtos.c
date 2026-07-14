@@ -2,9 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct hisi_wpa_file FILE;
-
-#define OS_NO_C_LIB_DEFINES
+#include "hisi_wpa_hostap_compat.h"
 #include "os.h"
 #include "eloop.h"
 

@@ -48,10 +48,20 @@ layer:
   TX, and key install/remove. The key ABI preserves peer presence, RX/TX and
   pairwise/group flags, and a bounded replay sequence instead of exposing
   hostap's internal key structure.
+- `supplicant_ws63.c` owns the opaque single-context lifecycle and bounded
+  state-event queue exposed through the versioned C ABI. Queue overflow is an
+  explicit failure event rather than a silent loss.
+- `personal.toml` is the complete source profile for the current WPA2-Personal
+  STA closure: 42 upstream/port RV32 objects, 15 compile definitions, and the
+  exact external compiler/crypto/memory ABI in `native.required-symbols`.
+- `freestanding_hisi.c` supplies the small formatter/string/sort contract still
+  used directly by that pinned source set. It is intentionally not a general
+  libc or POSIX compatibility layer.
 
-This closes the W2C runtime seam and the EAPOL subpart of W2D, not a complete
-supplicant build. The full hostap object closure, production formatting support,
-and WS63 scan/auth/assoc/event bridge remain W2D work. Host behavior tests,
-freestanding RV32 compilation, ABI size/offset assertions, and an exact global
-symbol manifest are enforced by `scripts/check-native-supplicant-port.py` so
-this partial boundary cannot be mistaken for a silicon parity claim.
+This closes the W2C source/libc/formatter build closure and the EAPOL subpart of
+W2D, not silicon parity. The WS63 scan/auth/assoc operations, management/EAPOL RX
+event bridge, Rust context owner, and `RadioRunner` integration remain W2D work.
+Host behavior tests, all-source freestanding RV32 compilation, ABI size/offset
+assertions, restricted-format checks, and an exact external symbol manifest are
+enforced by `scripts/check-native-supplicant-port.py` so a successful archive
+build cannot be mistaken for a working connection.
