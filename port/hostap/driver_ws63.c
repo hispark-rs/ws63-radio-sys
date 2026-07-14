@@ -117,7 +117,8 @@ static int ws63_set_key(void *private_data,
     struct ws63_driver_data *driver = private_data;
     struct hisi_wpa_key key = { 0 };
     if (driver == NULL || params == NULL || params->key_idx < 0 ||
-        params->key_idx > UINT8_MAX || params->seq_len > sizeof(key.sequence) ||
+        params->key_idx > (int) UINT8_MAX ||
+        params->seq_len > sizeof(key.sequence) ||
         (params->seq_len != 0 && params->seq == NULL) ||
         check_key_flag(params->key_flag) != 0 ||
         (params->key_flag & KEY_FLAG_PMK) != 0 ||
