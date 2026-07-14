@@ -19,6 +19,10 @@ sha256 = "fa8f0071c07374d443db10dd2d5569a48e1e07486538b2eae701252e2188edbc"
 id = "wpa2-personal-oracle"
 sha256 = "891c195279d768ce5664e16fecac95f353fd2217c4e3590315baa4cb6e7f25a2"
 
+[[artifacts]]
+id = "wpa3-personal-candidate"
+sha256 = "d1bfa6a87459d16efdea4c796ed8af43e678c48e4570ce041218312ff9952778"
+
 [[tasks]]
 entry_symbol = "frw_task_process"
 source = "wifi-driver-tcm"
@@ -37,3 +41,11 @@ entry_symbol = "wpa_supplicant_main_task"
 source = "wpa2-personal-oracle"
 role = "critical"
 vendor_priority = 4
+wpa_profile = "wpa2-personal"
+
+[[tasks]]
+entry_symbol = "wpa_supplicant_main_task"
+source = "wpa3-personal-candidate"
+role = "critical"
+vendor_priority = 4
+wpa_profile = "wpa3-personal"

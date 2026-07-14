@@ -48,6 +48,7 @@ struct TaskProfile {
     source: String,
     role: String,
     vendor_priority: u8,
+    wpa_profile: Option<String>,
 }
 
 fn sha256(path: &std::path::Path) -> String {
@@ -103,8 +104,8 @@ fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Pa
     let mut symbols = BTreeSet::new();
     for task in &profile.tasks {
         assert!(
-            symbols.insert(task.entry_symbol.as_str()),
-            "duplicate task entry symbol"
+            symbols.insert((task.entry_symbol.as_str(), task.wpa_profile.as_deref())),
+            "duplicate task entry symbol/profile"
         );
         assert!(
             artifacts.contains(task.source.as_str()),
@@ -118,6 +119,12 @@ fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Pa
             "invalid task role"
         );
         assert!(task.vendor_priority < 32, "invalid vendor task priority");
+        assert!(
+            task.wpa_profile
+                .as_deref()
+                .is_none_or(|profile| matches!(profile, "wpa2-personal" | "wpa3-personal")),
+            "invalid WPA task profile"
+        );
     }
 }
 

@@ -25,6 +25,7 @@ struct ProfileTask {
     source: String,
     role: String,
     vendor_priority: u8,
+    wpa_profile: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -32,6 +33,7 @@ struct Arguments {
     elf: Option<PathBuf>,
     log: Option<PathBuf>,
     entries: Vec<u64>,
+    wpa_profile: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -80,7 +82,7 @@ struct ObservedTask {
 
 fn usage() -> ! {
     eprintln!(
-        "usage: hisi-rf-link task-profile --elf <ELF> [--log <UART_LOG>] [--entry <ADDR>]..."
+        "usage: hisi-rf-link task-profile --elf <ELF> [--wpa-profile <PROFILE>] [--log <UART_LOG>] [--entry <ADDR>]..."
     );
     std::process::exit(2);
 }
@@ -106,12 +108,15 @@ fn parse_args(mut args: impl Iterator<Item = OsString>) -> Arguments {
                 println!(
                     "Classify observed WS63 RF tasks using the hash-bound scheduling profile.\n\n\
                      usage: hisi-rf-link task-profile --elf <ELF> \
-                     [--log <UART_LOG>] [--entry <ADDR>]..."
+                     [--wpa-profile <PROFILE>] [--log <UART_LOG>] [--entry <ADDR>]..."
                 );
                 std::process::exit(0);
             }
             Some("--elf") => parsed.elf = args.next().map(PathBuf::from),
             Some("--log") => parsed.log = args.next().map(PathBuf::from),
+            Some("--wpa-profile") => {
+                parsed.wpa_profile = args.next().and_then(|value| value.into_string().ok())
+            }
             Some("--entry") => {
                 let value = args
                     .next()
@@ -213,10 +218,17 @@ fn match_profile_task<'a>(
     symbol.and_then(|symbol| tasks_by_symbol.get(symbol))
 }
 
+fn task_applies_to_wpa_profile(task: &ProfileTask, selected: Option<&str>) -> bool {
+    task.wpa_profile
+        .as_deref()
+        .is_none_or(|profile| Some(profile) == selected)
+}
+
 fn build_report(
     profile: SchedulingProfile,
     elf: &Path,
     mut observed: Vec<ObservedTaskInput>,
+    selected_wpa_profile: Option<&str>,
 ) -> Result<Report, String> {
     let symbols = elf_symbols(elf)?;
     let mut tasks_by_symbol = BTreeMap::new();
@@ -224,6 +236,7 @@ fn build_report(
     let profile_tasks = profile
         .tasks
         .into_iter()
+        .filter(|task| task_applies_to_wpa_profile(task, selected_wpa_profile))
         .map(|task| {
             let address = symbols
                 .by_name
@@ -281,6 +294,14 @@ fn build_report(
 
 pub(crate) fn run(args: impl Iterator<Item = OsString>) {
     let arguments = parse_args(args);
+    if arguments
+        .wpa_profile
+        .as_deref()
+        .is_some_and(|profile| !matches!(profile, "wpa2-personal" | "wpa3-personal"))
+    {
+        eprintln!("unsupported WS63 WPA task profile");
+        std::process::exit(2);
+    }
     let elf = arguments.elf.expect("--elf checked by parse_args");
     let mut observed = arguments
         .entries
@@ -300,7 +321,13 @@ pub(crate) fn run(args: impl Iterator<Item = OsString>) {
 
     let profile: SchedulingProfile =
         toml::from_str(SCHEDULING_PROFILE).expect("parse embedded WS63 scheduling profile");
-    let report = build_report(profile, &elf, observed).unwrap_or_else(|error| {
+    let report = build_report(
+        profile,
+        &elf,
+        observed,
+        arguments.wpa_profile.as_deref().or(Some("wpa2-personal")),
+    )
+    .unwrap_or_else(|error| {
         eprintln!("{error}");
         std::process::exit(1)
     });
@@ -312,7 +339,10 @@ pub(crate) fn run(args: impl Iterator<Item = OsString>) {
 
 #[cfg(test)]
 mod tests {
-    use super::{ProfileTask, match_profile_task, parse_fields, parse_log, parse_u64};
+    use super::{
+        ProfileTask, match_profile_task, parse_fields, parse_log, parse_u64,
+        task_applies_to_wpa_profile,
+    };
     use std::collections::BTreeMap;
 
     #[test]
@@ -352,9 +382,24 @@ mod tests {
                 source: "fixture".to_owned(),
                 role: "worker".to_owned(),
                 vendor_priority: 4,
+                wpa_profile: None,
             },
         );
         assert!(match_profile_task(Some("unknown"), &tasks).is_none());
         assert!(match_profile_task(None, &tasks).is_none());
+    }
+
+    #[test]
+    fn selects_same_symbol_from_the_active_wpa_profile() {
+        let task = ProfileTask {
+            entry_symbol: "wpa_supplicant_main_task".to_owned(),
+            entry_address: None,
+            source: "wpa3-personal-candidate".to_owned(),
+            role: "critical".to_owned(),
+            vendor_priority: 4,
+            wpa_profile: Some("wpa3-personal".to_owned()),
+        };
+        assert!(task_applies_to_wpa_profile(&task, Some("wpa3-personal")));
+        assert!(!task_applies_to_wpa_profile(&task, Some("wpa2-personal")));
     }
 }
