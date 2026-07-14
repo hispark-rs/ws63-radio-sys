@@ -1,5 +1,6 @@
 #include "hisi_wpa_hostap_compat.h"
 #include "hisi_wpa_supplicant.h"
+#include "hisi_wpa_driver_port.h"
 
 #include "common/defs.h"
 #include "drivers/driver.h"
@@ -241,6 +242,55 @@ int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,
     wpa_supplicant_event(context->interface, EVENT_RX_MGMT, &event);
     observe_state(context);
     return 0;
+}
+
+int32_t hisi_wpa_feed_scan_result(struct hisi_wpa_context *context,
+    const struct hisi_wpa_scan_result *result)
+{
+    if (context == NULL || context->interface == NULL ||
+        context->interface->drv_priv == NULL)
+        return -1;
+    return hisi_wpa_driver_feed_scan_result(context->interface->drv_priv,
+        result);
+}
+
+int32_t hisi_wpa_feed_scan_done(struct hisi_wpa_context *context,
+    int32_t status)
+{
+    int32_t result;
+    if (context == NULL || context->interface == NULL ||
+        context->interface->drv_priv == NULL)
+        return -1;
+    result = hisi_wpa_driver_feed_scan_done(context->interface->drv_priv,
+        status);
+    observe_state(context);
+    return result;
+}
+
+int32_t hisi_wpa_feed_associate_result(struct hisi_wpa_context *context,
+    const struct hisi_wpa_associate_result *result)
+{
+    int32_t status;
+    if (context == NULL || context->interface == NULL ||
+        context->interface->drv_priv == NULL)
+        return -1;
+    status = hisi_wpa_driver_feed_associate_result(
+        context->interface->drv_priv, result);
+    observe_state(context);
+    return status;
+}
+
+int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
+    const struct hisi_wpa_disconnect_event *event)
+{
+    int32_t status;
+    if (context == NULL || context->interface == NULL ||
+        context->interface->drv_priv == NULL)
+        return -1;
+    status = hisi_wpa_driver_feed_disconnect(context->interface->drv_priv,
+        event);
+    observe_state(context);
+    return status;
 }
 
 struct hisi_wpa_poll_result hisi_wpa_poll(struct hisi_wpa_context *context,

@@ -8,8 +8,10 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_ABI_VERSION 5u
+#define HISI_WPA_ABI_VERSION 6u
 #define HISI_WPA_MAX_SSID_LEN 32u
+#define HISI_WPA_MAX_SCAN_FREQUENCIES 14u
+#define HISI_WPA_MAX_SCAN_IE_LEN 2304u
 #define HISI_WPA_EVENT_DATA_LEN 128u
 #define HISI_WPA_KEY_SEQUENCE_LEN 16u
 #define HISI_WPA_STATUS_EVENT_OVERFLOW (-1001)
@@ -33,6 +35,12 @@ extern "C" {
 #define HISI_WPA_KEY_FLAG_GROUP (1u << 4)
 #define HISI_WPA_KEY_FLAG_PAIRWISE (1u << 5)
 #define HISI_WPA_KEY_FLAG_PMK (1u << 6)
+
+#define HISI_WPA_AUTH_OPEN 0u
+#define HISI_WPA_AUTH_SAE 3u
+
+#define HISI_WPA_VERSION_1 (1u << 0)
+#define HISI_WPA_VERSION_2 (1u << 1)
 
 struct hisi_wpa_context;
 
@@ -86,6 +94,77 @@ struct hisi_wpa_key {
     uint8_t sequence[HISI_WPA_KEY_SEQUENCE_LEN];
 };
 
+/* Personal STA scan requests intentionally support one SSID. */
+struct hisi_wpa_scan_request {
+    uint16_t abi_version;
+    uint8_t ssid_len;
+    uint8_t num_frequencies;
+    uint8_t ssid[HISI_WPA_MAX_SSID_LEN];
+    uint8_t bssid[6];
+    uint8_t bssid_present;
+    uint8_t reserved;
+    int32_t frequencies[HISI_WPA_MAX_SCAN_FREQUENCIES];
+    const uint8_t *extra_ies;
+    size_t extra_ies_len;
+};
+
+struct hisi_wpa_scan_result {
+    uint16_t abi_version;
+    uint16_t capabilities;
+    uint32_t flags;
+    uint8_t bssid[6];
+    uint8_t reserved0[2];
+    int32_t frequency_mhz;
+    uint16_t beacon_interval;
+    uint16_t reserved1;
+    int32_t quality;
+    int32_t level_mbm;
+    uint32_t age_ms;
+    uint32_t ie_len;
+    uint32_t beacon_ie_len;
+    const uint8_t *ies;
+};
+
+struct hisi_wpa_associate_request {
+    uint16_t abi_version;
+    uint8_t auth_type;
+    uint8_t pmf;
+    uint8_t ssid_len;
+    uint8_t bssid_present;
+    uint8_t sae_pwe;
+    uint8_t privacy;
+    uint8_t ssid[HISI_WPA_MAX_SSID_LEN];
+    uint8_t bssid[6];
+    uint8_t reserved0[2];
+    uint32_t frequency_mhz;
+    uint32_t wpa_versions;
+    uint32_t pairwise_suite;
+    uint32_t group_suite;
+    uint32_t key_mgmt_suite;
+    const uint8_t *association_ies;
+    size_t association_ies_len;
+};
+
+struct hisi_wpa_associate_result {
+    uint16_t abi_version;
+    uint16_t status;
+    uint16_t frequency_mhz;
+    uint16_t reserved;
+    uint8_t bssid[6];
+    uint8_t reserved1[2];
+    const uint8_t *request_ies;
+    size_t request_ies_len;
+    const uint8_t *response_ies;
+    size_t response_ies_len;
+};
+
+struct hisi_wpa_disconnect_event {
+    uint16_t abi_version;
+    uint16_t reason;
+    const uint8_t *ies;
+    size_t ies_len;
+};
+
 struct hisi_wpa_event {
     uint16_t abi_version;
     uint8_t kind;
@@ -131,6 +210,11 @@ struct hisi_wpa_driver_hooks {
     int32_t (*install_key)(void *driver, const struct hisi_wpa_key *key,
         const uint8_t *material, size_t material_len);
     int32_t (*remove_key)(void *driver, const struct hisi_wpa_key *key);
+    int32_t (*start_scan)(void *driver,
+        const struct hisi_wpa_scan_request *request);
+    int32_t (*associate)(void *driver,
+        const struct hisi_wpa_associate_request *request);
+    int32_t (*deauthenticate)(void *driver, uint16_t reason);
 };
 
 int32_t hisi_wpa_driver_install(const struct hisi_wpa_driver_hooks *hooks);
@@ -158,6 +242,14 @@ int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
 int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,
     uint32_t frequency_mhz, int32_t rssi_dbm,
     const uint8_t *frame, size_t frame_len);
+int32_t hisi_wpa_feed_scan_result(struct hisi_wpa_context *context,
+    const struct hisi_wpa_scan_result *result);
+int32_t hisi_wpa_feed_scan_done(struct hisi_wpa_context *context,
+    int32_t status);
+int32_t hisi_wpa_feed_associate_result(struct hisi_wpa_context *context,
+    const struct hisi_wpa_associate_result *result);
+int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
+    const struct hisi_wpa_disconnect_event *event);
 struct hisi_wpa_poll_result hisi_wpa_poll(struct hisi_wpa_context *context,
     uint64_t now_ms, uint32_t work_budget);
 int32_t hisi_wpa_next_event(struct hisi_wpa_context *context,
@@ -172,6 +264,12 @@ _Static_assert(offsetof(struct hisi_wpa_key, flags) == 4,
     "hisi_wpa_key flags offset drift");
 _Static_assert(offsetof(struct hisi_wpa_key, sequence) == 16,
     "hisi_wpa_key sequence offset drift");
+_Static_assert(offsetof(struct hisi_wpa_scan_request, frequencies) == 44,
+    "hisi_wpa_scan_request frequencies offset drift");
+_Static_assert(offsetof(struct hisi_wpa_scan_result, ies) % sizeof(void *) == 0,
+    "hisi_wpa_scan_result pointer alignment drift");
+_Static_assert(offsetof(struct hisi_wpa_associate_request, frequency_mhz) == 48,
+    "hisi_wpa_associate_request frequency offset drift");
 _Static_assert(sizeof(struct hisi_wpa_event) == 144,
     "hisi_wpa_event ABI drift");
 _Static_assert(sizeof(struct hisi_wpa_poll_result) == 16,
@@ -182,7 +280,7 @@ _Static_assert(sizeof(struct hisi_wpa_os_hooks) == 11 * sizeof(void *),
     "hisi_wpa_os_hooks ABI drift");
 _Static_assert(offsetof(struct hisi_wpa_driver_hooks, driver) == sizeof(void *),
     "hisi_wpa_driver_hooks prefix drift");
-_Static_assert(sizeof(struct hisi_wpa_driver_hooks) == 7 * sizeof(void *),
+_Static_assert(sizeof(struct hisi_wpa_driver_hooks) == 10 * sizeof(void *),
     "hisi_wpa_driver_hooks ABI drift");
 
 #ifdef __cplusplus

@@ -44,6 +44,18 @@ static struct hisi_wpa_key removed_key;
 static uint8_t sent_mgmt[64];
 static size_t sent_mgmt_len;
 static uint32_t sent_mgmt_frequency;
+static struct hisi_wpa_scan_request started_scan;
+static struct hisi_wpa_associate_request started_association;
+static uint16_t deauthentication_reason;
+static enum wpa_event_type last_driver_event;
+
+void wpa_supplicant_event(void *context, enum wpa_event_type event,
+    union wpa_event_data *data)
+{
+    assert(context == (void *) 0x789au);
+    (void) data;
+    last_driver_event = event;
+}
 
 static void *allocate_zeroed(void *context, size_t size, size_t alignment)
 {
@@ -206,6 +218,31 @@ static int32_t remove_key(void *driver, const struct hisi_wpa_key *key)
     return 0;
 }
 
+static int32_t start_scan(void *driver,
+    const struct hisi_wpa_scan_request *request)
+{
+    assert(driver == (void *) 0x4567u);
+    assert(request != NULL && request->abi_version == HISI_WPA_ABI_VERSION);
+    started_scan = *request;
+    return 0;
+}
+
+static int32_t associate(void *driver,
+    const struct hisi_wpa_associate_request *request)
+{
+    assert(driver == (void *) 0x4567u);
+    assert(request != NULL && request->abi_version == HISI_WPA_ABI_VERSION);
+    started_association = *request;
+    return 0;
+}
+
+static int32_t deauthenticate(void *driver, uint16_t reason)
+{
+    assert(driver == (void *) 0x4567u);
+    deauthentication_reason = reason;
+    return 0;
+}
+
 static const struct hisi_wpa_driver_hooks driver_hooks = {
     .abi_version = HISI_WPA_ABI_VERSION,
     .reserved = 0,
@@ -215,6 +252,9 @@ static const struct hisi_wpa_driver_hooks driver_hooks = {
     .send_mgmt = send_mgmt,
     .install_key = install_key,
     .remove_key = remove_key,
+    .start_scan = start_scan,
+    .associate = associate,
+    .deauthenticate = deauthenticate,
 };
 
 static void receive_eapol(void *context, const uint8_t *source,
@@ -362,7 +402,15 @@ static void test_ws63_driver_bridge(void)
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
     };
     static const uint8_t management[4] = { 0xb0, 0, 0, 0 };
+    static const uint8_t ssid[] = "test";
+    static const uint8_t scan_ies[] = { 0, 4, 't', 'e', 's', 't' };
+    static const uint8_t rsn_ie[] = { 48, 2, 1, 0 };
+    int frequencies[] = { 2412, 0 };
     struct wpa_driver_set_key_params params = { 0 };
+    struct wpa_driver_scan_params scan = { 0 };
+    struct wpa_driver_associate_params association = { 0 };
+    struct hisi_wpa_scan_result scan_result = { 0 };
+    struct wpa_scan_results *results;
     const uint8_t *own;
     void *driver;
 
@@ -412,6 +460,60 @@ static void test_ws63_driver_bridge(void)
     assert(memcmp(sent_mgmt, management, sizeof(management)) == 0);
     assert(wpa_driver_ws63_ops.send_mlme(driver, management,
         sizeof(management), 0, 2412, NULL, 0, 0, 0, 0) == -1);
+
+    scan.ssids[0].ssid = ssid;
+    scan.ssids[0].ssid_len = sizeof(ssid) - 1;
+    scan.num_ssids = 1;
+    scan.freqs = frequencies;
+    scan.bssid = peer;
+    assert(wpa_driver_ws63_ops.scan2(driver, &scan) == 0);
+    assert(started_scan.ssid_len == sizeof(ssid) - 1);
+    assert(memcmp(started_scan.ssid, ssid, sizeof(ssid) - 1) == 0);
+    assert(started_scan.num_frequencies == 1 &&
+        started_scan.frequencies[0] == 2412);
+    assert(started_scan.bssid_present == 1 &&
+        memcmp(started_scan.bssid, peer, sizeof(peer)) == 0);
+
+    scan_result.abi_version = HISI_WPA_ABI_VERSION;
+    scan_result.capabilities = 0x11;
+    scan_result.bssid[0] = 0x02;
+    scan_result.frequency_mhz = 2412;
+    scan_result.level_mbm = -4200;
+    scan_result.ie_len = sizeof(scan_ies);
+    scan_result.ies = scan_ies;
+    assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) == 0);
+    assert(hisi_wpa_driver_feed_scan_done(driver, 0) == 0);
+    results = wpa_driver_ws63_ops.get_scan_results2(driver);
+    assert(results != NULL && results->num == 1);
+    assert(results->res[0]->freq == 2412 && results->res[0]->level == -4200);
+    assert(results->res[0]->ie_len == sizeof(scan_ies));
+    assert(memcmp(results->res[0] + 1, scan_ies, sizeof(scan_ies)) == 0);
+    os_free(results->res[0]);
+    os_free(results->res);
+    os_free(results);
+
+    association.bssid = peer;
+    association.ssid = ssid;
+    association.ssid_len = sizeof(ssid) - 1;
+    association.freq.freq = 2412;
+    association.wpa_ie = rsn_ie;
+    association.wpa_ie_len = sizeof(rsn_ie);
+    association.wpa_proto = WPA_PROTO_RSN;
+    association.pairwise_suite = WPA_CIPHER_CCMP;
+    association.group_suite = WPA_CIPHER_CCMP;
+    association.key_mgmt_suite = WPA_KEY_MGMT_PSK;
+    association.auth_alg = WPA_AUTH_ALG_OPEN;
+    association.mode = IEEE80211_MODE_INFRA;
+    association.mgmt_frame_protection = MGMT_FRAME_PROTECTION_OPTIONAL;
+    association.sae_pwe = SAE_PWE_NOT_SET;
+    assert(wpa_driver_ws63_ops.associate(driver, &association) == 0);
+    assert(started_association.auth_type == HISI_WPA_AUTH_OPEN);
+    assert(started_association.pmf == HISI_WPA_PMF_OPTIONAL);
+    assert(started_association.frequency_mhz == 2412);
+    assert(started_association.wpa_versions == HISI_WPA_VERSION_2);
+    assert(started_association.association_ies_len == sizeof(rsn_ie));
+    assert(wpa_driver_ws63_ops.deauthenticate(driver, peer, 3) == 0);
+    assert(deauthentication_reason == 3);
 
     wpa_driver_ws63_ops.deinit(driver);
     assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == 0);

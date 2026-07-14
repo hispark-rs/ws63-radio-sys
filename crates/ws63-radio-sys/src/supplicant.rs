@@ -6,8 +6,10 @@
 
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 5;
+pub const ABI_VERSION: u16 = 6;
 pub const MAX_SSID_LEN: usize = 32;
+pub const MAX_SCAN_FREQUENCIES: usize = 14;
+pub const MAX_SCAN_IE_LEN: usize = 2304;
 pub const EVENT_DATA_LEN: usize = 128;
 pub const KEY_SEQUENCE_LEN: usize = 16;
 
@@ -93,6 +95,86 @@ pub struct Key {
 
 #[derive(Clone, Copy)]
 #[repr(C)]
+pub struct ScanRequest {
+    pub abi_version: u16,
+    pub ssid_len: u8,
+    pub num_frequencies: u8,
+    pub ssid: [u8; MAX_SSID_LEN],
+    pub bssid: [u8; 6],
+    pub bssid_present: u8,
+    pub reserved: u8,
+    pub frequencies: [i32; MAX_SCAN_FREQUENCIES],
+    pub extra_ies: *const u8,
+    pub extra_ies_len: usize,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct NativeScanResult {
+    pub abi_version: u16,
+    pub capabilities: u16,
+    pub flags: u32,
+    pub bssid: [u8; 6],
+    pub reserved0: [u8; 2],
+    pub frequency_mhz: i32,
+    pub beacon_interval: u16,
+    pub reserved1: u16,
+    pub quality: i32,
+    pub level_mbm: i32,
+    pub age_ms: u32,
+    pub ie_len: u32,
+    pub beacon_ie_len: u32,
+    pub ies: *const u8,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct AssociateRequest {
+    pub abi_version: u16,
+    pub auth_type: u8,
+    pub pmf: u8,
+    pub ssid_len: u8,
+    pub bssid_present: u8,
+    pub sae_pwe: u8,
+    pub privacy: u8,
+    pub ssid: [u8; MAX_SSID_LEN],
+    pub bssid: [u8; 6],
+    pub reserved0: [u8; 2],
+    pub frequency_mhz: u32,
+    pub wpa_versions: u32,
+    pub pairwise_suite: u32,
+    pub group_suite: u32,
+    pub key_mgmt_suite: u32,
+    pub association_ies: *const u8,
+    pub association_ies_len: usize,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct AssociateResult {
+    pub abi_version: u16,
+    pub status: u16,
+    pub frequency_mhz: u16,
+    pub reserved: u16,
+    pub bssid: [u8; 6],
+    pub reserved1: [u8; 2],
+    pub request_ies: *const u8,
+    pub request_ies_len: usize,
+    pub response_ies: *const u8,
+    pub response_ies_len: usize,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct DisconnectEvent {
+    pub abi_version: u16,
+    pub reason: u16,
+    pub ies: *const u8,
+    pub ies_len: usize,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
 pub struct Event {
     pub abi_version: u16,
     pub kind: u8,
@@ -163,6 +245,11 @@ pub type InstallKey = unsafe extern "C" fn(
     material_len: usize,
 ) -> c_int;
 pub type RemoveKey = unsafe extern "C" fn(driver: *mut c_void, key: *const Key) -> c_int;
+pub type StartScan =
+    unsafe extern "C" fn(driver: *mut c_void, request: *const ScanRequest) -> c_int;
+pub type Associate =
+    unsafe extern "C" fn(driver: *mut c_void, request: *const AssociateRequest) -> c_int;
+pub type Deauthenticate = unsafe extern "C" fn(driver: *mut c_void, reason: u16) -> c_int;
 #[repr(C)]
 pub struct DriverHooks {
     pub abi_version: u16,
@@ -173,6 +260,9 @@ pub struct DriverHooks {
     pub send_mgmt: Option<SendMgmt>,
     pub install_key: Option<InstallKey>,
     pub remove_key: Option<RemoveKey>,
+    pub start_scan: Option<StartScan>,
+    pub associate: Option<Associate>,
+    pub deauthenticate: Option<Deauthenticate>,
 }
 
 unsafe extern "C" {
@@ -212,6 +302,16 @@ unsafe extern "C" {
         frame: *const u8,
         frame_len: usize,
     ) -> c_int;
+    pub fn hisi_wpa_feed_scan_result(
+        context: *mut Context,
+        result: *const NativeScanResult,
+    ) -> c_int;
+    pub fn hisi_wpa_feed_scan_done(context: *mut Context, status: i32) -> c_int;
+    pub fn hisi_wpa_feed_associate_result(
+        context: *mut Context,
+        result: *const AssociateResult,
+    ) -> c_int;
+    pub fn hisi_wpa_feed_disconnect(context: *mut Context, event: *const DisconnectEvent) -> c_int;
     pub fn hisi_wpa_poll(context: *mut Context, now_ms: u64, work_budget: u32) -> PollResult;
     pub fn hisi_wpa_next_event(context: *mut Context, event: *mut Event) -> c_int;
     pub fn hisi_wpa_destroy(context: *mut Context);
@@ -222,10 +322,13 @@ const _: () = {
     assert!(core::mem::size_of::<Key>() == 32);
     assert!(core::mem::offset_of!(Key, flags) == 4);
     assert!(core::mem::offset_of!(Key, sequence) == 16);
+    assert!(core::mem::offset_of!(ScanRequest, frequencies) == 44);
+    assert!(core::mem::offset_of!(NativeScanResult, ies) % core::mem::size_of::<usize>() == 0);
+    assert!(core::mem::offset_of!(AssociateRequest, frequency_mhz) == 48);
     assert!(core::mem::size_of::<Event>() == 144);
     assert!(core::mem::size_of::<PollResult>() == 16);
     assert!(core::mem::offset_of!(OsHooks, context) == core::mem::size_of::<usize>());
     assert!(core::mem::size_of::<OsHooks>() == 11 * core::mem::size_of::<usize>());
     assert!(core::mem::offset_of!(DriverHooks, driver) == core::mem::size_of::<usize>());
-    assert!(core::mem::size_of::<DriverHooks>() == 7 * core::mem::size_of::<usize>());
+    assert!(core::mem::size_of::<DriverHooks>() == 10 * core::mem::size_of::<usize>());
 };
