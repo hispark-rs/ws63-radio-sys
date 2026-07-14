@@ -106,6 +106,8 @@ int l2_packet_send(struct l2_packet_data *l2, const uint8_t *destination,
 {
     const struct hisi_wpa_driver_hooks *hooks = hisi_wpa_driver_current();
     const uint8_t *resolved_destination = destination;
+    const uint8_t *payload = frame;
+    size_t payload_len = frame_len;
     if (l2 == NULL || hooks == NULL || frame == NULL || frame_len == 0 ||
         protocol != l2->protocol)
         return -1;
@@ -115,11 +117,13 @@ int l2_packet_send(struct l2_packet_data *l2, const uint8_t *destination,
             return -1;
         header = (const struct l2_ethhdr *) frame;
         resolved_destination = header->h_dest;
+        payload += sizeof(*header);
+        payload_len -= sizeof(*header);
     }
-    if (resolved_destination == NULL)
+    if (resolved_destination == NULL || payload_len == 0)
         return -1;
-    return hooks->send_eapol(hooks->driver, resolved_destination, frame,
-        frame_len);
+    return hooks->send_eapol(hooks->driver, resolved_destination, payload,
+        payload_len);
 }
 
 int32_t hisi_wpa_l2_feed(const uint8_t source[6], const uint8_t *frame,

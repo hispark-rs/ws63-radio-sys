@@ -284,7 +284,10 @@ static void test_l2_packet_bridge(void)
     static const uint8_t payload[4] = { 0x88, 0x8e, 0x01, 0x02 };
     struct l2_packet_data *l2;
     struct l2_packet_data *duplicate;
-    struct l2_ethhdr header;
+    struct {
+        struct l2_ethhdr header;
+        uint8_t payload[sizeof(payload)];
+    } frame;
     uint8_t own[6];
 
     assert(hisi_wpa_driver_install(&driver_hooks) == 0);
@@ -306,15 +309,18 @@ static void test_l2_packet_bridge(void)
     assert(received_frame_len == sizeof(payload));
     assert(memcmp(received_source, source, sizeof(source)) == 0);
 
-    memcpy(header.h_dest, destination, sizeof(destination));
-    memcpy(header.h_source, source, sizeof(source));
-    header.h_proto = 0x8e88;
+    memcpy(frame.header.h_dest, destination, sizeof(destination));
+    memcpy(frame.header.h_source, source, sizeof(source));
+    frame.header.h_proto = 0x8e88;
+    memcpy(frame.payload, payload, sizeof(payload));
     l2_packet_deinit(l2);
     l2 = l2_packet_init("wlan0", own, 0x888e, NULL, NULL, 1);
     assert(l2 != NULL);
-    assert(l2_packet_send(l2, NULL, 0x888e, (const uint8_t *) &header,
-        sizeof(header)) == 0);
+    assert(l2_packet_send(l2, NULL, 0x888e, (const uint8_t *) &frame,
+        sizeof(frame)) == 0);
     assert(memcmp(sent_destination, destination, sizeof(destination)) == 0);
+    assert(sent_frame_len == sizeof(payload));
+    assert(memcmp(sent_frame, payload, sizeof(payload)) == 0);
     l2_packet_deinit(l2);
     assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == 0);
 }

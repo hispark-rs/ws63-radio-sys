@@ -98,7 +98,7 @@ struct hisi_wpa_os_hooks {
 struct hisi_wpa_driver_hooks {
     void *driver;
     int32_t (*get_own_address)(void *driver, uint8_t address[6]);
-    /* The frame follows the l2_packet include_l2_header mode selected by hostap. */
+    /* frame starts at the IEEE 802.1X/EAPOL header; no Ethernet header. */
     int32_t (*send_eapol)(void *driver, const uint8_t dst[6],
         const uint8_t *frame, size_t frame_len);
     int32_t (*send_mgmt)(void *driver, uint32_t frequency_mhz,
