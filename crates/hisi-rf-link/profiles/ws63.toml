@@ -70,6 +70,12 @@ relative = "libmbedtls_v3.6.0.a"
 order = 35
 profiles = ["wpa3-personal"]
 [[wpa_archives]]
+name = "mbedtls_harden"
+source = "sdk"
+relative = "driver/security_unified/mbedtls_harden_adapt/libmbedtls_harden.a"
+order = 36
+profiles = ["wpa3-personal"]
+[[wpa_archives]]
 name = "c"
 source = "sdk"
 relative = "liteos/libs/libc.a"

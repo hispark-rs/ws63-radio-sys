@@ -67,13 +67,14 @@ fn machine_profile_resolves_wifi_archives() {
 }
 
 #[test]
-fn machine_profile_adds_mbedtls_only_for_wpa3_personal() {
+fn machine_profile_adds_mbedtls_crypto_archives_only_for_wpa3_personal() {
     let directory = tempfile::tempdir().unwrap();
     let sdk = directory.path().join("sdk");
     for relative in [
         "driver/security_unified/libdrv_security_unified.a",
         "hal/security_unified/libhal_security_unified.a",
         "libmbedtls_v3.6.0.a",
+        "driver/security_unified/mbedtls_harden_adapt/libmbedtls_harden.a",
         "liteos/libs/libc.a",
         "liteos/libs/libm.a",
     ] {
@@ -103,8 +104,10 @@ fn machine_profile_adds_mbedtls_only_for_wpa3_personal() {
     let wpa2 = resolve("wpa2-personal");
     assert_eq!(wpa2.lines().count(), 5);
     assert!(!wpa2.contains("libmbedtls_v3.6.0.a"));
+    assert!(!wpa2.contains("libmbedtls_harden.a"));
 
     let wpa3 = resolve("wpa3-personal");
-    assert_eq!(wpa3.lines().count(), 6);
+    assert_eq!(wpa3.lines().count(), 7);
     assert!(wpa3.contains("libmbedtls_v3.6.0.a"));
+    assert!(wpa3.contains("libmbedtls_harden.a"));
 }
