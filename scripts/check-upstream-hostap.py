@@ -20,6 +20,28 @@ def git(*args: str) -> str:
     ).strip()
 
 
+def tagged_commit(tag: str) -> str:
+    try:
+        return git("rev-parse", "--verify", f"refs/tags/{tag}^{{commit}}")
+    except subprocess.CalledProcessError:
+        # actions/checkout recursively fetches the pinned submodule commit but
+        # may omit tag refs. Verify the immutable upstream tag instead of
+        # treating a shallow checkout as source drift.
+        output = git(
+            "ls-remote",
+            "--exit-code",
+            "origin",
+            f"refs/tags/{tag}",
+            f"refs/tags/{tag}^{{}}",
+        )
+        refs = dict(
+            line.split("\t", 1)[::-1]
+            for line in output.splitlines()
+            if "\t" in line
+        )
+        return refs.get(f"refs/tags/{tag}^{{}}", refs.get(f"refs/tags/{tag}", ""))
+
+
 def main() -> int:
     metadata = json.loads(MANIFEST.read_text())
     actual = git("rev-parse", "HEAD")
@@ -27,9 +49,12 @@ def main() -> int:
     if actual != expected:
         raise SystemExit(f"hostap submodule drift: expected {expected}, got {actual}")
 
-    tags = git("tag", "--points-at", "HEAD").splitlines()
-    if metadata["tag"] not in tags:
-        raise SystemExit(f"hostap commit is not tagged {metadata['tag']}")
+    tag_commit = tagged_commit(metadata["tag"])
+    if tag_commit != expected:
+        raise SystemExit(
+            f"hostap tag {metadata['tag']} drift: expected {expected}, "
+            f"got {tag_commit or 'missing'}"
+        )
 
     version_header = (
         ROOT / "third-party/hostap/src/common/version.h"
