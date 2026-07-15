@@ -157,7 +157,12 @@ fn main() {
     let supplicant_source = manifest.join("../../upstream/hostap-2.11.json");
     let upstream_hostap = manifest.join("../../third-party/hostap");
     let native_port = manifest.join("../../port/hostap");
-    let native_profile_path = native_port.join("personal.toml");
+    let native_wpa3 = env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3").is_some();
+    let native_profile_path = native_port.join(if native_wpa3 {
+        "personal-wpa3.toml"
+    } else {
+        "personal.toml"
+    });
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
@@ -356,4 +361,5 @@ fn main() {
         build.compile("hisi_wpa_native_port");
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3");
 }

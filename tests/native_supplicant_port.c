@@ -10,6 +10,7 @@ typedef struct hisi_wpa_file FILE;
 #include "hisi_wpa_supplicant.h"
 #include "hisi_wpa_driver_port.h"
 #include "common.h"
+#include "common/ieee802_11_defs.h"
 #include "drivers/driver.h"
 #include "eloop.h"
 #include "l2_packet/l2_packet.h"
@@ -463,6 +464,51 @@ static void test_ws63_driver_bridge(void)
     assert(memcmp(sent_mgmt, management, sizeof(management)) == 0);
     assert(wpa_driver_ws63_ops.send_mlme(driver, management,
         sizeof(management), 0, 2412, NULL, 0, 0, 0, 0) == -1);
+
+    {
+        struct wpa_driver_capa capability;
+        assert(wpa_driver_ws63_ops.get_capa(driver, &capability) == 0);
+        assert((capability.key_mgmt &
+            WPA_DRIVER_CAPA_KEY_MGMT_WPA2_PSK) != 0);
+#ifdef CONFIG_SAE
+        assert((capability.key_mgmt & WPA_DRIVER_CAPA_KEY_MGMT_SAE) != 0);
+        assert((capability.flags &
+            (WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE)) ==
+            (WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE));
+#else
+        assert((capability.flags &
+            (WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE)) == 0);
+#endif
+    }
+
+#ifdef CONFIG_SAE
+    {
+        static const uint8_t auth_data[] = {
+            1, 0, 0, 0, 19, 0, 0xa5, 0x5a
+        };
+        struct wpa_driver_auth_params authentication = { 0 };
+        const struct ieee80211_mgmt *mgmt;
+        authentication.freq = 2412;
+        authentication.bssid = peer;
+        authentication.ssid = ssid;
+        authentication.ssid_len = sizeof(ssid) - 1;
+        authentication.auth_alg = WPA_AUTH_ALG_SAE;
+        authentication.auth_data = auth_data;
+        authentication.auth_data_len = sizeof(auth_data);
+        assert(wpa_driver_ws63_ops.authenticate(driver, &authentication) == 0);
+        assert(sent_mgmt_frequency == 2412);
+        assert(sent_mgmt_len == offsetof(struct ieee80211_mgmt,
+            u.auth.auth_transaction) + sizeof(auth_data));
+        mgmt = (const struct ieee80211_mgmt *) sent_mgmt;
+        assert(le_to_host16(mgmt->frame_control) ==
+            ((WLAN_FC_TYPE_MGMT << 2) | (WLAN_FC_STYPE_AUTH << 4)));
+        assert(memcmp(mgmt->da, peer, ETH_ALEN) == 0);
+        assert(memcmp(mgmt->sa, own, ETH_ALEN) == 0);
+        assert(le_to_host16(mgmt->u.auth.auth_alg) == WLAN_AUTH_SAE);
+        assert(memcmp(&mgmt->u.auth.auth_transaction, auth_data,
+            sizeof(auth_data)) == 0);
+    }
+#endif
 
     scan.ssids[0].ssid = ssid;
     scan.ssids[0].ssid_len = sizeof(ssid) - 1;

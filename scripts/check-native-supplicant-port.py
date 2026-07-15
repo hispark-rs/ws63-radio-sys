@@ -10,7 +10,10 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PORT = ROOT / "port" / "hostap"
-PROFILE = PORT / "personal.toml"
+PROFILE_SPECS = [
+    (PORT / "personal.toml", PORT / "native.required-symbols"),
+    (PORT / "personal-wpa3.toml", PORT / "native-wpa3.required-symbols"),
+]
 HOSTAP = ROOT / "third-party" / "hostap"
 HOSTAP_SUPPLICANT = HOSTAP / "wpa_supplicant"
 HOSTAP_UTILS = ROOT / "third-party" / "hostap" / "src" / "utils"
@@ -41,17 +44,19 @@ COMMON = [
 ]
 
 
-def profile_array(name: str) -> list[str]:
-    text = PROFILE.read_text()
+def profile_array(profile: pathlib.Path, name: str) -> list[str]:
+    text = profile.read_text()
     match = re.search(rf"(?ms)^{re.escape(name)}\s*=\s*\[(.*?)\]", text)
     if not match:
-        raise RuntimeError(f"missing {name} in {PROFILE}")
+        raise RuntimeError(f"missing {name} in {profile}")
     return re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', match.group(1))
 
 
-def profile_sources() -> list[pathlib.Path]:
-    sources = [HOSTAP / source for source in profile_array("upstream_sources")]
-    sources.extend(PORT / source for source in profile_array("port_sources"))
+def profile_sources(profile: pathlib.Path) -> list[pathlib.Path]:
+    sources = [
+        HOSTAP / source for source in profile_array(profile, "upstream_sources")
+    ]
+    sources.extend(PORT / source for source in profile_array(profile, "port_sources"))
     missing = [str(source) for source in sources if not source.is_file()]
     if missing:
         raise RuntimeError(f"missing native profile sources: {missing}")
@@ -150,7 +155,9 @@ def object_symbols(nm: str, object_path: pathlib.Path) -> tuple[set[str], set[st
     return defined, undefined
 
 
-def check_native_external_symbols(nm: str, objects: list[pathlib.Path]) -> None:
+def check_native_external_symbols(
+    nm: str, objects: list[pathlib.Path], manifest: pathlib.Path
+) -> None:
     defined: set[str] = set()
     undefined: set[str] = set()
     for object_path in objects:
@@ -160,7 +167,7 @@ def check_native_external_symbols(nm: str, objects: list[pathlib.Path]) -> None:
     actual = undefined - defined
     expected = {
         line.strip()
-        for line in (PORT / "native.required-symbols").read_text().splitlines()
+        for line in manifest.read_text().splitlines()
         if line.strip() and not line.startswith("#")
     }
     if actual != expected:
@@ -170,12 +177,14 @@ def check_native_external_symbols(nm: str, objects: list[pathlib.Path]) -> None:
         )
 
 
-def check_restricted_scan_formats(sources: list[pathlib.Path]) -> None:
+def check_restricted_scan_formats(
+    profile: pathlib.Path, sources: list[pathlib.Path]
+) -> None:
     actual: set[str] = set()
     pattern = re.compile(r'\bsscanf\s*\(\s*[^,\n]+,\s*"([^"]*)"')
     for source in sources:
         actual.update(pattern.findall(source.read_text(errors="replace")))
-    expected = set(profile_array("sscanf_formats"))
+    expected = set(profile_array(profile, "sscanf_formats"))
     if actual != expected:
         raise RuntimeError(
             f"restricted sscanf format drift: expected={sorted(expected)}, "
@@ -187,51 +196,60 @@ def main() -> None:
     host_cc = os.environ.get("CC", "cc")
     clang = riscv_clang()
     nm = llvm_nm(clang)
-    native_sources = profile_sources()
-    profile_defines = [f"-D{definition}" for definition in profile_array("defines")]
     with tempfile.TemporaryDirectory(prefix="hisi-wpa-port-") as directory:
         output = pathlib.Path(directory)
-        executable = output / "native-port-test"
-        run(
-            [host_cc, *COMMON, *map(str, SOURCES),
-             str(ROOT / "tests" / "native_supplicant_port.c"),
-             "-o", str(executable)]
-        )
-        run([str(executable)])
-
-        objects: dict[str, pathlib.Path] = {}
-        all_objects: list[pathlib.Path] = []
-        cross_flags = [
-            flag for flag in COMMON if flag != "-DOS_NO_C_LIB_DEFINES"
-        ]
-        cross_flags.extend([
-            "-Wno-zero-length-array",
-            "-Wno-flexible-array-extensions",
-            "-Wno-unused-but-set-variable",
-            "-Wno-unused-variable",
-            "-include",
-            str(PORT / "hisi_wpa_hostap_compat.h"),
-            *profile_defines,
-        ])
-        for index, source in enumerate(native_sources):
-            object_path = output / f"{index:02d}-{source.stem}.o"
+        for name, extra_defines in (
+            ("personal", []),
+            ("personal-wpa3", ["-DCONFIG_SAE"]),
+        ):
+            executable = output / f"native-port-test-{name}"
             run(
-                [clang, "--target=riscv32-unknown-none-elf", "-ffreestanding",
-                 "-fno-builtin", "-march=rv32imfc", "-mabi=ilp32f",
-                 *cross_flags, "-c", str(source),
-                 "-o", str(object_path)]
+                [host_cc, *COMMON, *extra_defines, *map(str, SOURCES),
+                 str(ROOT / "tests" / "native_supplicant_port.c"),
+                 "-o", str(executable)]
             )
-            objects[source.name] = object_path
-            all_objects.append(object_path)
-        if len(all_objects) != len(native_sources):
-            raise RuntimeError("native profile object count drift")
-        check_driver_symbols(nm, objects["driver_ws63.c"])
-        check_native_external_symbols(nm, all_objects)
-        check_restricted_scan_formats(native_sources)
-        print(
-            f"native supplicant profile: {len(all_objects)} RV32 objects, "
-            f"{len(profile_array('defines'))} defines, external ABI locked"
-        )
+            run([str(executable)])
+
+        for profile_index, (profile, manifest) in enumerate(PROFILE_SPECS):
+            native_sources = profile_sources(profile)
+            profile_defines = [
+                f"-D{definition}" for definition in profile_array(profile, "defines")
+            ]
+            objects: dict[str, pathlib.Path] = {}
+            all_objects: list[pathlib.Path] = []
+            cross_flags = [
+                flag for flag in COMMON if flag != "-DOS_NO_C_LIB_DEFINES"
+            ]
+            cross_flags.extend([
+                "-Wno-zero-length-array",
+                "-Wno-flexible-array-extensions",
+                "-Wno-unused-but-set-variable",
+                "-Wno-unused-variable",
+                "-include",
+                str(PORT / "hisi_wpa_hostap_compat.h"),
+                *profile_defines,
+            ])
+            for index, source in enumerate(native_sources):
+                object_path = output / f"{profile_index}-{index:02d}-{source.stem}.o"
+                run(
+                    [clang, "--target=riscv32-unknown-none-elf", "-ffreestanding",
+                     "-fno-builtin", "-march=rv32imfc", "-mabi=ilp32f",
+                     *cross_flags, "-c", str(source),
+                     "-o", str(object_path)]
+                )
+                objects[source.name] = object_path
+                all_objects.append(object_path)
+            if len(all_objects) != len(native_sources):
+                raise RuntimeError("native profile object count drift")
+            check_driver_symbols(nm, objects["driver_ws63.c"])
+            check_native_external_symbols(nm, all_objects, manifest)
+            check_restricted_scan_formats(profile, native_sources)
+            print(
+                f"native supplicant profile {profile.stem}: "
+                f"{len(all_objects)} RV32 objects, "
+                f"{len(profile_array(profile, 'defines'))} defines, "
+                "external ABI locked"
+            )
 
 
 if __name__ == "__main__":

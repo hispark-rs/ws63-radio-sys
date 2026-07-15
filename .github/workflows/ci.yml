@@ -36,5 +36,8 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --features upstream-supplicant-port --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
       - run: python3 crates/hisi-rf-link/python/test_relocations.py
       - run: cargo package -p hisi-rf-link --locked

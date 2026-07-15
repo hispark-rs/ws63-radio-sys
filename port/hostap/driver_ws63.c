@@ -1,9 +1,11 @@
 #include "hisi_wpa_hostap_compat.h"
 #include "drivers/driver.h"
+#include "common/ieee802_11_defs.h"
 
 #include "hisi_wpa_driver_port.h"
 
 #define WS63_MAX_SCAN_RESULTS 32u
+#define WS63_MAX_AUTH_FRAME_LEN 768u
 
 struct ws63_driver_data {
     void *supplicant_context;
@@ -216,6 +218,63 @@ static uint32_t map_key_mgmt_suite(unsigned int suite)
         return UINT32_MAX;
     }
 }
+
+static int ws63_get_capa(void *private_data, struct wpa_driver_capa *capa)
+{
+    if (private_data == NULL || capa == NULL)
+        return -1;
+    os_memset(capa, 0, sizeof(*capa));
+    capa->key_mgmt = WPA_DRIVER_CAPA_KEY_MGMT_WPA2_PSK;
+    capa->enc = WPA_DRIVER_CAPA_ENC_CCMP;
+    capa->auth = WPA_DRIVER_AUTH_OPEN;
+#ifdef CONFIG_SAE
+    capa->key_mgmt |= WPA_DRIVER_CAPA_KEY_MGMT_SAE;
+    capa->enc |= WPA_DRIVER_CAPA_ENC_BIP;
+    capa->flags = WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE;
+#endif
+    return 0;
+}
+
+#ifdef CONFIG_SAE
+static int ws63_authenticate(void *private_data,
+    struct wpa_driver_auth_params *params)
+{
+    struct ws63_driver_data *driver = private_data;
+    uint8_t frame[WS63_MAX_AUTH_FRAME_LEN];
+    struct ieee80211_mgmt *mgmt = (struct ieee80211_mgmt *) frame;
+    size_t fixed_len = offsetof(struct ieee80211_mgmt,
+        u.auth.auth_transaction);
+    size_t frame_len;
+    size_t index;
+    if (driver == NULL || params == NULL || params->bssid == NULL ||
+        params->ssid == NULL || params->ssid_len == 0 ||
+        params->ssid_len > HISI_WPA_MAX_SSID_LEN || params->freq <= 0 ||
+        params->auth_alg != WPA_AUTH_ALG_SAE || params->auth_data == NULL ||
+        params->auth_data_len < 4 || params->auth_data_len >
+        sizeof(frame) - fixed_len || params->local_state_change || params->p2p ||
+        params->mld || params->ap_mld_addr != NULL)
+        return -1;
+    for (index = 0; index < ARRAY_SIZE(params->wep_key); index++) {
+        if (params->wep_key[index] != NULL || params->wep_key_len[index] != 0)
+            return -1;
+    }
+
+    frame_len = fixed_len + params->auth_data_len;
+    os_memset(frame, 0, fixed_len);
+    mgmt->frame_control = host_to_le16((WLAN_FC_TYPE_MGMT << 2) |
+        (WLAN_FC_STYPE_AUTH << 4));
+    os_memcpy(mgmt->da, params->bssid, ETH_ALEN);
+    os_memcpy(mgmt->sa, driver->own_address, ETH_ALEN);
+    os_memcpy(mgmt->bssid, params->bssid, ETH_ALEN);
+    mgmt->u.auth.auth_alg = host_to_le16(WLAN_AUTH_SAE);
+    os_memcpy(&mgmt->u.auth.auth_transaction, params->auth_data,
+        params->auth_data_len);
+    os_memcpy(driver->current_ssid, params->ssid, params->ssid_len);
+    driver->current_ssid_len = params->ssid_len;
+    return driver->hooks.send_mgmt(driver->hooks.driver,
+        (uint32_t) params->freq, frame, frame_len);
+}
+#endif
 
 static int ws63_associate(void *private_data,
     struct wpa_driver_associate_params *params)
@@ -459,9 +518,13 @@ const struct wpa_driver_ops wpa_driver_ws63_ops = {
     .get_bssid = ws63_get_bssid,
     .get_ssid = ws63_get_ssid,
     .get_mac_addr = ws63_get_mac_addr,
+    .get_capa = ws63_get_capa,
     .send_mlme = ws63_send_mlme,
     .scan2 = ws63_scan,
     .get_scan_results2 = ws63_get_scan_results,
     .associate = ws63_associate,
     .deauthenticate = ws63_deauthenticate,
+#ifdef CONFIG_SAE
+    .authenticate = ws63_authenticate,
+#endif
 };

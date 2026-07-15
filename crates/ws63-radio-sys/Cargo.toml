@@ -22,5 +22,9 @@ wifi = []
 wpa2-personal = ["wifi"]
 wpa3-personal = ["wifi"]
 upstream-supplicant-port = []
+# Compile the pinned upstream hostap SAE/PMF closure. This does not select the
+# legacy vendor WPA3 archives; the Rust integration must provide the explicit
+# P-256 and entropy capabilities required by this profile.
+upstream-supplicant-wpa3 = ["upstream-supplicant-port"]
 ble = []
 sle = []

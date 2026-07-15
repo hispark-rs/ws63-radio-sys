@@ -157,11 +157,22 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
     const uint8_t *passphrase, size_t passphrase_len)
 {
     struct wpa_ssid *network;
+    int is_wpa3;
     if (context == NULL || !context->initialized || config == NULL ||
         config->abi_version != HISI_WPA_ABI_VERSION ||
-        config->security != HISI_WPA_SECURITY_WPA2_PSK ||
+        (config->security != HISI_WPA_SECURITY_WPA2_PSK &&
+        config->security != HISI_WPA_SECURITY_WPA3_SAE) ||
         config->ssid_len == 0 || config->ssid_len > HISI_WPA_MAX_SSID_LEN ||
         passphrase == NULL || passphrase_len < 8 || passphrase_len > 63)
+        return -1;
+    is_wpa3 = config->security == HISI_WPA_SECURITY_WPA3_SAE;
+#ifndef CONFIG_SAE
+    if (is_wpa3)
+        return -1;
+#endif
+    if (is_wpa3 &&
+        (config->pmf != HISI_WPA_PMF_REQUIRED ||
+        config->sae_pwe > HISI_WPA_SAE_PWE_BOTH))
         return -1;
     if (context->network != NULL) {
         if (wpa_config_remove_network(context->interface->conf,
@@ -181,7 +192,7 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
         return -4;
     }
     network->ssid_len = config->ssid_len;
-    network->key_mgmt = WPA_KEY_MGMT_PSK;
+    network->key_mgmt = is_wpa3 ? WPA_KEY_MGMT_SAE : WPA_KEY_MGMT_PSK;
     network->proto = WPA_PROTO_RSN;
     network->pairwise_cipher = WPA_CIPHER_CCMP;
     network->group_cipher = WPA_CIPHER_CCMP;
@@ -189,11 +200,28 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
         MGMT_FRAME_PROTECTION_REQUIRED :
         config->pmf == HISI_WPA_PMF_OPTIONAL ?
         MGMT_FRAME_PROTECTION_OPTIONAL : NO_MGMT_FRAME_PROTECTION;
+    if (is_wpa3)
+        network->sae_pwe = (enum sae_pwe) config->sae_pwe;
+#ifdef CONFIG_SAE
+    if (is_wpa3) {
+        int *groups = os_malloc(2 * sizeof(*groups));
+        if (groups == NULL) {
+            (void) wpa_config_remove_network(context->interface->conf,
+                network->id);
+            return -5;
+        }
+        groups[0] = 19;
+        groups[1] = 0;
+        os_free(context->interface->conf->sae_groups);
+        context->interface->conf->sae_groups = groups;
+    }
+#endif
     if (!all_zero(config->bssid, sizeof(config->bssid))) {
         network->bssid_set = 1;
         os_memcpy(network->bssid, config->bssid, sizeof(config->bssid));
     }
-    wpa_config_update_psk(network);
+    if (!is_wpa3)
+        wpa_config_update_psk(network);
     context->network = network;
     return 0;
 }
@@ -233,10 +261,38 @@ int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,
     const uint8_t *frame, size_t frame_len)
 {
     union wpa_event_data event;
+    const struct ieee80211_mgmt *mgmt;
+    size_t auth_len;
+    uint16_t frame_control;
     if (context == NULL || context->interface == NULL || frame == NULL ||
         frame_len == 0)
         return -1;
     os_memset(&event, 0, sizeof(event));
+#ifdef CONFIG_SAE
+    auth_len = offsetof(struct ieee80211_mgmt, u.auth.variable);
+    if (frame_len >= auth_len) {
+        mgmt = (const struct ieee80211_mgmt *) frame;
+        frame_control = le_to_host16(mgmt->frame_control);
+        if (WLAN_FC_GET_TYPE(frame_control) == WLAN_FC_TYPE_MGMT &&
+            WLAN_FC_GET_STYPE(frame_control) == WLAN_FC_STYPE_AUTH) {
+            os_memcpy(event.auth.peer, mgmt->sa, ETH_ALEN);
+            os_memcpy(event.auth.bssid, mgmt->bssid, ETH_ALEN);
+            event.auth.auth_type = le_to_host16(mgmt->u.auth.auth_alg);
+            event.auth.auth_transaction =
+                le_to_host16(mgmt->u.auth.auth_transaction);
+            event.auth.status_code = le_to_host16(mgmt->u.auth.status_code);
+            event.auth.ies = mgmt->u.auth.variable;
+            event.auth.ies_len = frame_len - auth_len;
+            wpa_supplicant_event(context->interface, EVENT_AUTH, &event);
+            observe_state(context);
+            return 0;
+        }
+    }
+#else
+    (void) mgmt;
+    (void) auth_len;
+    (void) frame_control;
+#endif
     event.rx_mgmt.freq = (int) frequency_mhz;
     event.rx_mgmt.ssi_signal = rssi_dbm;
     event.rx_mgmt.frame = frame;

@@ -1,0 +1,78 @@
+revision = "hostap-2.11-personal-wpa3-v1"
+sscanf_formats = ["%u:%u"]
+
+# Upstream-native STA profile for WPA3-Personal. This deliberately does not
+# select any vendor supplicant archive. The P-256/bignum symbols remain an
+# explicit Rust crypto capability supplied by the final firmware.
+upstream_sources = [
+  "wpa_supplicant/config.c",
+  "wpa_supplicant/notify.c",
+  "wpa_supplicant/bss.c",
+  "wpa_supplicant/eap_register.c",
+  "wpa_supplicant/config_none.c",
+  "wpa_supplicant/bssid_ignore.c",
+  "wpa_supplicant/wpas_glue.c",
+  "wpa_supplicant/scan.c",
+  "wpa_supplicant/sme.c",
+  "wpa_supplicant/wpa_supplicant.c",
+  "wpa_supplicant/events.c",
+  "src/utils/common.c",
+  "src/utils/wpa_debug.c",
+  "src/utils/wpabuf.c",
+  "src/utils/bitfield.c",
+  "src/utils/crc32.c",
+  "src/common/ptksa_cache.c",
+  "src/common/wpa_common.c",
+  "src/common/ieee802_11_common.c",
+  "src/common/hw_features_common.c",
+  "src/common/sae.c",
+  "src/common/dragonfly.c",
+  "src/rsn_supp/pmksa_cache.c",
+  "src/rsn_supp/wpa.c",
+  "src/rsn_supp/preauth.c",
+  "src/rsn_supp/wpa_ie.c",
+  "src/drivers/driver_common.c",
+  "src/crypto/crypto_none.c",
+  "src/crypto/tls_none.c",
+  "src/crypto/aes-unwrap.c",
+  "src/crypto/aes-omac1.c",
+  "src/crypto/md5.c",
+  "src/crypto/md5-internal.c",
+  "src/crypto/sha1-prf.c",
+  "src/crypto/sha256-prf.c",
+  "src/crypto/sha256-kdf.c",
+]
+
+port_sources = [
+  "hisi_wpa_port.c",
+  "freestanding_hisi.c",
+  "os_hisi_rtos.c",
+  "eloop_hisi_rtos.c",
+  "hisi_wpa_driver_port.c",
+  "l2_packet_ws63.c",
+  "driver_ws63.c",
+  "drivers_ws63.c",
+  "supplicant_ws63.c",
+  "dh_groups_hisi.c",
+]
+
+defines = [
+  "CONFIG_ANSI_C_EXTRA",
+  "OS_NO_C_LIB_DEFINES",
+  "CONFIG_BACKEND_NONE",
+  "CONFIG_NO_CONFIG_WRITE",
+  "CONFIG_NO_CONFIG_BLOBS",
+  "CONFIG_NO_CTRL_IFACE",
+  "CONFIG_NO_STDOUT_DEBUG",
+  "CONFIG_NO_WMM_AC",
+  "CONFIG_NO_RRM",
+  "CONFIG_NO_ROBUST_AV",
+  "CONFIG_NO_RC4",
+  "CONFIG_NO_RANDOM_POOL",
+  "CONFIG_SME",
+  "CONFIG_SHA256",
+  "CONFIG_SAE",
+  "CONFIG_ECC",
+  "CONFIG_HMAC_SHA256_KDF",
+  "WPA_SUPPLICANT_CLEANUP_INTERVAL=600",
+]
