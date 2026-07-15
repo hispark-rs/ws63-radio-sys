@@ -22,8 +22,10 @@ struct hisi_wpa_context {
     enum wpa_states observed_state;
     struct hisi_wpa_event events[HISI_WPA_EVENT_CAPACITY];
     uint32_t dropped_events;
+    uint32_t total_dropped_events;
     uint8_t event_read;
     uint8_t event_write;
+    uint8_t max_event_depth;
     uint8_t initialized;
 };
 
@@ -35,6 +37,12 @@ static uint64_t timestamp_ms(void)
     return (uint64_t) now.sec * 1000u + (uint64_t) now.usec / 1000u;
 }
 
+static uint8_t event_depth(const struct hisi_wpa_context *context)
+{
+    return (uint8_t) ((context->event_write + HISI_WPA_EVENT_CAPACITY -
+        context->event_read) % HISI_WPA_EVENT_CAPACITY);
+}
+
 static void push_event(struct hisi_wpa_context *context, uint8_t kind,
     int32_t status)
 {
@@ -42,7 +50,10 @@ static void push_event(struct hisi_wpa_context *context, uint8_t kind,
         HISI_WPA_EVENT_CAPACITY);
     struct hisi_wpa_event *event;
     if (next == context->event_read) {
-        context->dropped_events++;
+        if (context->dropped_events != UINT32_MAX)
+            context->dropped_events++;
+        if (context->total_dropped_events != UINT32_MAX)
+            context->total_dropped_events++;
         return;
     }
     event = &context->events[context->event_write];
@@ -52,6 +63,8 @@ static void push_event(struct hisi_wpa_context *context, uint8_t kind,
     event->status = status;
     event->timestamp_ms = timestamp_ms();
     context->event_write = next;
+    if (event_depth(context) > context->max_event_depth)
+        context->max_event_depth = event_depth(context);
 }
 
 static uint8_t event_for_state(enum wpa_states state)
@@ -293,6 +306,19 @@ uint32_t hisi_wpa_context_diagnostic_word(
     word |= wpa_s->last_scan_res_used != 0 ? 1u << 10 : 0;
     word |= wpa_s->connect_without_scan != NULL ? 1u << 11 : 0;
     return word;
+}
+
+uint32_t hisi_wpa_event_ring_diagnostic_word(
+    const struct hisi_wpa_context *context)
+{
+    uint32_t dropped;
+    if (context == NULL)
+        return UINT32_MAX;
+    dropped = context->total_dropped_events > UINT16_MAX ? UINT16_MAX :
+        context->total_dropped_events;
+    return (uint32_t) event_depth(context) |
+        ((uint32_t) context->max_event_depth << 8) |
+        (dropped << 16);
 }
 
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,

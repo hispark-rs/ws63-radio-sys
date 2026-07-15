@@ -401,6 +401,9 @@ int32_t hisi_wpa_driver_feed_associate_result(void *private_data,
     os_memset(&event, 0, sizeof(event));
     if (result->status != 0) {
         driver->associated = 0;
+        event.assoc_reject.bssid = result->bssid;
+        event.assoc_reject.resp_ies = result->response_ies;
+        event.assoc_reject.resp_ies_len = result->response_ies_len;
         event.assoc_reject.status_code = result->status;
         wpa_supplicant_event(driver->supplicant_context,
             EVENT_ASSOC_REJECT, &event);

@@ -270,6 +270,11 @@ int32_t hisi_wpa_connect(struct hisi_wpa_context *context);
 int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context);
 uint32_t hisi_wpa_context_diagnostic_word(
     const struct hisi_wpa_context *context);
+
+/* Diagnostic-only event-ring snapshot: current depth, maximum depth, and the
+ * saturated cumulative drop count in bits 0..7, 8..15, and 16..31. */
+uint32_t hisi_wpa_event_ring_diagnostic_word(
+    const struct hisi_wpa_context *context);
 uint32_t hisi_wpa_driver_diagnostic_word(void);
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len);
