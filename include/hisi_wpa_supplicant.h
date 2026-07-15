@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_ABI_VERSION 6u
+#define HISI_WPA_ABI_VERSION 8u
 #define HISI_WPA_MAX_SSID_LEN 32u
 #define HISI_WPA_MAX_SCAN_FREQUENCIES 14u
 #define HISI_WPA_MAX_SCAN_IE_LEN 2304u
@@ -165,6 +165,33 @@ struct hisi_wpa_disconnect_event {
     size_t ies_len;
 };
 
+enum hisi_wpa_external_auth_action {
+    HISI_WPA_EXTERNAL_AUTH_START = 0,
+    HISI_WPA_EXTERNAL_AUTH_ABORT = 1,
+};
+
+struct hisi_wpa_external_auth_event {
+    uint16_t abi_version;
+    uint8_t action;
+    uint8_t ssid_len;
+    uint8_t bssid[6];
+    uint16_t status;
+    uint32_t key_mgmt_suite;
+    uint8_t pmkid_present;
+    uint8_t reserved[3];
+    uint8_t ssid[HISI_WPA_MAX_SSID_LEN];
+    uint8_t pmkid[16];
+};
+
+struct hisi_wpa_external_auth_status {
+    uint16_t abi_version;
+    uint16_t status;
+    uint8_t bssid[6];
+    uint8_t pmkid_present;
+    uint8_t reserved;
+    uint8_t pmkid[16];
+};
+
 struct hisi_wpa_event {
     uint16_t abi_version;
     uint8_t kind;
@@ -202,6 +229,7 @@ struct hisi_wpa_driver_hooks {
     uint16_t reserved;
     void *driver;
     int32_t (*get_own_address)(void *driver, uint8_t address[6]);
+    int32_t (*get_driver_flags)(void *driver, uint64_t *flags);
     /* frame starts at the IEEE 802.1X/EAPOL header; no Ethernet header. */
     int32_t (*send_eapol)(void *driver, const uint8_t dst[6],
         const uint8_t *frame, size_t frame_len);
@@ -215,6 +243,8 @@ struct hisi_wpa_driver_hooks {
     int32_t (*associate)(void *driver,
         const struct hisi_wpa_associate_request *request);
     int32_t (*deauthenticate)(void *driver, uint16_t reason);
+    int32_t (*send_external_auth_status)(void *driver,
+        const struct hisi_wpa_external_auth_status *status);
 };
 
 int32_t hisi_wpa_driver_install(const struct hisi_wpa_driver_hooks *hooks);
@@ -225,6 +255,7 @@ int32_t hisi_wpa_os_uninstall(void *context);
 
 uint32_t hisi_wpa_eloop_run_once(uint32_t work_budget);
 uint64_t hisi_wpa_eloop_next_deadline_us(void);
+uint32_t hisi_wpa_eloop_diagnostic_flags(void);
 void hisi_wpa_eloop_wake(void);
 
 size_t hisi_wpa_context_size(void);
@@ -237,6 +268,9 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
     const uint8_t *passphrase, size_t passphrase_len);
 int32_t hisi_wpa_connect(struct hisi_wpa_context *context);
 int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context);
+uint32_t hisi_wpa_context_diagnostic_word(
+    const struct hisi_wpa_context *context);
+uint32_t hisi_wpa_driver_diagnostic_word(void);
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len);
 int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,
@@ -250,6 +284,8 @@ int32_t hisi_wpa_feed_associate_result(struct hisi_wpa_context *context,
     const struct hisi_wpa_associate_result *result);
 int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
     const struct hisi_wpa_disconnect_event *event);
+int32_t hisi_wpa_feed_external_auth(struct hisi_wpa_context *context,
+    const struct hisi_wpa_external_auth_event *event);
 struct hisi_wpa_poll_result hisi_wpa_poll(struct hisi_wpa_context *context,
     uint64_t now_ms, uint32_t work_budget);
 int32_t hisi_wpa_next_event(struct hisi_wpa_context *context,
@@ -270,6 +306,10 @@ _Static_assert(offsetof(struct hisi_wpa_scan_result, ies) % sizeof(void *) == 0,
     "hisi_wpa_scan_result pointer alignment drift");
 _Static_assert(offsetof(struct hisi_wpa_associate_request, frequency_mhz) == 48,
     "hisi_wpa_associate_request frequency offset drift");
+_Static_assert(sizeof(struct hisi_wpa_external_auth_event) == 68,
+    "hisi_wpa_external_auth_event ABI drift");
+_Static_assert(sizeof(struct hisi_wpa_external_auth_status) == 28,
+    "hisi_wpa_external_auth_status ABI drift");
 _Static_assert(sizeof(struct hisi_wpa_event) == 144,
     "hisi_wpa_event ABI drift");
 _Static_assert(sizeof(struct hisi_wpa_poll_result) == 16,
@@ -280,7 +320,7 @@ _Static_assert(sizeof(struct hisi_wpa_os_hooks) == 11 * sizeof(void *),
     "hisi_wpa_os_hooks ABI drift");
 _Static_assert(offsetof(struct hisi_wpa_driver_hooks, driver) == sizeof(void *),
     "hisi_wpa_driver_hooks prefix drift");
-_Static_assert(sizeof(struct hisi_wpa_driver_hooks) == 10 * sizeof(void *),
+_Static_assert(sizeof(struct hisi_wpa_driver_hooks) == 12 * sizeof(void *),
     "hisi_wpa_driver_hooks ABI drift");
 
 #ifdef __cplusplus

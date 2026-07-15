@@ -8,10 +8,12 @@ static int hooks_valid(const struct hisi_wpa_driver_hooks *hooks)
 {
     return hooks != NULL && hooks->abi_version == HISI_WPA_ABI_VERSION &&
         hooks->reserved == 0 && hooks->driver != NULL &&
-        hooks->get_own_address != NULL && hooks->send_eapol != NULL &&
+        hooks->get_own_address != NULL && hooks->get_driver_flags != NULL &&
+        hooks->send_eapol != NULL &&
         hooks->send_mgmt != NULL && hooks->install_key != NULL &&
         hooks->remove_key != NULL && hooks->start_scan != NULL &&
-        hooks->associate != NULL && hooks->deauthenticate != NULL;
+        hooks->associate != NULL && hooks->deauthenticate != NULL &&
+        hooks->send_external_auth_status != NULL;
 }
 
 static int hooks_equal(const struct hisi_wpa_driver_hooks *left,
@@ -21,13 +23,16 @@ static int hooks_equal(const struct hisi_wpa_driver_hooks *left,
         left->reserved == right->reserved &&
         left->driver == right->driver &&
         left->get_own_address == right->get_own_address &&
+        left->get_driver_flags == right->get_driver_flags &&
         left->send_eapol == right->send_eapol &&
         left->send_mgmt == right->send_mgmt &&
         left->install_key == right->install_key &&
         left->remove_key == right->remove_key &&
         left->start_scan == right->start_scan &&
         left->associate == right->associate &&
-        left->deauthenticate == right->deauthenticate;
+        left->deauthenticate == right->deauthenticate &&
+        left->send_external_auth_status ==
+            right->send_external_auth_status;
 }
 
 int32_t hisi_wpa_driver_install(const struct hisi_wpa_driver_hooks *hooks)

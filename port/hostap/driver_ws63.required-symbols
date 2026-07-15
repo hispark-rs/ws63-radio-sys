@@ -1,5 +1,6 @@
 # Global symbol contract for the freestanding RV32 driver_ws63 object.
 defined wpa_driver_ws63_ops
+defined hisi_wpa_driver_diagnostic_word
 defined hisi_wpa_driver_feed_associate_result
 defined hisi_wpa_driver_feed_disconnect
 defined hisi_wpa_driver_feed_scan_done

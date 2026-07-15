@@ -19,6 +19,9 @@ struct hisi_timeout {
 static struct hisi_timeout *g_timeouts;
 static int g_initialized;
 static int g_terminate;
+static uint32_t g_timeout_registrations;
+static uint32_t g_timeout_allocation_failures;
+static uint32_t g_timeout_executions;
 
 static uint64_t saturating_add(uint64_t left, uint64_t right)
 {
@@ -64,6 +67,9 @@ int eloop_init(void)
         return -1;
     g_timeouts = NULL;
     g_terminate = 0;
+    g_timeout_registrations = 0;
+    g_timeout_allocation_failures = 0;
+    g_timeout_executions = 0;
     g_initialized = 1;
     return 0;
 }
@@ -109,14 +115,17 @@ int eloop_register_timeout(unsigned int seconds, unsigned int microseconds,
     if (!g_initialized || handler == NULL || now_us(&current) != 0)
         return -1;
     timeout = os_zalloc(sizeof(*timeout));
-    if (timeout == NULL)
+    if (timeout == NULL) {
+        g_timeout_allocation_failures++;
         return -1;
+    }
     timeout->deadline_us = saturating_add(current,
         timeout_delta(seconds, microseconds));
     timeout->handler = handler;
     timeout->eloop_data = eloop_data;
     timeout->user_data = user_data;
     insert_timeout(timeout);
+    g_timeout_registrations++;
     hisi_wpa_os_wake_runner();
     return 0;
 }
@@ -262,6 +271,7 @@ uint32_t hisi_wpa_eloop_run_once(uint32_t work_budget)
             os_free(timeout);
             handler(eloop_data, user_data);
         }
+        g_timeout_executions++;
         completed++;
     }
     return completed;
@@ -270,6 +280,18 @@ uint32_t hisi_wpa_eloop_run_once(uint32_t work_budget)
 uint64_t hisi_wpa_eloop_next_deadline_us(void)
 {
     return g_timeouts == NULL ? UINT64_MAX : g_timeouts->deadline_us;
+}
+
+uint32_t hisi_wpa_eloop_diagnostic_flags(void)
+{
+    uint32_t pending = 0;
+    struct hisi_timeout *cursor;
+    for (cursor = g_timeouts; cursor != NULL; cursor = cursor->next)
+        pending++;
+    return (g_timeout_registrations != 0 ? 1u : 0u) |
+        (g_timeout_allocation_failures != 0 ? 2u : 0u) |
+        (g_timeout_executions != 0 ? 4u : 0u) |
+        (pending != 0 ? 8u : 0u);
 }
 
 void hisi_wpa_eloop_wake(void) { hisi_wpa_os_wake_runner(); }

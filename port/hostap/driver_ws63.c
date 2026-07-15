@@ -5,7 +5,12 @@
 #include "hisi_wpa_driver_port.h"
 
 #define WS63_MAX_SCAN_RESULTS 32u
-#define WS63_MAX_AUTH_FRAME_LEN 768u
+static uint32_t g_driver_diagnostic;
+
+uint32_t hisi_wpa_driver_diagnostic_word(void)
+{
+    return g_driver_diagnostic;
+}
 
 struct ws63_driver_data {
     void *supplicant_context;
@@ -221,7 +226,11 @@ static uint32_t map_key_mgmt_suite(unsigned int suite)
 
 static int ws63_get_capa(void *private_data, struct wpa_driver_capa *capa)
 {
-    if (private_data == NULL || capa == NULL)
+    struct ws63_driver_data *driver = private_data;
+    uint64_t flags = 0;
+    if (driver == NULL || capa == NULL)
+        return -1;
+    if (driver->hooks.get_driver_flags(driver->hooks.driver, &flags) != 0)
         return -1;
     os_memset(capa, 0, sizeof(*capa));
     capa->key_mgmt = WPA_DRIVER_CAPA_KEY_MGMT_WPA2_PSK;
@@ -230,68 +239,31 @@ static int ws63_get_capa(void *private_data, struct wpa_driver_capa *capa)
 #ifdef CONFIG_SAE
     capa->key_mgmt |= WPA_DRIVER_CAPA_KEY_MGMT_SAE;
     capa->enc |= WPA_DRIVER_CAPA_ENC_BIP;
-    capa->flags = WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE;
 #endif
+    capa->flags = flags;
     return 0;
 }
-
-#ifdef CONFIG_SAE
-static int ws63_authenticate(void *private_data,
-    struct wpa_driver_auth_params *params)
-{
-    struct ws63_driver_data *driver = private_data;
-    uint8_t frame[WS63_MAX_AUTH_FRAME_LEN];
-    struct ieee80211_mgmt *mgmt = (struct ieee80211_mgmt *) frame;
-    size_t fixed_len = offsetof(struct ieee80211_mgmt,
-        u.auth.auth_transaction);
-    size_t frame_len;
-    size_t index;
-    if (driver == NULL || params == NULL || params->bssid == NULL ||
-        params->ssid == NULL || params->ssid_len == 0 ||
-        params->ssid_len > HISI_WPA_MAX_SSID_LEN || params->freq <= 0 ||
-        params->auth_alg != WPA_AUTH_ALG_SAE || params->auth_data == NULL ||
-        params->auth_data_len < 4 || params->auth_data_len >
-        sizeof(frame) - fixed_len || params->local_state_change || params->p2p ||
-        params->mld || params->ap_mld_addr != NULL)
-        return -1;
-    for (index = 0; index < ARRAY_SIZE(params->wep_key); index++) {
-        if (params->wep_key[index] != NULL || params->wep_key_len[index] != 0)
-            return -1;
-    }
-
-    frame_len = fixed_len + params->auth_data_len;
-    os_memset(frame, 0, fixed_len);
-    mgmt->frame_control = host_to_le16((WLAN_FC_TYPE_MGMT << 2) |
-        (WLAN_FC_STYPE_AUTH << 4));
-    os_memcpy(mgmt->da, params->bssid, ETH_ALEN);
-    os_memcpy(mgmt->sa, driver->own_address, ETH_ALEN);
-    os_memcpy(mgmt->bssid, params->bssid, ETH_ALEN);
-    mgmt->u.auth.auth_alg = host_to_le16(WLAN_AUTH_SAE);
-    os_memcpy(&mgmt->u.auth.auth_transaction, params->auth_data,
-        params->auth_data_len);
-    os_memcpy(driver->current_ssid, params->ssid, params->ssid_len);
-    driver->current_ssid_len = params->ssid_len;
-    return driver->hooks.send_mgmt(driver->hooks.driver,
-        (uint32_t) params->freq, frame, frame_len);
-}
-#endif
 
 static int ws63_associate(void *private_data,
     struct wpa_driver_associate_params *params)
 {
     struct ws63_driver_data *driver = private_data;
     struct hisi_wpa_associate_request request = { 0 };
+    int status;
     size_t index;
+    g_driver_diagnostic = 8u;
     if (driver == NULL || params == NULL || params->ssid == NULL ||
         params->ssid_len == 0 || params->ssid_len > HISI_WPA_MAX_SSID_LEN ||
         params->mode != IEEE80211_MODE_INFRA ||
         params->wpa_ie_len > HISI_WPA_MAX_SCAN_IE_LEN ||
         (params->wpa_ie_len != 0 && params->wpa_ie == NULL))
         return -1;
+    g_driver_diagnostic = 9u;
     for (index = 0; index < 4; index++) {
         if (params->wep_key[index] != NULL || params->wep_key_len[index] != 0)
             return -1;
     }
+    g_driver_diagnostic = 10u;
     request.abi_version = HISI_WPA_ABI_VERSION;
     request.ssid_len = (uint8_t) params->ssid_len;
     os_memcpy(request.ssid, params->ssid, params->ssid_len);
@@ -312,16 +284,22 @@ static int ws63_associate(void *private_data,
     request.pairwise_suite = map_cipher_suite(params->pairwise_suite);
     request.group_suite = map_cipher_suite(params->group_suite);
     request.key_mgmt_suite = map_key_mgmt_suite(params->key_mgmt_suite);
+    g_driver_diagnostic = 11u;
     if (request.pairwise_suite == UINT32_MAX ||
         request.group_suite == UINT32_MAX ||
         request.key_mgmt_suite == UINT32_MAX)
         return -1;
-    if ((params->auth_alg & WPA_AUTH_ALG_SAE) != 0)
-        request.auth_type = HISI_WPA_AUTH_SAE;
-    else if ((params->auth_alg & WPA_AUTH_ALG_OPEN) != 0)
+    g_driver_diagnostic = 12u;
+    /* Match the WS63 driver_soc oracle: hostap may advertise OPEN|SAE for
+     * external authentication. OPEN is the firmware association mode; the SAE
+     * AKM suite causes firmware to emit EVENT_EXTERNAL_AUTH. */
+    if ((params->auth_alg & WPA_AUTH_ALG_OPEN) != 0)
         request.auth_type = HISI_WPA_AUTH_OPEN;
+    else if ((params->auth_alg & WPA_AUTH_ALG_SAE) != 0)
+        request.auth_type = HISI_WPA_AUTH_SAE;
     else
         return -1;
+    g_driver_diagnostic = 13u;
     if (params->mgmt_frame_protection < NO_MGMT_FRAME_PROTECTION ||
         params->mgmt_frame_protection > MGMT_FRAME_PROTECTION_REQUIRED)
         return -1;
@@ -330,7 +308,9 @@ static int ws63_associate(void *private_data,
     request.privacy = params->pairwise_suite != WPA_CIPHER_NONE;
     request.association_ies = params->wpa_ie;
     request.association_ies_len = params->wpa_ie_len;
-    return driver->hooks.associate(driver->hooks.driver, &request);
+    status = driver->hooks.associate(driver->hooks.driver, &request);
+    g_driver_diagnostic = status == 0 ? 1u : 14u;
+    return status;
 }
 
 static int ws63_deauthenticate(void *private_data, const uint8_t *address,
@@ -505,9 +485,37 @@ static int ws63_send_mlme(void *private_data, const uint8_t *frame,
         csa_offsets != NULL || csa_offsets_len != 0 || no_encrypt != 0 ||
         wait_ms != 0 || link_id >= 0)
         return -1;
-    return driver->hooks.send_mgmt(driver->hooks.driver, frequency_mhz,
-        frame, frame_len);
+    {
+        int status = driver->hooks.send_mgmt(driver->hooks.driver,
+            frequency_mhz, frame, frame_len);
+        g_driver_diagnostic = status == 0 ? 3u : 12u;
+        return status;
+    }
 }
+
+#ifdef CONFIG_SAE
+static int ws63_send_external_auth_status(void *private_data,
+    struct external_auth *params)
+{
+    struct ws63_driver_data *driver = private_data;
+    struct hisi_wpa_external_auth_status status = { 0 };
+    int result;
+    if (driver == NULL || params == NULL || params->bssid == NULL ||
+        params->mld_addr != NULL)
+        return -1;
+    status.abi_version = HISI_WPA_ABI_VERSION;
+    status.status = params->status;
+    os_memcpy(status.bssid, params->bssid, sizeof(status.bssid));
+    if (params->pmkid != NULL) {
+        status.pmkid_present = 1;
+        os_memcpy(status.pmkid, params->pmkid, sizeof(status.pmkid));
+    }
+    result = driver->hooks.send_external_auth_status(driver->hooks.driver,
+        &status);
+    g_driver_diagnostic = result == 0 ? 4u : 13u;
+    return result;
+}
+#endif
 
 const struct wpa_driver_ops wpa_driver_ws63_ops = {
     .name = "ws63",
@@ -525,6 +533,6 @@ const struct wpa_driver_ops wpa_driver_ws63_ops = {
     .associate = ws63_associate,
     .deauthenticate = ws63_deauthenticate,
 #ifdef CONFIG_SAE
-    .authenticate = ws63_authenticate,
+    .send_external_auth_status = ws63_send_external_auth_status,
 #endif
 };

@@ -48,7 +48,9 @@ static uint32_t sent_mgmt_frequency;
 static struct hisi_wpa_scan_request started_scan;
 static struct hisi_wpa_associate_request started_association;
 static uint16_t deauthentication_reason;
+static struct hisi_wpa_external_auth_status external_auth_status;
 static enum wpa_event_type last_driver_event;
+static uint64_t driver_flags = WPA_DRIVER_FLAGS_SAE | WPA_DRIVER_FLAGS_SME;
 
 void wpa_supplicant_event(void *context, enum wpa_event_type event,
     union wpa_event_data *data)
@@ -177,6 +179,14 @@ static int32_t get_own_address(void *driver, uint8_t address[6])
     return 0;
 }
 
+static int32_t get_driver_flags(void *driver, uint64_t *flags)
+{
+    assert(driver == (void *) 0x4567u);
+    assert(flags != NULL);
+    *flags = driver_flags;
+    return 0;
+}
+
 static int32_t send_eapol(void *driver, const uint8_t destination[6],
     const uint8_t *frame, size_t frame_len)
 {
@@ -244,11 +254,21 @@ static int32_t deauthenticate(void *driver, uint16_t reason)
     return 0;
 }
 
+static int32_t send_external_auth_status(void *driver,
+    const struct hisi_wpa_external_auth_status *status)
+{
+    assert(driver == (void *) 0x4567u);
+    assert(status != NULL && status->abi_version == HISI_WPA_ABI_VERSION);
+    external_auth_status = *status;
+    return 0;
+}
+
 static const struct hisi_wpa_driver_hooks driver_hooks = {
     .abi_version = HISI_WPA_ABI_VERSION,
     .reserved = 0,
     .driver = (void *) 0x4567u,
     .get_own_address = get_own_address,
+    .get_driver_flags = get_driver_flags,
     .send_eapol = send_eapol,
     .send_mgmt = send_mgmt,
     .install_key = install_key,
@@ -256,6 +276,7 @@ static const struct hisi_wpa_driver_hooks driver_hooks = {
     .start_scan = start_scan,
     .associate = associate,
     .deauthenticate = deauthenticate,
+    .send_external_auth_status = send_external_auth_status,
 };
 
 static void receive_eapol(void *context, const uint8_t *source,
@@ -472,43 +493,12 @@ static void test_ws63_driver_bridge(void)
             WPA_DRIVER_CAPA_KEY_MGMT_WPA2_PSK) != 0);
 #ifdef CONFIG_SAE
         assert((capability.key_mgmt & WPA_DRIVER_CAPA_KEY_MGMT_SAE) != 0);
-        assert((capability.flags &
-            (WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE)) ==
-            (WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE));
+        assert((capability.flags & WPA_DRIVER_FLAGS_SAE) != 0);
+        assert((capability.flags & WPA_DRIVER_FLAGS_SME) != 0);
 #else
-        assert((capability.flags &
-            (WPA_DRIVER_FLAGS_SME | WPA_DRIVER_FLAGS_SAE)) == 0);
+        assert(capability.flags == driver_flags);
 #endif
     }
-
-#ifdef CONFIG_SAE
-    {
-        static const uint8_t auth_data[] = {
-            1, 0, 0, 0, 19, 0, 0xa5, 0x5a
-        };
-        struct wpa_driver_auth_params authentication = { 0 };
-        const struct ieee80211_mgmt *mgmt;
-        authentication.freq = 2412;
-        authentication.bssid = peer;
-        authentication.ssid = ssid;
-        authentication.ssid_len = sizeof(ssid) - 1;
-        authentication.auth_alg = WPA_AUTH_ALG_SAE;
-        authentication.auth_data = auth_data;
-        authentication.auth_data_len = sizeof(auth_data);
-        assert(wpa_driver_ws63_ops.authenticate(driver, &authentication) == 0);
-        assert(sent_mgmt_frequency == 2412);
-        assert(sent_mgmt_len == offsetof(struct ieee80211_mgmt,
-            u.auth.auth_transaction) + sizeof(auth_data));
-        mgmt = (const struct ieee80211_mgmt *) sent_mgmt;
-        assert(le_to_host16(mgmt->frame_control) ==
-            ((WLAN_FC_TYPE_MGMT << 2) | (WLAN_FC_STYPE_AUTH << 4)));
-        assert(memcmp(mgmt->da, peer, ETH_ALEN) == 0);
-        assert(memcmp(mgmt->sa, own, ETH_ALEN) == 0);
-        assert(le_to_host16(mgmt->u.auth.auth_alg) == WLAN_AUTH_SAE);
-        assert(memcmp(&mgmt->u.auth.auth_transaction, auth_data,
-            sizeof(auth_data)) == 0);
-    }
-#endif
 
     scan.ssids[0].ssid = ssid;
     scan.ssids[0].ssid_len = sizeof(ssid) - 1;
@@ -556,13 +546,40 @@ static void test_ws63_driver_bridge(void)
     association.mgmt_frame_protection = MGMT_FRAME_PROTECTION_OPTIONAL;
     association.sae_pwe = SAE_PWE_NOT_SET;
     assert(wpa_driver_ws63_ops.associate(driver, &association) == 0);
+    assert(hisi_wpa_driver_diagnostic_word() == 1);
     assert(started_association.auth_type == HISI_WPA_AUTH_OPEN);
     assert(started_association.pmf == HISI_WPA_PMF_OPTIONAL);
     assert(started_association.frequency_mhz == 2412);
     assert(started_association.wpa_versions == HISI_WPA_VERSION_2);
     assert(started_association.association_ies_len == sizeof(rsn_ie));
+#ifdef CONFIG_SAE
+    association.key_mgmt_suite = WPA_KEY_MGMT_SAE;
+    association.auth_alg = WPA_AUTH_ALG_OPEN | WPA_AUTH_ALG_SAE;
+    association.mgmt_frame_protection = MGMT_FRAME_PROTECTION_REQUIRED;
+    association.sae_pwe = SAE_PWE_BOTH;
+    assert(wpa_driver_ws63_ops.associate(driver, &association) == 0);
+    assert(started_association.auth_type == HISI_WPA_AUTH_OPEN);
+    assert(started_association.key_mgmt_suite == RSN_AUTH_KEY_MGMT_SAE);
+#endif
     assert(wpa_driver_ws63_ops.deauthenticate(driver, peer, 3) == 0);
     assert(deauthentication_reason == 3);
+
+#ifdef CONFIG_SAE
+    {
+        static const uint8_t pmkid[16] = { 1, 2, 3, 4 };
+        struct external_auth auth_status = { 0 };
+        auth_status.bssid = peer;
+        auth_status.status = WLAN_STATUS_SUCCESS;
+        auth_status.pmkid = pmkid;
+        assert(wpa_driver_ws63_ops.send_external_auth_status(driver,
+            &auth_status) == 0);
+        assert(hisi_wpa_driver_diagnostic_word() == 4);
+        assert(external_auth_status.status == WLAN_STATUS_SUCCESS);
+        assert(memcmp(external_auth_status.bssid, peer, ETH_ALEN) == 0);
+        assert(external_auth_status.pmkid_present == 1);
+        assert(memcmp(external_auth_status.pmkid, pmkid, sizeof(pmkid)) == 0);
+    }
+#endif
 
     wpa_driver_ws63_ops.deinit(driver);
     assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == 0);

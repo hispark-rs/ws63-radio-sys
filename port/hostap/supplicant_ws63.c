@@ -75,6 +75,22 @@ static uint8_t event_for_state(enum wpa_states state)
     }
 }
 
+static int32_t failure_status_for_state(
+    const struct wpa_supplicant *interface, enum wpa_states state)
+{
+    if (state != WPA_DISCONNECTED && state != WPA_INTERFACE_DISABLED &&
+        state != WPA_INACTIVE)
+        return 0;
+    if (interface->auth_status_code != WLAN_STATUS_SUCCESS)
+        return (int32_t) (0x10000000u | interface->auth_status_code);
+    if (interface->assoc_status_code != WLAN_STATUS_SUCCESS)
+        return (int32_t) (0x20000000u | interface->assoc_status_code);
+    if (interface->disconnect_reason != 0)
+        return (int32_t) (0x30000000u |
+            ((uint32_t) interface->disconnect_reason & 0xffffu));
+    return 0;
+}
+
 static void observe_state(struct hisi_wpa_context *context)
 {
     enum wpa_states state;
@@ -87,7 +103,8 @@ static void observe_state(struct hisi_wpa_context *context)
     context->observed_state = state;
     event = event_for_state(state);
     if (event != HISI_WPA_EVENT_NONE)
-        push_event(context, event, 0);
+        push_event(context, event,
+            failure_status_for_state(context->interface, state));
 }
 
 size_t hisi_wpa_context_size(void)
@@ -185,8 +202,13 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
         return -3;
     wpa_config_set_network_defaults(network);
     network->ssid = os_memdup(config->ssid, config->ssid_len);
-    network->passphrase = dup_binstr(passphrase, passphrase_len);
-    if (network->ssid == NULL || network->passphrase == NULL) {
+    if (is_wpa3)
+        network->sae_password = dup_binstr(passphrase, passphrase_len);
+    else
+        network->passphrase = dup_binstr(passphrase, passphrase_len);
+    if (network->ssid == NULL ||
+        (is_wpa3 ? network->sae_password == NULL :
+        network->passphrase == NULL)) {
         (void) wpa_config_remove_network(context->interface->conf,
             network->id);
         return -4;
@@ -200,8 +222,14 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
         MGMT_FRAME_PROTECTION_REQUIRED :
         config->pmf == HISI_WPA_PMF_OPTIONAL ?
         MGMT_FRAME_PROTECTION_OPTIONAL : NO_MGMT_FRAME_PROTECTION;
-    if (is_wpa3)
+    if (is_wpa3) {
         network->sae_pwe = (enum sae_pwe) config->sae_pwe;
+        /* hostap 2.11 builds wpa_driver_associate_params.sae_pwe from the
+         * interface-wide configuration, not from wpa_ssid. Keep both values
+         * aligned so the selected PWE mode reaches the WS63 firmware. */
+        context->interface->conf->sae_pwe =
+            (enum sae_pwe) config->sae_pwe;
+    }
 #ifdef CONFIG_SAE
     if (is_wpa3) {
         int *groups = os_malloc(2 * sizeof(*groups));
@@ -246,6 +274,27 @@ int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context)
     return 0;
 }
 
+uint32_t hisi_wpa_context_diagnostic_word(
+    const struct hisi_wpa_context *context)
+{
+    const struct wpa_supplicant *wpa_s;
+    uint32_t word;
+    if (context == NULL || context->interface == NULL)
+        return UINT32_MAX;
+    wpa_s = context->interface;
+    word = (uint32_t) wpa_s->wpa_state & 0x0fu;
+    word |= wpa_s->disconnected ? 1u << 4 : 0;
+    word |= wpa_s->scanning ? 1u << 5 : 0;
+    word |= wpa_s->current_ssid != NULL ? 1u << 6 : 0;
+    word |= wpa_s->current_ssid != NULL && wpa_s->current_ssid->disabled ?
+        1u << 7 : 0;
+    word |= wpa_s->conf->ap_scan == 0 ? 1u << 8 : 0;
+    word |= wpa_s->p2p_mgmt ? 1u << 9 : 0;
+    word |= wpa_s->last_scan_res_used != 0 ? 1u << 10 : 0;
+    word |= wpa_s->connect_without_scan != NULL ? 1u << 11 : 0;
+    return word;
+}
+
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len)
 {
@@ -261,43 +310,48 @@ int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,
     const uint8_t *frame, size_t frame_len)
 {
     union wpa_event_data event;
-    const struct ieee80211_mgmt *mgmt;
-    size_t auth_len;
-    uint16_t frame_control;
     if (context == NULL || context->interface == NULL || frame == NULL ||
         frame_len == 0)
         return -1;
     os_memset(&event, 0, sizeof(event));
-#ifdef CONFIG_SAE
-    auth_len = offsetof(struct ieee80211_mgmt, u.auth.variable);
-    if (frame_len >= auth_len) {
-        mgmt = (const struct ieee80211_mgmt *) frame;
-        frame_control = le_to_host16(mgmt->frame_control);
-        if (WLAN_FC_GET_TYPE(frame_control) == WLAN_FC_TYPE_MGMT &&
-            WLAN_FC_GET_STYPE(frame_control) == WLAN_FC_STYPE_AUTH) {
-            os_memcpy(event.auth.peer, mgmt->sa, ETH_ALEN);
-            os_memcpy(event.auth.bssid, mgmt->bssid, ETH_ALEN);
-            event.auth.auth_type = le_to_host16(mgmt->u.auth.auth_alg);
-            event.auth.auth_transaction =
-                le_to_host16(mgmt->u.auth.auth_transaction);
-            event.auth.status_code = le_to_host16(mgmt->u.auth.status_code);
-            event.auth.ies = mgmt->u.auth.variable;
-            event.auth.ies_len = frame_len - auth_len;
-            wpa_supplicant_event(context->interface, EVENT_AUTH, &event);
-            observe_state(context);
-            return 0;
-        }
-    }
-#else
-    (void) mgmt;
-    (void) auth_len;
-    (void) frame_control;
-#endif
+    /* WS63 SAE is driven by external-auth. Authentication management frames
+     * must remain EVENT_RX_MGMT so upstream SME can match commit/confirm to
+     * the active external-auth transaction. EVENT_AUTH is the direct-SME
+     * contract and silently strands this path. */
     event.rx_mgmt.freq = (int) frequency_mhz;
     event.rx_mgmt.ssi_signal = rssi_dbm;
     event.rx_mgmt.frame = frame;
     event.rx_mgmt.frame_len = frame_len;
     wpa_supplicant_event(context->interface, EVENT_RX_MGMT, &event);
+    observe_state(context);
+    return 0;
+}
+
+int32_t hisi_wpa_feed_external_auth(struct hisi_wpa_context *context,
+    const struct hisi_wpa_external_auth_event *external)
+{
+    union wpa_event_data event;
+    if (context == NULL || context->interface == NULL || external == NULL ||
+        external->abi_version != HISI_WPA_ABI_VERSION ||
+        external->action > HISI_WPA_EXTERNAL_AUTH_ABORT ||
+        external->ssid_len > HISI_WPA_MAX_SSID_LEN ||
+        external->pmkid_present > 1)
+        return -1;
+    if (external->action == HISI_WPA_EXTERNAL_AUTH_START &&
+        external->ssid_len == 0)
+        return -1;
+    os_memset(&event, 0, sizeof(event));
+    event.external_auth.action = external->action;
+    event.external_auth.bssid = external->bssid;
+    event.external_auth.ssid = external->ssid_len == 0 ? NULL :
+        external->ssid;
+    event.external_auth.ssid_len = external->ssid_len;
+    event.external_auth.key_mgmt_suite = external->key_mgmt_suite;
+    event.external_auth.status = external->status;
+    event.external_auth.pmkid = external->pmkid_present ? external->pmkid :
+        NULL;
+    event.external_auth.mld_addr = NULL;
+    wpa_supplicant_event(context->interface, EVENT_EXTERNAL_AUTH, &event);
     observe_state(context);
     return 0;
 }

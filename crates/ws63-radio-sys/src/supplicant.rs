@@ -6,7 +6,7 @@
 
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 6;
+pub const ABI_VERSION: u16 = 8;
 pub const MAX_SSID_LEN: usize = 32;
 pub const MAX_SCAN_FREQUENCIES: usize = 14;
 pub const MAX_SCAN_IE_LEN: usize = 2304;
@@ -173,6 +173,39 @@ pub struct DisconnectEvent {
     pub ies_len: usize,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u8)]
+pub enum ExternalAuthAction {
+    Start = 0,
+    Abort = 1,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct ExternalAuthEvent {
+    pub abi_version: u16,
+    pub action: u8,
+    pub ssid_len: u8,
+    pub bssid: [u8; 6],
+    pub status: u16,
+    pub key_mgmt_suite: u32,
+    pub pmkid_present: u8,
+    pub reserved: [u8; 3],
+    pub ssid: [u8; MAX_SSID_LEN],
+    pub pmkid: [u8; 16],
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct ExternalAuthStatus {
+    pub abi_version: u16,
+    pub status: u16,
+    pub bssid: [u8; 6],
+    pub pmkid_present: u8,
+    pub reserved: u8,
+    pub pmkid: [u8; 16],
+}
+
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct Event {
@@ -232,6 +265,7 @@ pub type SendEapol = unsafe extern "C" fn(
     frame_len: usize,
 ) -> c_int;
 pub type GetOwnAddress = unsafe extern "C" fn(driver: *mut c_void, address: *mut u8) -> c_int;
+pub type GetDriverFlags = unsafe extern "C" fn(driver: *mut c_void, flags: *mut u64) -> c_int;
 pub type SendMgmt = unsafe extern "C" fn(
     driver: *mut c_void,
     frequency_mhz: u32,
@@ -250,12 +284,15 @@ pub type StartScan =
 pub type Associate =
     unsafe extern "C" fn(driver: *mut c_void, request: *const AssociateRequest) -> c_int;
 pub type Deauthenticate = unsafe extern "C" fn(driver: *mut c_void, reason: u16) -> c_int;
+pub type SendExternalAuthStatus =
+    unsafe extern "C" fn(driver: *mut c_void, status: *const ExternalAuthStatus) -> c_int;
 #[repr(C)]
 pub struct DriverHooks {
     pub abi_version: u16,
     pub reserved: u16,
     pub driver: *mut c_void,
     pub get_own_address: Option<GetOwnAddress>,
+    pub get_driver_flags: Option<GetDriverFlags>,
     pub send_eapol: Option<SendEapol>,
     pub send_mgmt: Option<SendMgmt>,
     pub install_key: Option<InstallKey>,
@@ -263,6 +300,7 @@ pub struct DriverHooks {
     pub start_scan: Option<StartScan>,
     pub associate: Option<Associate>,
     pub deauthenticate: Option<Deauthenticate>,
+    pub send_external_auth_status: Option<SendExternalAuthStatus>,
 }
 
 unsafe extern "C" {
@@ -270,6 +308,7 @@ unsafe extern "C" {
     pub fn hisi_wpa_os_uninstall(context: *mut c_void) -> c_int;
     pub fn hisi_wpa_eloop_run_once(work_budget: u32) -> u32;
     pub fn hisi_wpa_eloop_next_deadline_us() -> u64;
+    pub fn hisi_wpa_eloop_diagnostic_flags() -> u32;
     pub fn hisi_wpa_eloop_wake();
     pub fn hisi_wpa_driver_install(hooks: *const DriverHooks) -> c_int;
     pub fn hisi_wpa_driver_uninstall(driver: *mut c_void) -> c_int;
@@ -289,6 +328,8 @@ unsafe extern "C" {
     ) -> c_int;
     pub fn hisi_wpa_connect(context: *mut Context) -> c_int;
     pub fn hisi_wpa_disconnect(context: *mut Context) -> c_int;
+    pub fn hisi_wpa_context_diagnostic_word(context: *const Context) -> u32;
+    pub fn hisi_wpa_driver_diagnostic_word() -> u32;
     pub fn hisi_wpa_feed_eapol(
         context: *mut Context,
         source: *const u8,
@@ -312,6 +353,10 @@ unsafe extern "C" {
         result: *const AssociateResult,
     ) -> c_int;
     pub fn hisi_wpa_feed_disconnect(context: *mut Context, event: *const DisconnectEvent) -> c_int;
+    pub fn hisi_wpa_feed_external_auth(
+        context: *mut Context,
+        event: *const ExternalAuthEvent,
+    ) -> c_int;
     pub fn hisi_wpa_poll(context: *mut Context, now_ms: u64, work_budget: u32) -> PollResult;
     pub fn hisi_wpa_next_event(context: *mut Context, event: *mut Event) -> c_int;
     pub fn hisi_wpa_destroy(context: *mut Context);
@@ -325,10 +370,12 @@ const _: () = {
     assert!(core::mem::offset_of!(ScanRequest, frequencies) == 44);
     assert!(core::mem::offset_of!(NativeScanResult, ies) % core::mem::size_of::<usize>() == 0);
     assert!(core::mem::offset_of!(AssociateRequest, frequency_mhz) == 48);
+    assert!(core::mem::size_of::<ExternalAuthEvent>() == 68);
+    assert!(core::mem::size_of::<ExternalAuthStatus>() == 28);
     assert!(core::mem::size_of::<Event>() == 144);
     assert!(core::mem::size_of::<PollResult>() == 16);
     assert!(core::mem::offset_of!(OsHooks, context) == core::mem::size_of::<usize>());
     assert!(core::mem::size_of::<OsHooks>() == 11 * core::mem::size_of::<usize>());
     assert!(core::mem::offset_of!(DriverHooks, driver) == core::mem::size_of::<usize>());
-    assert!(core::mem::size_of::<DriverHooks>() == 10 * core::mem::size_of::<usize>());
+    assert!(core::mem::size_of::<DriverHooks>() == 12 * core::mem::size_of::<usize>());
 };
