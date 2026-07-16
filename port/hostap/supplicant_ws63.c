@@ -31,35 +31,58 @@ struct hisi_wpa_context {
     uint8_t max_event_depth;
     uint8_t initialized;
     uint8_t first_eapol_retry_pending;
+    uint8_t first_eapol_timeouts;
+    uint8_t first_eapol_disconnect_events;
+    uint8_t first_eapol_fallbacks;
+    uint8_t first_eapol_local_disconnects;
+    uint8_t first_eapol_cached_retries;
+    uint8_t first_eapol_scan_retries;
 };
+
+static void increment_diagnostic(uint8_t *value)
+{
+    if (*value != UINT8_MAX)
+        (*value)++;
+}
 
 static void hisi_wpa_schedule_first_eapol_retry(
     struct hisi_wpa_context *context, int disconnect_confirmed)
 {
     struct wpa_bss *bss;
+    int locally_disconnected;
     if (context == NULL || context->interface == NULL ||
         !context->first_eapol_retry_pending)
         return;
     context->first_eapol_retry_pending = 0;
     context->interface->reassociate = 1;
-    if (disconnect_confirmed && context->network != NULL &&
+    locally_disconnected = context->interface->drv_priv != NULL &&
+        hisi_wpa_driver_is_disconnected(context->interface->drv_priv);
+    if (!disconnect_confirmed && locally_disconnected)
+        increment_diagnostic(&context->first_eapol_local_disconnects);
+    if ((disconnect_confirmed || locally_disconnected) &&
+        context->network != NULL &&
         context->network->bssid_set) {
         bss = wpa_bss_get_bssid(context->interface,
             context->network->bssid);
         if (bss != NULL) {
+            increment_diagnostic(&context->first_eapol_cached_retries);
             wpa_supplicant_associate(context->interface, bss,
                 context->network);
             return;
         }
     }
+    increment_diagnostic(&context->first_eapol_scan_retries);
     wpa_supplicant_req_scan(context->interface, 0, 100000);
 }
 
 static void hisi_wpa_first_eapol_disconnect_fallback(
     void *eloop_ctx, void *timeout_ctx)
 {
+    struct hisi_wpa_context *context = eloop_ctx;
     (void) timeout_ctx;
-    hisi_wpa_schedule_first_eapol_retry(eloop_ctx, 0);
+    if (context != NULL)
+        increment_diagnostic(&context->first_eapol_fallbacks);
+    hisi_wpa_schedule_first_eapol_retry(context, 0);
 }
 
 static void hisi_wpa_first_eapol_timeout(void *eloop_ctx, void *timeout_ctx)
@@ -81,6 +104,7 @@ static void hisi_wpa_first_eapol_timeout(void *eloop_ctx, void *timeout_ctx)
      * for that event before reusing the cached BSS. The bounded fallback
      * covers firmware versions which omit the callback. */
     wpa_supplicant_cancel_auth_timeout(wpa_s);
+    increment_diagnostic(&context->first_eapol_timeouts);
     context->first_eapol_retry_pending = 1;
     wpa_supplicant_deauthenticate(wpa_s, WLAN_REASON_DEAUTH_LEAVING);
     (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
@@ -386,6 +410,20 @@ uint32_t hisi_wpa_event_ring_diagnostic_word(
         (dropped << 16);
 }
 
+uint32_t hisi_wpa_recovery_diagnostic_word(
+    const struct hisi_wpa_context *context)
+{
+    if (context == NULL)
+        return UINT32_MAX;
+    return ((uint32_t) context->first_eapol_timeouts & 0x0fu) |
+        (((uint32_t) context->first_eapol_disconnect_events & 0x0fu) << 4) |
+        (((uint32_t) context->first_eapol_fallbacks & 0x0fu) << 8) |
+        (((uint32_t) context->first_eapol_local_disconnects & 0x0fu) << 12) |
+        (((uint32_t) context->first_eapol_cached_retries & 0x0fu) << 16) |
+        (((uint32_t) context->first_eapol_scan_retries & 0x0fu) << 20) |
+        (context->first_eapol_retry_pending ? 1u << 24 : 0);
+}
+
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len)
 {
@@ -507,6 +545,7 @@ int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
     status = hisi_wpa_driver_feed_disconnect(context->interface->drv_priv,
         event);
     if (status == 0 && context->first_eapol_retry_pending) {
+        increment_diagnostic(&context->first_eapol_disconnect_events);
         (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
             context, NULL);
         hisi_wpa_schedule_first_eapol_retry(context, 1);

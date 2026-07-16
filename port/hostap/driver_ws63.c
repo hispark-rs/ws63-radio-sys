@@ -440,6 +440,12 @@ int32_t hisi_wpa_driver_feed_disconnect(void *private_data,
     return 0;
 }
 
+int hisi_wpa_driver_is_disconnected(const void *private_data)
+{
+    const struct ws63_driver_data *driver = private_data;
+    return driver != NULL && !driver->associated;
+}
+
 static const uint8_t *ws63_get_mac_addr(void *private_data)
 {
     struct ws63_driver_data *driver = private_data;

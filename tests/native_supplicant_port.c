@@ -434,6 +434,7 @@ static void test_ws63_driver_bridge(void)
     struct wpa_driver_set_key_params params = { 0 };
     struct wpa_driver_scan_params scan = { 0 };
     struct wpa_driver_associate_params association = { 0 };
+    struct hisi_wpa_associate_result association_result = { 0 };
     struct hisi_wpa_scan_result scan_result = { 0 };
     struct wpa_scan_results *results;
     const uint8_t *own;
@@ -442,6 +443,7 @@ static void test_ws63_driver_bridge(void)
     assert(hisi_wpa_driver_install(&driver_hooks) == 0);
     driver = wpa_driver_ws63_ops.init((void *) 0x789au, "wlan0");
     assert(driver != NULL);
+    assert(hisi_wpa_driver_is_disconnected(driver));
     assert(hisi_wpa_driver_uninstall(driver_hooks.driver) == -2);
     own = wpa_driver_ws63_ops.get_mac_addr(driver);
     assert(own != NULL && own[0] == 0x02 && own[5] == 0x33);
@@ -546,12 +548,19 @@ static void test_ws63_driver_bridge(void)
     association.mgmt_frame_protection = MGMT_FRAME_PROTECTION_OPTIONAL;
     association.sae_pwe = SAE_PWE_NOT_SET;
     assert(wpa_driver_ws63_ops.associate(driver, &association) == 0);
+    assert(hisi_wpa_driver_is_disconnected(driver));
     assert(hisi_wpa_driver_diagnostic_word() == 1);
     assert(started_association.auth_type == HISI_WPA_AUTH_OPEN);
     assert(started_association.pmf == HISI_WPA_PMF_OPTIONAL);
     assert(started_association.frequency_mhz == 2412);
     assert(started_association.wpa_versions == HISI_WPA_VERSION_2);
     assert(started_association.association_ies_len == sizeof(rsn_ie));
+    association_result.abi_version = HISI_WPA_ABI_VERSION;
+    association_result.frequency_mhz = 2412;
+    memcpy(association_result.bssid, peer, sizeof(peer));
+    assert(hisi_wpa_driver_feed_associate_result(driver,
+        &association_result) == 0);
+    assert(!hisi_wpa_driver_is_disconnected(driver));
 #ifdef CONFIG_SAE
     association.key_mgmt_suite = WPA_KEY_MGMT_SAE;
     association.auth_alg = WPA_AUTH_ALG_OPEN | WPA_AUTH_ALG_SAE;
@@ -563,6 +572,7 @@ static void test_ws63_driver_bridge(void)
 #endif
     assert(wpa_driver_ws63_ops.deauthenticate(driver, peer, 3) == 0);
     assert(deauthentication_reason == 3);
+    assert(hisi_wpa_driver_is_disconnected(driver));
 
 #ifdef CONFIG_SAE
     {

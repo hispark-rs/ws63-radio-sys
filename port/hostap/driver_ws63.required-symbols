@@ -5,6 +5,7 @@ defined hisi_wpa_driver_feed_associate_result
 defined hisi_wpa_driver_feed_disconnect
 defined hisi_wpa_driver_feed_scan_done
 defined hisi_wpa_driver_feed_scan_result
+defined hisi_wpa_driver_is_disconnected
 undefined hisi_wpa_driver_acquire
 undefined hisi_wpa_driver_release
 undefined memcpy

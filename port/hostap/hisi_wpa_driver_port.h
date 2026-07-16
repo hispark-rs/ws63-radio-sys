@@ -20,6 +20,7 @@ int32_t hisi_wpa_driver_feed_associate_result(void *private_data,
     const struct hisi_wpa_associate_result *result);
 int32_t hisi_wpa_driver_feed_disconnect(void *private_data,
     const struct hisi_wpa_disconnect_event *event);
+int hisi_wpa_driver_is_disconnected(const void *private_data);
 
 /* Called only by the runner after it dequeues a bounded vendor event. */
 int32_t hisi_wpa_l2_feed(const uint8_t source[6], const uint8_t *frame,

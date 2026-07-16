@@ -275,6 +275,11 @@ uint32_t hisi_wpa_context_diagnostic_word(
  * saturated cumulative drop count in bits 0..7, 8..15, and 16..31. */
 uint32_t hisi_wpa_event_ring_diagnostic_word(
     const struct hisi_wpa_context *context);
+/* Diagnostic-only first-EAPOL recovery counters. Six saturated nibbles encode
+ * timeout, disconnect-event, fallback, local-disconnect, cached-retry, and
+ * scan-retry counts; bit 24 records a pending recovery. */
+uint32_t hisi_wpa_recovery_diagnostic_word(
+    const struct hisi_wpa_context *context);
 uint32_t hisi_wpa_driver_diagnostic_word(void);
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len);

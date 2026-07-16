@@ -330,6 +330,7 @@ unsafe extern "C" {
     pub fn hisi_wpa_disconnect(context: *mut Context) -> c_int;
     pub fn hisi_wpa_context_diagnostic_word(context: *const Context) -> u32;
     pub fn hisi_wpa_event_ring_diagnostic_word(context: *const Context) -> u32;
+    pub fn hisi_wpa_recovery_diagnostic_word(context: *const Context) -> u32;
     pub fn hisi_wpa_driver_diagnostic_word() -> u32;
     pub fn hisi_wpa_feed_eapol(
         context: *mut Context,
