@@ -85,6 +85,13 @@ static void hisi_wpa_first_eapol_disconnect_fallback(
     hisi_wpa_schedule_first_eapol_retry(context, 0);
 }
 
+static void hisi_wpa_first_eapol_disconnect_complete(
+    void *eloop_ctx, void *timeout_ctx)
+{
+    (void) timeout_ctx;
+    hisi_wpa_schedule_first_eapol_retry(eloop_ctx, 1);
+}
+
 static void hisi_wpa_first_eapol_timeout(void *eloop_ctx, void *timeout_ctx)
 {
     struct hisi_wpa_context *context = eloop_ctx;
@@ -108,6 +115,8 @@ static void hisi_wpa_first_eapol_timeout(void *eloop_ctx, void *timeout_ctx)
     context->first_eapol_retry_pending = 1;
     wpa_supplicant_deauthenticate(wpa_s, WLAN_REASON_DEAUTH_LEAVING);
     (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
+        context, NULL);
+    (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_complete,
         context, NULL);
     (void) eloop_register_timeout(1, 0,
         hisi_wpa_first_eapol_disconnect_fallback, context, NULL);
@@ -370,6 +379,8 @@ int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context)
         context, NULL);
     (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
         context, NULL);
+    (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_complete,
+        context, NULL);
     wpa_supplicant_deauthenticate(context->interface,
         WLAN_REASON_DEAUTH_LEAVING);
     observe_state(context);
@@ -548,7 +559,15 @@ int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
         increment_diagnostic(&context->first_eapol_disconnect_events);
         (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
             context, NULL);
-        hisi_wpa_schedule_first_eapol_retry(context, 1);
+        /* Finish the disconnect event before starting another association.
+         * Calling wpa_supplicant_associate() in this callback can race the
+         * state transition scheduled by EVENT_DISASSOC and leave the context
+         * in SCANNING without submitting external-auth. Zero-delay eloop work
+         * is ordering, not a timing workaround: it runs on the same owner after
+         * the current event stack has unwound. */
+        if (eloop_register_timeout(0, 0,
+            hisi_wpa_first_eapol_disconnect_complete, context, NULL) != 0)
+            return -1;
     }
     observe_state(context);
     return status;
