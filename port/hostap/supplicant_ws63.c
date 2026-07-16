@@ -7,9 +7,12 @@
 #include "eloop.h"
 #include "config.h"
 #include "wpa_supplicant_i.h"
+#include "bss.h"
+#include "scan.h"
 
 #define HISI_WPA_EVENT_CAPACITY 8u
 #define HISI_WPA_IFNAME "wlan0"
+#define HISI_WPA_FIRST_EAPOL_TIMEOUT_SECONDS 3
 
 extern int32_t hisi_wpa_l2_feed(const uint8_t source[6],
     const uint8_t *frame, size_t frame_len);
@@ -27,7 +30,64 @@ struct hisi_wpa_context {
     uint8_t event_write;
     uint8_t max_event_depth;
     uint8_t initialized;
+    uint8_t first_eapol_retry_pending;
 };
+
+static void hisi_wpa_schedule_first_eapol_retry(
+    struct hisi_wpa_context *context, int disconnect_confirmed)
+{
+    struct wpa_bss *bss;
+    if (context == NULL || context->interface == NULL ||
+        !context->first_eapol_retry_pending)
+        return;
+    context->first_eapol_retry_pending = 0;
+    context->interface->reassociate = 1;
+    if (disconnect_confirmed && context->network != NULL &&
+        context->network->bssid_set) {
+        bss = wpa_bss_get_bssid(context->interface,
+            context->network->bssid);
+        if (bss != NULL) {
+            wpa_supplicant_associate(context->interface, bss,
+                context->network);
+            return;
+        }
+    }
+    wpa_supplicant_req_scan(context->interface, 0, 100000);
+}
+
+static void hisi_wpa_first_eapol_disconnect_fallback(
+    void *eloop_ctx, void *timeout_ctx)
+{
+    (void) timeout_ctx;
+    hisi_wpa_schedule_first_eapol_retry(eloop_ctx, 0);
+}
+
+static void hisi_wpa_first_eapol_timeout(void *eloop_ctx, void *timeout_ctx)
+{
+    struct hisi_wpa_context *context = eloop_ctx;
+    struct wpa_supplicant *wpa_s;
+    (void) timeout_ctx;
+    if (context == NULL || context->interface == NULL)
+        return;
+    wpa_s = context->interface;
+    if (wpa_s->wpa_state != WPA_ASSOCIATED || wpa_s->eapol_received != 0)
+        return;
+
+    /* The generic authentication timeout blacklists the current BSSID. That
+     * is useful when roaming among multiple APs, but prevents deterministic
+     * recovery for this explicitly selected WS63 station BSSID. Reset-matrix
+     * HIL observed status 30 followed by association success with no first
+     * EAPOL frame. WS63 acknowledges IOCTL_DISCONNECT asynchronously, so wait
+     * for that event before reusing the cached BSS. The bounded fallback
+     * covers firmware versions which omit the callback. */
+    wpa_supplicant_cancel_auth_timeout(wpa_s);
+    context->first_eapol_retry_pending = 1;
+    wpa_supplicant_deauthenticate(wpa_s, WLAN_REASON_DEAUTH_LEAVING);
+    (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
+        context, NULL);
+    (void) eloop_register_timeout(1, 0,
+        hisi_wpa_first_eapol_disconnect_fallback, context, NULL);
+}
 
 static uint64_t timestamp_ms(void)
 {
@@ -281,6 +341,11 @@ int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context)
 {
     if (context == NULL || context->interface == NULL)
         return -1;
+    context->first_eapol_retry_pending = 0;
+    (void) eloop_cancel_timeout(hisi_wpa_first_eapol_timeout,
+        context, NULL);
+    (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
+        context, NULL);
     wpa_supplicant_deauthenticate(context->interface,
         WLAN_REASON_DEAUTH_LEAVING);
     observe_state(context);
@@ -414,6 +479,20 @@ int32_t hisi_wpa_feed_associate_result(struct hisi_wpa_context *context,
         return -1;
     status = hisi_wpa_driver_feed_associate_result(
         context->interface->drv_priv, result);
+    if (status == 0 && result->status == 0 &&
+        context->interface->wpa_state == WPA_ASSOCIATED) {
+        /* Reset-matrix HIL can observe association success after status 30 but
+         * no first EAPOL frame. Upstream's generic ten-second timeout makes
+         * this recoverable path consume most of the caller's connect deadline.
+         * Keep that timeout as a final guard. This earlier driver-profile
+         * check retries the explicit BSSID without adding it to hostap's
+         * ignore list. A normal WS63 EAPOL frame arrives immediately; three
+         * seconds leaves margin beyond the two-second nonblocking RX probe. */
+        (void) eloop_cancel_timeout(hisi_wpa_first_eapol_timeout,
+            context, NULL);
+        (void) eloop_register_timeout(HISI_WPA_FIRST_EAPOL_TIMEOUT_SECONDS,
+            0, hisi_wpa_first_eapol_timeout, context, NULL);
+    }
     observe_state(context);
     return status;
 }
@@ -427,6 +506,11 @@ int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
         return -1;
     status = hisi_wpa_driver_feed_disconnect(context->interface->drv_priv,
         event);
+    if (status == 0 && context->first_eapol_retry_pending) {
+        (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
+            context, NULL);
+        hisi_wpa_schedule_first_eapol_retry(context, 1);
+    }
     observe_state(context);
     return status;
 }
