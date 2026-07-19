@@ -6,9 +6,9 @@ authors.workspace = true
 repository.workspace = true
 description = "Raw ABI and archive-selection contract for WS63 Wi-Fi, BLE, and SLE vendor blobs"
 license = "MIT"
+readme = "README.md"
 links = "ws63_radio_sys"
 build = "build.rs"
-publish = false
 
 [build-dependencies]
 hisi-rf-link = { path = "../hisi-rf-link", version = "=0.1.0-alpha.1" }

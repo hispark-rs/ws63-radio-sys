@@ -2,15 +2,25 @@
 
 Low-level WS63 radio blob integration contracts.
 
-This repository owns two release units:
+This repository owns three Cargo packages in one versioned release unit:
 
 - `ws63-radio-sys`: a `no_std` crate that identifies the vendor archive ABI and
-  exports blob paths to dependent Cargo build scripts through `links` metadata.
-- `hisi-rf-link`: the host-side linker/post-link tool for vendor relocations and
-  mask-ROM patch generation.
+  exports link contracts to dependent Cargo build scripts through `links` metadata.
+- `ws63-radio-blob`: redistributable, normalized WS63 target archives and pinned
+  upstream hostap target archives, delivered through Cargo without build-time downloads.
+- `hisi-rf-link`: the host-side maintainer tool and pure Rust library for relocation
+  inventory, normalization, verification, and compatibility profiles.
 
-The language-neutral vendor payload remains the nested `ws63-RF` submodule. It is
-not packaged on crates.io; consult the original SDK license before redistribution.
+The language-neutral `ws63-RF` submodule remains the provenance/oracle input. Consumer
+builds use the hash-bound payload in `ws63-radio-blob`; they do not read the submodule,
+an SDK checkout, or a host-specific path. Redistribution terms for the binary payload
+are recorded in `crates/ws63-radio-blob/LICENSE-BLOB.md`.
+
+The normal Cargo path contains no vendor relocation and performs no post-link ELF
+mutation. `hisi-rf-link` normalizes vendor archives ahead of release, while
+`ws63-radio-sys` generates a relocatable ROM patch object using standard RISC-V
+`R_RISCV_CALL_PLT` relocations. Stock `rust-lld` resolves the final replacement
+addresses in one link. Image headers and hashes remain owned by `hisi-fwpkg`.
 
 `crates/hisi-rf-link/profiles/ws63-scheduling.toml` binds observed RF task entry
 symbols and vendor priorities to exact archive or ROM hashes. It records
@@ -27,13 +37,12 @@ Rust provider and final ELF. This is a compatibility profile, not a LiteOS
 backend.
 
 `crates/hisi-rf-link/profiles/ws63-supplicant-boundary.toml` owns the exact
-legacy WPA archive closure, the native hostap archive name, and the bounded
-native object markers and legacy-provider symbol set. Cargo merges the cc-rs
-archive into the `ws63-radio-sys` rlib, so the object markers preserve its
-provenance in the final rust-lld map. Parent final-link checks consume this
-profile so an upstream-supplicant image cannot silently pull the vendor
-supplicant, vendor mbedTLS, or its LiteOS compatibility provider back into the
-firmware.
+legacy WPA archive closure, the two pinned native hostap archive profiles, and
+the bounded native object markers and legacy-provider symbol set. The prebuilt
+target archive preserves those markers in the final rust-lld map. Parent final-link
+checks consume this profile so an upstream-supplicant image cannot silently pull
+the vendor supplicant, vendor mbedTLS, or its LiteOS compatibility provider back
+into the firmware.
 
 The WPA archive profile is explicit. `wpa2-personal` preserves the verified
 supplicant/security/libc closure; `wpa3-personal` additionally selects the vendor
@@ -47,8 +56,9 @@ define the same narrow, versioned ABI for a single runner-owned context. The
 vendor archive remains a behavior and silicon-parity oracle while the upstream
 port is brought up; it is not the long-term runtime architecture.
 
-The optional `upstream-supplicant-port` feature compiles the first native port
-layer:
+The optional `upstream-supplicant-port` feature selects the Cargo-delivered native
+port archive. Rebuilding that archive from the pinned source is a maintainer lane;
+consumer builds do not invoke a C compiler or archiver. The port contains:
 
 - `os_hisi_rtos.c` delegates allocation, clocks, sleeping, entropy and runner
   wakeups through the versioned OS hook table;
