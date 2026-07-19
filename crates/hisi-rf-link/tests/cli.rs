@@ -46,6 +46,26 @@ fn task_profile_exposes_help() {
 }
 
 #[test]
+fn inspect_summarizes_real_vendor_archive() {
+    let archive = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../ws63-RF/lib/libwifi_alg_edca_opt.a");
+    let output = Command::new(binary())
+        .args(["inspect", "--summary"])
+        .arg(archive)
+        .output()
+        .expect("inspect vendor archive");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let summary: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(summary["archives"], 1);
+    assert!(summary["total"].as_u64().unwrap() > 0);
+    assert!(summary["by_type"]["R_RISCV_48_LLUI"].as_u64().unwrap() > 0);
+}
+
+#[test]
 fn machine_profile_resolves_wifi_archives() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../ws63-RF");
     let output = Command::new(binary())

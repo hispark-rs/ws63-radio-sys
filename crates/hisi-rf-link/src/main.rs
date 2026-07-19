@@ -40,7 +40,7 @@ const COMMANDS: &[(&str, &str)] = &[
 
 fn usage() -> ! {
     eprintln!(
-        "usage: hisi-rf-link <archive-paths|task-profile|{}> [arguments...]",
+        "usage: hisi-rf-link <inspect|archive-paths|task-profile|{}> [arguments...]",
         COMMANDS
             .iter()
             .map(|(name, _)| *name)
@@ -48,6 +48,39 @@ fn usage() -> ! {
             .join("|")
     );
     std::process::exit(2);
+}
+
+fn inspect(mut args: impl Iterator<Item = std::ffi::OsString>) {
+    let mut arguments = args.by_ref().collect::<Vec<_>>();
+    let summary = arguments
+        .first()
+        .is_some_and(|argument| argument == "--summary");
+    if summary {
+        arguments.remove(0);
+    }
+    let mut inventories = Vec::new();
+    for argument in arguments {
+        let path = PathBuf::from(argument);
+        let inventory = hisi_rf_link::normalize::inspect_archive(&path).unwrap_or_else(|error| {
+            eprintln!("inspect {}: {error}", path.display());
+            std::process::exit(1);
+        });
+        inventories.push(inventory);
+    }
+    if inventories.is_empty() {
+        usage();
+    }
+    if summary {
+        serde_json::to_writer_pretty(
+            std::io::stdout(),
+            &hisi_rf_link::normalize::summarize(&inventories),
+        )
+        .expect("write relocation summary");
+    } else {
+        serde_json::to_writer_pretty(std::io::stdout(), &inventories)
+            .expect("write relocation inventory");
+    }
+    println!();
 }
 
 fn print_path(path: PathBuf) {
@@ -119,6 +152,10 @@ fn main() {
     };
     if command == "archive-paths" {
         archive_paths(args);
+        return;
+    }
+    if command == "inspect" {
+        inspect(args);
         return;
     }
     if command == "task-profile" {
