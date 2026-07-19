@@ -151,6 +151,8 @@ fn main() {
         .map(PathBuf::from)
         .unwrap_or_else(|| root.join("lib"));
     let profile_path = manifest.join("../hisi-rf-link/profiles/ws63.toml");
+    let runtime_compat_profile_path =
+        manifest.join("../hisi-rf-link/profiles/ws63-runtime-compat.toml");
     let scheduling_profile_path = manifest.join("../hisi-rf-link/profiles/ws63-scheduling.toml");
     let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
     let supplicant_header = manifest.join("../../include/hisi_wpa_supplicant.h");
@@ -208,6 +210,7 @@ fn main() {
         // redirect it away from the canonical delivery.
         ("rom_callback_archive", root.join("lib/librom_callback.a")),
         ("archive_profile", profile_path),
+        ("runtime_compat_profile", runtime_compat_profile_path),
         ("task_profile", scheduling_profile_path),
         ("nvs_linker", nvs_linker),
         ("supplicant_header", supplicant_header),

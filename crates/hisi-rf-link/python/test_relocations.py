@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Regression tests for the bundled HiSilicon relocation tools."""
 
 import runpy
@@ -41,4 +45,3 @@ class SelfCallPlaceholderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -1,0 +1,76 @@
+revision = "ws63-runtime-compat-2026-07-19"
+archive_profile_revision = "ws63-rf-2026-07-13"
+
+# This is the exact LiteOS/architecture namespace referenced by the base Wi-Fi
+# archives selected by ws63.toml. `provided` symbols form the bounded Rust ABI
+# adapter. `off-path` symbols occur only in archive members discarded by the
+# current Wi-Fi init/connect link closure; a final upstream-supplicant ELF must
+# not define them.
+namespace_patterns = ["^Arch", "^LOS_", "^Os", "^reg_rw_check_addr$"]
+
+[[symbols]]
+name = "ArchIntLock"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "ArchIntRestore"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "LOS_HistoryTaskCpuUsage"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "LOS_TaskLock"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "LOS_TaskUnlock"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "OsGetIdleTaskId"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "reg_rw_check_addr"
+classification = "provided"
+provider = "ws63-rf-rs::ws63_runtime_compat"
+
+[[symbols]]
+name = "LOS_MS2Tick"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_MuxCreate"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_MuxPend"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_MuxPost"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_SwtmrCreate"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_SwtmrStart"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_SwtmrStop"
+classification = "off-path"
+
+[[symbols]]
+name = "LOS_Tick2MS"
+classification = "off-path"

@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Verify that a patched RF link preserved the oracle layout.
 
 `rf-patch-reloc58-from-oracle.py` bakes oracle-resolved addresses into the

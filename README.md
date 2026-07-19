@@ -17,10 +17,20 @@ symbols and vendor priorities to exact archive or ROM hashes. It records
 classification evidence, not runtime policy: unmatched entries remain `unknown`,
 and a consuming firmware must verify an external archive before using its rows.
 
+`crates/hisi-rf-link/profiles/ws63-runtime-compat.toml` is the machine-readable
+boundary for the delivered Wi-Fi archives' LiteOS/architecture namespace. It
+distinguishes the seven symbols supplied by the bounded native-runtime adapter
+from eight archive-only symbols that are not reachable in the upstream
+supplicant firmware. `scripts/check-runtime-compat-profile.py` compares the
+manifest with `nm -u` output, while the parent integration verifies both the
+Rust provider and final ELF. This is a compatibility profile, not a LiteOS
+backend.
+
 The WPA archive profile is explicit. `wpa2-personal` preserves the verified
 supplicant/security/libc closure; `wpa3-personal` additionally selects the vendor
-mbedTLS 3.6.0 oracle required by the current SAE/P-256 implementation. The latter
-is a link candidate until its controlled-AP HIL gate passes.
+mbedTLS 3.6.0 oracle used for migration parity. The upstream profiles select
+neither vendor supplicant archive. The vendor profiles remain explicit oracle
+features during the migration window and are not the default architecture.
 
 The replacement path is pinned upstream hostap 2.11, not the SDK's LiteOS-derived
 2.10 fork. `include/hisi_wpa_supplicant.h` and `ws63_radio_sys::supplicant`
@@ -58,10 +68,10 @@ layer:
   used directly by that pinned source set. It is intentionally not a general
   libc or POSIX compatibility layer.
 
-This closes the W2C source/libc/formatter build closure and the EAPOL subpart of
-W2D, not silicon parity. The WS63 scan/auth/assoc operations, management/EAPOL RX
-event bridge, Rust context owner, and `RadioRunner` integration remain W2D work.
+W2C and W2D are closed: the single native `RadioRunner` now drives scan,
+authentication, association, management/EAPOL RX/TX and key installation, and
+the upstream WPA2 and transition-mode WPA3 paths have on-silicon parity evidence.
 Host behavior tests, all-source freestanding RV32 compilation, ABI size/offset
-assertions, restricted-format checks, and an exact external symbol manifest are
-enforced by `scripts/check-native-supplicant-port.py` so a successful archive
-build cannot be mistaken for a working connection.
+assertions, restricted-format checks, and exact external symbol manifests remain
+mandatory in `scripts/check-native-supplicant-port.py`; they complement rather
+than replace the parent repository's HIL gates.

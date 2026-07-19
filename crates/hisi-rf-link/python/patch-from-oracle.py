@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Patch HiSilicon R_RISCV_48_LLUI relocations out of WS63 RF archives.
 
 The vendor Wi-Fi blobs use a HiSilicon-specific relocation type 58 for the

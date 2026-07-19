@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 """Generate the WS63 mask-ROM instruction patch table in a final ELF.
 
 The vendor firmware performs the same operation after link: every linked
