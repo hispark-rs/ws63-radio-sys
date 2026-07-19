@@ -94,3 +94,40 @@ jobs:
           path: target/native-supplicant-rebuild/libhisi_wpa_native_port_*.a
           if-no-files-found: error
           retention-days: 7
+
+  consumer-artifacts:
+    name: Consumer artifacts (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            host: x86_64-unknown-linux-gnu
+          - os: macos-15
+            host: aarch64-apple-darwin
+          - os: windows-latest
+            host: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    env:
+      # Exercise Cargo paths that cannot be passed through unquoted shell glue.
+      CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
+    steps:
+      # Deliberately omit submodules: consumer builds must use only packaged
+      # Cargo artifacts, never the vendor archive/source checkout.
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2026-07-09
+          components: rust-src
+      - name: Expand and validate packaged radio artifacts
+        run: cargo check -p ws63-radio-blob --target ${{ matrix.host }} --locked
+      - name: Build WPA2 Cargo consumer contract
+        run: >-
+          cargo check -Zbuild-std=core,alloc
+          --target riscv32imfc-unknown-none-elf
+          -p ws63-radio-sys --features upstream-supplicant-port --locked
+      - name: Build WPA3 Cargo consumer contract
+        run: >-
+          cargo check -Zbuild-std=core,alloc
+          --target riscv32imfc-unknown-none-elf
+          -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
