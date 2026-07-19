@@ -11,11 +11,13 @@ build = "build.rs"
 publish = false
 
 [build-dependencies]
+object = { version = "0.37", default-features = false, features = ["write"] }
 serde = { version = "1", features = ["derive"] }
 sha2 = "0.10"
 toml = "0.9"
 
 [dependencies]
+hisi-rom-sys-ws63 = "=0.1.0-alpha.1"
 ws63-radio-blob = { path = "../ws63-radio-blob", version = "=0.1.0-alpha.1" }
 
 [features]
