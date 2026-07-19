@@ -50,7 +50,10 @@ jobs:
       - name: Package release unit
         run: |
           cargo package -p hisi-rf-link --locked --target x86_64-unknown-linux-gnu
-          cargo package -p ws63-radio-blob --locked --no-verify
+          cargo package -p ws63-radio-blob --locked --target x86_64-unknown-linux-gnu
+          # The facade's exact-version dependencies do not exist in the registry
+          # until release time. Publish CI performs its full target verification
+          # after that dependency layer is indexed.
           cargo package -p ws63-radio-sys --locked --no-verify --list \
             > target/ws63-radio-sys-package-files.txt
 

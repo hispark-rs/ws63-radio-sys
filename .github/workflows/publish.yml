@@ -119,7 +119,7 @@ jobs:
       - name: Build dependency crate artifacts
         run: |
           cargo package -p hisi-rf-link --locked --target x86_64-unknown-linux-gnu
-          cargo package -p ws63-radio-blob --locked --no-verify
+          cargo package -p ws63-radio-blob --locked --target x86_64-unknown-linux-gnu
           cargo package -p ws63-radio-sys --locked --no-verify --list \
             > target/ws63-radio-sys-package-files.txt
 
@@ -153,23 +153,33 @@ jobs:
             return 1
           }
 
-          publish_one() {
+          publish_preverified() {
             crate="$1"
             if crate_exists "$crate"; then
               echo "$crate $version already exists; skipping upload"
             else
+              # The exact package was already verified for its intended target
+              # above. Upload without re-running Cargo's host-default build.
               cargo publish -p "$crate" --locked --no-verify
             fi
             wait_until_indexed "$crate"
           }
 
-          publish_one hisi-rf-link
-          publish_one ws63-radio-blob
+          publish_preverified hisi-rf-link
+          publish_preverified ws63-radio-blob
 
-          # Only now can Cargo resolve the exact registry dependency while
-          # preparing the final distributable crate.
-          cargo package -p ws63-radio-sys --locked --no-verify
-          publish_one ws63-radio-sys
+          # Only now can Cargo resolve and compile the exact registry dependency
+          # layer from the final distributable crate. `cargo publish` then reuses
+          # this target-verified package instead of attempting a host build.
+          cargo package "-Zbuild-std=core,alloc" \
+            -p ws63-radio-sys --locked \
+            --target riscv32imfc-unknown-none-elf
+          if crate_exists ws63-radio-sys; then
+            echo "ws63-radio-sys $version already exists; skipping upload"
+          else
+            cargo publish -p ws63-radio-sys --locked --no-verify
+          fi
+          wait_until_indexed ws63-radio-sys
 
       - name: Upload crate artifacts
         uses: actions/upload-artifact@v4

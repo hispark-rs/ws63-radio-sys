@@ -40,10 +40,23 @@ cargo run -p hisi-rf-link --target <host-target> --locked -- \
   --output-dir target/native-supplicant-rebuild \
   --compiler <pinned-riscv64-unknown-elf-gcc> \
   --archiver <pinned-riscv64-unknown-elf-ar>
-cargo package -p hisi-rf-link --locked --no-verify
-cargo package -p ws63-radio-blob --locked --no-verify
+cargo package -p hisi-rf-link --locked --target <host-target>
+cargo package -p ws63-radio-blob --locked --target <host-target>
 cargo package -p ws63-radio-sys --locked --no-verify --list
 ```
+
+The final `ws63-radio-sys` tarball is fully compiled only after its exact-version
+dependency layer is visible in crates.io:
+
+```console
+cargo package "-Zbuild-std=core,alloc" -p ws63-radio-sys --locked \
+  --target riscv32imfc-unknown-none-elf
+```
+
+After those target-specific package checks pass, the workflow uses
+`cargo publish --no-verify` only as the upload operation. This deliberately avoids
+re-running a host-default verification for a package already compiled for its
+declared host or RISC-V target; it does not replace the preceding package gate.
 
 The language-neutral `ws63-RF` submodule remains the provenance/oracle input. Consumer
 builds use the hash-bound payload in `ws63-radio-blob`; they do not read the submodule,
