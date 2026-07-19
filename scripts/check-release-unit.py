@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import tomllib
 from pathlib import Path
@@ -18,6 +19,11 @@ PACKAGES = {
     "ws63-radio-blob": ROOT / "crates/ws63-radio-blob/Cargo.toml",
     "ws63-radio-sys": ROOT / "crates/ws63-radio-sys/Cargo.toml",
 }
+ARTIFACT_MANIFEST = ROOT / "crates/ws63-radio-blob/artifacts/manifest.json"
+BUILDER_WORKFLOWS = (
+    ROOT / ".github/workflows/ci.yml",
+    ROOT / ".github/workflows/publish.yml",
+)
 
 
 def load_manifest(path: Path) -> dict:
@@ -70,6 +76,35 @@ def main() -> int:
     if invalid:
         print(
             f"ws63-radio-sys must pin release-unit dependencies to {exact}: {invalid}",
+            file=sys.stderr,
+        )
+        return 1
+
+    artifact_manifest = json.loads(ARTIFACT_MANIFEST.read_text())
+    builder = artifact_manifest["native_supplicant"]["builder"]
+    cc_requirement = dependency_version(
+        manifests["hisi-rf-link"], "dependencies", "cc"
+    )
+    if cc_requirement != f"={builder['cc_rs']}":
+        print(
+            "hisi-rf-link cc-rs pin does not match the native archive builder "
+            f"manifest: dependency={cc_requirement!r}, "
+            f"manifest={builder['cc_rs']!r}",
+            file=sys.stderr,
+        )
+        return 1
+
+    tap_commit = builder["homebrew_tap_commit"]
+    expected_setting = f"RISCV_HOMEBREW_TAP_COMMIT: {tap_commit}"
+    drifted_workflows = [
+        str(path.relative_to(ROOT))
+        for path in BUILDER_WORKFLOWS
+        if expected_setting not in path.read_text()
+    ]
+    if drifted_workflows:
+        print(
+            "native archive canonical toolchain drift: "
+            f"{drifted_workflows} must contain {expected_setting!r}",
             file=sys.stderr,
         )
         return 1

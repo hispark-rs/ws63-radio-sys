@@ -13,7 +13,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  native-archive-repro:
+    name: Rebuild native hostap archives
+    runs-on: macos-15
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      RISCV_HOMEBREW_TAP_COMMIT: 05d4faf21cadbfa8864a84e5f4e0d3a61caf2f77
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2026-07-09
+      - name: Install pinned canonical RISC-V toolchain
+        run: |
+          brew tap riscv-software-src/riscv
+          tap="$(brew --repository riscv-software-src/riscv)"
+          git -C "$tap" checkout "$RISCV_HOMEBREW_TAP_COMMIT"
+          brew trust riscv-software-src/riscv
+          brew install riscv-software-src/riscv/riscv-gnu-toolchain
+      - name: Rebuild and compare target archives
+        run: |
+          case "${RUNNER_ARCH}" in
+            ARM64) host_target=aarch64-apple-darwin ;;
+            X64) host_target=x86_64-apple-darwin ;;
+            *) echo "unsupported macOS runner architecture: ${RUNNER_ARCH}" >&2; exit 1 ;;
+          esac
+          cargo run -p hisi-rf-link --locked --target "$host_target" -- \
+            rebuild-native-supplicant \
+            --repository-root . \
+            --output-dir target/native-supplicant-rebuild \
+            --compiler "$(command -v riscv64-unknown-elf-gcc)" \
+            --archiver "$(command -v riscv64-unknown-elf-ar)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rebuilt-native-supplicant-archives
+          path: target/native-supplicant-rebuild/libhisi_wpa_native_port_*.a
+          if-no-files-found: error
+          retention-days: 14
+
   publish:
+    needs: native-archive-repro
     runs-on: ubuntu-latest
     env:
       RUSTUP_TOOLCHAIN: nightly-2026-07-09
@@ -29,7 +70,7 @@ jobs:
       - name: Install maintainer toolchains
         run: |
           sudo apt-get update
-          sudo apt-get install --yes gcc-riscv64-unknown-elf libssl-dev pkg-config
+          sudo apt-get install --yes libssl-dev pkg-config
 
       - name: Check release-unit version
         env:

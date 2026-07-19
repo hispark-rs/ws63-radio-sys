@@ -12,8 +12,10 @@ into Cargo's package-specific `OUT_DIR`, validates their size and SHA-256 from
 
 The manifest binds every archive to a size and SHA-256. Native supplicant
 entries additionally record the upstream tag, commit, release tarball hash,
-target, compiler, and source-profile revision. Rebuilding those entries is a
-maintainer/release operation; consumer builds only expand and link them.
+target, compiler, archiver, exact `cc-rs` version, canonical builder source, and
+source-profile revision. CI rebuilds both native archives with that contract and
+compares their bytes with this package. Rebuilding is a maintainer/release
+operation; consumer builds only expand and link them.
 
 These are target artifacts, not host executables. Image headers and firmware
 hashing remain the responsibility of `hisi-fwpkg`.

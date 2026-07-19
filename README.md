@@ -17,7 +17,10 @@ All three packages use the same version and are released by one `v<version>` tag
 Ordinary CI rebuilds the normalized vendor archives from the pinned `ws63-RF`
 submodule, compares their bytes and manifest with the Cargo payload, cross-compiles
 the complete pinned hostap source profiles for ABI verification, and packages the
-complete unit. The tag-triggered publish workflow repeats those gates and
+complete unit. A separate canonical macOS builder also rebuilds both hostap target
+archives with the pinned GCC/binutils/cc-rs contract and requires a byte-for-byte
+match with the Cargo payload. The tag-triggered publish workflow depends on the
+same canonical rebuild before it
 then uploads the crates in dependency order: `hisi-rf-link`, `ws63-radio-blob`, and
 finally `ws63-radio-sys`. It waits for each dependency to become visible on crates.io
 before publishing the next package, and safely skips a version that is already present.
@@ -31,6 +34,12 @@ Local release checks do not upload artifacts:
 ```console
 uv run scripts/check-release-unit.py --tag v0.1.0-alpha.2
 uv run scripts/check-release-artifacts.py
+cargo run -p hisi-rf-link --target <host-target> --locked -- \
+  rebuild-native-supplicant \
+  --repository-root . \
+  --output-dir target/native-supplicant-rebuild \
+  --compiler <pinned-riscv64-unknown-elf-gcc> \
+  --archiver <pinned-riscv64-unknown-elf-ar>
 cargo package -p hisi-rf-link --locked --no-verify
 cargo package -p ws63-radio-blob --locked --no-verify
 cargo package -p ws63-radio-sys --locked --no-verify --list
