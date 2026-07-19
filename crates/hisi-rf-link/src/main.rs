@@ -3,8 +3,6 @@ use std::{env, fs, path::PathBuf, process::Command};
 
 mod task_profile;
 
-const PROFILE: &str = include_str!("../profiles/ws63.toml");
-
 #[derive(Deserialize)]
 struct Profile {
     wifi_archives: Vec<WifiArchive>,
@@ -209,7 +207,8 @@ fn print_path(path: PathBuf) {
 }
 
 fn archive_paths(mut args: impl Iterator<Item = std::ffi::OsString>) {
-    let profile: Profile = toml::from_str(PROFILE).expect("parse embedded WS63 profile");
+    let profile: Profile =
+        toml::from_str(hisi_rf_link::WS63_ARCHIVE_PROFILE).expect("parse embedded WS63 profile");
     match args
         .next()
         .and_then(|arg| arg.into_string().ok())

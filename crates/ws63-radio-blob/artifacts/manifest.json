@@ -134,6 +134,20 @@
       }
     },
     {
+      "archive": "librom_callback.a",
+      "input_sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
+      "output_sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
+      "input_size": 77076,
+      "output_size": 77076,
+      "kind": "rom-callback-archive",
+      "transformations": {
+        "llui48_to_riscv32": 0,
+        "branchi_same_section_encoded": 0,
+        "relax_markers_removed_from_branchi_sections": 0,
+        "llui_rep_markers_removed": 0
+      }
+    },
+    {
       "archive": "libhisi_wpa_native_port_wpa2.a",
       "output_sha256": "1d8f0ab90a830a438cac3bde3d395a6e03b57ce2f904a9e1e32fff4733235cb8",
       "output_size": 1026062,

@@ -8,8 +8,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const SCHEDULING_PROFILE: &str = include_str!("../profiles/ws63-scheduling.toml");
-
 #[derive(Debug, Deserialize)]
 struct SchedulingProfile {
     revision: String,
@@ -319,8 +317,8 @@ pub(crate) fn run(args: impl Iterator<Item = OsString>) {
         observed.extend(parse_log(&contents));
     }
 
-    let profile: SchedulingProfile =
-        toml::from_str(SCHEDULING_PROFILE).expect("parse embedded WS63 scheduling profile");
+    let profile: SchedulingProfile = toml::from_str(hisi_rf_link::WS63_SCHEDULING_PROFILE)
+        .expect("parse embedded WS63 scheduling profile");
     let report = build_report(
         profile,
         &elf,

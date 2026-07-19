@@ -94,6 +94,9 @@ fn main() {
             "expanded SHA-256 mismatch for {}",
             artifact.archive
         );
+        if artifact.archive == "librom_callback.a" {
+            println!("cargo:rom_callback_archive={}", destination.display());
+        }
     }
 
     println!("cargo:lib_dir={}", output.display());

@@ -223,7 +223,7 @@ fn write_rom_patch_object(rom_symbols: &Path, patch_list: &Path, output: &Path) 
     patches.len()
 }
 
-fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Path) {
+fn validate_scheduling_profile(profile: &SchedulingProfile, oracle_root: Option<&Path>) {
     assert!(
         !profile.revision.is_empty(),
         "empty scheduling-profile revision"
@@ -252,7 +252,7 @@ fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Pa
             "invalid SHA-256 for {}",
             artifact.id
         );
-        if let Some(relative) = &artifact.path {
+        if let (Some(root), Some(relative)) = (oracle_root, &artifact.path) {
             let path = root.join(relative);
             assert_eq!(
                 sha256(&path),
@@ -292,11 +292,8 @@ fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Pa
 
 fn main() {
     let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
-    let default_root = manifest.join("../../ws63-RF");
-    let root = env::var_os("WS63_RF_ROOT")
-        .map(PathBuf::from)
-        .unwrap_or(default_root);
-    let root = root.canonicalize().unwrap_or(root);
+    let oracle_root = env::var_os("WS63_RF_ORACLE_ROOT").map(PathBuf::from);
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
     let packaged_lib = PathBuf::from(
         env::var_os("DEP_WS63_RADIO_BLOB_LIB_DIR")
             .expect("ws63-radio-blob did not export its normalized archive directory"),
@@ -304,13 +301,29 @@ fn main() {
     let lib = env::var_os("WS63_RF_LIB_DIR")
         .map(PathBuf::from)
         .unwrap_or(packaged_lib);
-    let profile_path = manifest.join("../hisi-rf-link/profiles/ws63.toml");
-    let runtime_compat_profile_path =
-        manifest.join("../hisi-rf-link/profiles/ws63-runtime-compat.toml");
-    let supplicant_boundary_profile_path =
-        manifest.join("../hisi-rf-link/profiles/ws63-supplicant-boundary.toml");
-    let scheduling_profile_path = manifest.join("../hisi-rf-link/profiles/ws63-scheduling.toml");
-    let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
+    let profile_path = out_dir.join("ws63-archive-profile.toml");
+    let runtime_compat_profile_path = out_dir.join("ws63-runtime-compat.toml");
+    let supplicant_boundary_profile_path = out_dir.join("ws63-supplicant-boundary.toml");
+    let scheduling_profile_path = out_dir.join("ws63-scheduling.toml");
+    for (path, contents) in [
+        (&profile_path, hisi_rf_link::WS63_ARCHIVE_PROFILE),
+        (
+            &runtime_compat_profile_path,
+            hisi_rf_link::WS63_RUNTIME_COMPAT_PROFILE,
+        ),
+        (
+            &supplicant_boundary_profile_path,
+            hisi_rf_link::WS63_SUPPLICANT_BOUNDARY_PROFILE,
+        ),
+        (
+            &scheduling_profile_path,
+            hisi_rf_link::WS63_SCHEDULING_PROFILE,
+        ),
+    ] {
+        fs::write(path, contents)
+            .unwrap_or_else(|error| panic!("write {}: {error}", path.display()));
+    }
+    let nvs_linker = manifest.join("linker/ws63-nvs.x");
     let rom_symbols = PathBuf::from(
         env::var_os("DEP_HISI_ROM_SYS_WS63_ROM_SYMBOLS")
             .expect("hisi-rom-sys-ws63 did not export its ROM symbol table"),
@@ -325,8 +338,7 @@ fn main() {
     );
     let native_wpa3 = env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3").is_some();
     let profile: Profile =
-        toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
-            .expect("parse WS63 archive profile");
+        toml::from_str(hisi_rf_link::WS63_ARCHIVE_PROFILE).expect("parse WS63 archive profile");
     let artifact_revision = env::var("DEP_WS63_RADIO_BLOB_PROFILE_REVISION")
         .expect("ws63-radio-blob did not export its profile revision");
     assert_eq!(
@@ -354,23 +366,22 @@ fn main() {
         })
         .collect::<Vec<_>>();
     wpa.sort_by_key(|archive| archive.order);
-    let scheduling_profile: SchedulingProfile = toml::from_str(
-        &fs::read_to_string(&scheduling_profile_path).expect("read WS63 task scheduling profile"),
-    )
-    .expect("parse WS63 task scheduling profile");
-    validate_scheduling_profile(&scheduling_profile, &root);
+    let scheduling_profile: SchedulingProfile =
+        toml::from_str(hisi_rf_link::WS63_SCHEDULING_PROFILE)
+            .expect("parse WS63 task scheduling profile");
+    validate_scheduling_profile(&scheduling_profile, oracle_root.as_deref());
+
+    let rom_callback_archive = PathBuf::from(
+        env::var_os("DEP_WS63_RADIO_BLOB_ROM_CALLBACK_ARCHIVE")
+            .expect("ws63-radio-blob did not export its ROM callback archive"),
+    );
 
     for (key, path) in [
-        ("root", root.clone()),
         ("lib_dir", lib.clone()),
-        ("include_dir", root.join("include")),
         ("rom_symbols", rom_symbols.clone()),
         ("rom_callbacks", rom_callbacks),
         ("rom_patches", rom_patches.clone()),
-        // This archive is an ABI veneer/data payload, not an input to the
-        // relocation transform. A patched `WS63_RF_LIB_DIR` therefore must not
-        // redirect it away from the canonical delivery.
-        ("rom_callback_archive", root.join("lib/librom_callback.a")),
+        ("rom_callback_archive", rom_callback_archive),
         ("archive_profile", profile_path),
         ("runtime_compat_profile", runtime_compat_profile_path),
         (
@@ -386,8 +397,7 @@ fn main() {
         println!("cargo:{key}={}", path.display());
         println!("cargo:rerun-if-changed={}", path.display());
     }
-    let rom_patch_object =
-        PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("ws63-rom-patches.o");
+    let rom_patch_object = out_dir.join("ws63-rom-patches.o");
     let rom_patch_count = write_rom_patch_object(&rom_symbols, &rom_patches, &rom_patch_object);
     assert_eq!(rom_patch_count, 37, "WS63 ROM patch inventory drift");
     println!("cargo:rom_patch_object={}", rom_patch_object.display());
@@ -431,7 +441,7 @@ fn main() {
             .collect::<Vec<_>>()
             .join(",")
     );
-    println!("cargo:rerun-if-env-changed=WS63_RF_ROOT");
+    println!("cargo:rerun-if-env-changed=WS63_RF_ORACLE_ROOT");
     println!("cargo:rerun-if-env-changed=WS63_RF_LIB_DIR");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA2_PERSONAL");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
