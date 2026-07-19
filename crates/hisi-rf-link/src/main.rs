@@ -38,7 +38,7 @@ const COMMANDS: &[(&str, &str)] = &[
 
 fn usage() -> ! {
     eprintln!(
-        "usage: hisi-rf-link <inspect|normalize|verify-normalized|verify-guarded-sites|archive-paths|task-profile|{}> [arguments...]",
+        "usage: hisi-rf-link <inspect|normalize|verify-normalized|verify-guarded-sites|rebuild-native-supplicant|archive-paths|task-profile|{}> [arguments...]",
         COMMANDS
             .iter()
             .map(|(name, _)| *name)
@@ -284,6 +284,13 @@ fn main() {
     }
     if command == "verify-guarded-sites" {
         verify_guarded_sites(args);
+        return;
+    }
+    if command == "rebuild-native-supplicant" {
+        hisi_rf_link::native_supplicant::run(args).unwrap_or_else(|error| {
+            eprintln!("rebuild native supplicant: {error}");
+            std::process::exit(1);
+        });
         return;
     }
     if command == "task-profile" {

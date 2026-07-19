@@ -171,6 +171,15 @@
     },
     "target": "riscv32imfc-unknown-none-elf",
     "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
+    "builder": {
+      "cc_rs": "1.2.67",
+      "compiler_first_line": "riscv64-unknown-elf-gcc (g1b306039a) 15.1.0",
+      "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
+      "canonical_runner": "macos-15",
+      "homebrew_tap": "riscv-software-src/riscv",
+      "homebrew_tap_commit": "05d4faf21cadbfa8864a84e5f4e0d3a61caf2f77",
+      "arm64_sequoia_bottle_sha256": "1de79406735be04e644eda497aae7d84529770ac99ae5a7b5f44b96f6d79a633"
+    },
     "profiles": [
       {
         "id": "wpa2",
