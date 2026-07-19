@@ -5,6 +5,7 @@ use std::{collections::BTreeSet, env, fs, path::PathBuf};
 #[derive(Deserialize)]
 struct Profile {
     revision: String,
+    normalized_artifact_revision: String,
     wifi_root_symbols: Vec<String>,
     rom_callback_root_symbols: Vec<String>,
     wifi_archives: Vec<WifiArchive>,
@@ -147,9 +148,13 @@ fn main() {
         .map(PathBuf::from)
         .unwrap_or(default_root);
     let root = root.canonicalize().unwrap_or(root);
+    let packaged_lib = PathBuf::from(
+        env::var_os("DEP_WS63_RADIO_BLOB_LIB_DIR")
+            .expect("ws63-radio-blob did not export its normalized archive directory"),
+    );
     let lib = env::var_os("WS63_RF_LIB_DIR")
         .map(PathBuf::from)
-        .unwrap_or_else(|| root.join("lib"));
+        .unwrap_or(packaged_lib);
     let profile_path = manifest.join("../hisi-rf-link/profiles/ws63.toml");
     let runtime_compat_profile_path =
         manifest.join("../hisi-rf-link/profiles/ws63-runtime-compat.toml");
@@ -170,6 +175,12 @@ fn main() {
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
+    let artifact_revision = env::var("DEP_WS63_RADIO_BLOB_PROFILE_REVISION")
+        .expect("ws63-radio-blob did not export its profile revision");
+    assert_eq!(
+        artifact_revision, profile.normalized_artifact_revision,
+        "WS63 normalized artifact/profile revision mismatch"
+    );
     let mut wifi = profile.wifi_archives;
     wifi.sort_by_key(|archive| archive.link_order);
     let wpa2 = env::var_os("CARGO_FEATURE_WPA2_PERSONAL").is_some();

@@ -1,4 +1,5 @@
 revision = "ws63-rf-2026-07-13"
+normalized_artifact_revision = "ws63-wifi-base-v1"
 
 wifi_root_symbols = ["alg_anti_intf_init", "alg_cca_opt_init", "alg_edca_opt_init", "alg_temp_protect_init", "alg_hmac_txbf_init", "dmac_psm_process_tim_elm_patch", "hh503_dispatch_trig_event_encap_patch"]
 rom_callback_root_symbols = ["__wrap_log_event_wifi_print1", "g_systick_clock"]

@@ -425,6 +425,7 @@ dependencies = [
  "serde",
  "sha2",
  "toml",
+ "ws63-radio-blob",
 ]
 
 [[package]]
