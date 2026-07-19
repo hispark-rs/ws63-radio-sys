@@ -1,0 +1,137 @@
+name: Publish release unit
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      RUSTUP_TOOLCHAIN: nightly-2026-07-09
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: astral-sh/setup-uv@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2026-07-09
+          components: clippy,rustfmt,rust-src
+      - name: Install maintainer toolchains
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gcc-riscv64-unknown-elf libssl-dev pkg-config
+
+      - name: Check release-unit version
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || '' }}
+        run: uv run scripts/check-release-unit.py --tag "$RELEASE_TAG"
+
+      - name: Check committed lockfile
+        run: |
+          cargo generate-lockfile --locked
+          git ls-files --error-unmatch Cargo.lock >/dev/null
+          git diff --exit-code -- Cargo.lock
+
+      - name: Verify release unit
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          cargo test --workspace --locked
+          uv run scripts/check-upstream-hostap.py
+          uv run scripts/check-runtime-compat-profile.py
+          uv run scripts/check-supplicant-boundary-profile.py
+          uv run scripts/check-native-supplicant-port.py
+          uv run scripts/check-upstream-personal-vectors.py
+          uv run crates/hisi-rf-link/python/test_relocations.py
+
+      - name: Check supplicant C ABI
+        run: |
+          printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
+            cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-abi.o -
+
+      - name: Build WS63 supplicant profiles
+        run: |
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --features upstream-supplicant-port --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
+
+      # Cargo cannot package the facade until its exact-version dependencies are
+      # visible in the registry. Build/package the dependency layer first; the
+      # publish step packages the facade after crates.io indexing completes.
+      - name: Build dependency crate artifacts
+        run: |
+          cargo package -p hisi-rf-link --locked --target x86_64-unknown-linux-gnu
+          cargo package -p ws63-radio-blob --locked --no-verify
+          cargo package -p ws63-radio-sys --locked --no-verify --list \
+            > target/ws63-radio-sys-package-files.txt
+
+      - name: Publish crates in dependency order
+        if: ${{ github.event_name == 'push' }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          version="$(uv run scripts/check-release-unit.py --print-version)"
+          user_agent="ws63-radio-sys-release/${version} (https://github.com/hispark-rs/ws63-radio-sys)"
+
+          crate_exists() {
+            curl --fail --silent \
+              --user-agent "$user_agent" \
+              "https://crates.io/api/v1/crates/$1/$version" >/dev/null
+          }
+
+          wait_until_indexed() {
+            crate="$1"
+            for attempt in $(seq 1 30); do
+              if crate_exists "$crate" && cargo info "$crate@$version" >/dev/null 2>&1; then
+                echo "$crate $version is visible on crates.io"
+                return 0
+              fi
+              echo "Waiting for $crate $version to become visible ($attempt/30)"
+              sleep 10
+            done
+            echo "$crate $version was not visible after 300 seconds" >&2
+            return 1
+          }
+
+          publish_one() {
+            crate="$1"
+            if crate_exists "$crate"; then
+              echo "$crate $version already exists; skipping upload"
+            else
+              cargo publish -p "$crate" --locked --no-verify
+            fi
+            wait_until_indexed "$crate"
+          }
+
+          publish_one hisi-rf-link
+          publish_one ws63-radio-blob
+
+          # Only now can Cargo resolve the exact registry dependency while
+          # preparing the final distributable crate.
+          cargo package -p ws63-radio-sys --locked --no-verify
+          publish_one ws63-radio-sys
+
+      - name: Upload crate artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ws63-radio-release-unit
+          path: |
+            target/package/*.crate
+            target/ws63-radio-sys-package-files.txt
+          if-no-files-found: error
+          retention-days: 14

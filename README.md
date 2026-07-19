@@ -11,6 +11,27 @@ This repository owns three Cargo packages in one versioned release unit:
 - `hisi-rf-link`: the host-side maintainer tool and pure Rust library for relocation
   inventory, normalization, verification, and compatibility profiles.
 
+## Release unit
+
+All three packages use the same version and are released by one `v<version>` tag.
+Ordinary CI builds and packages the complete unit. The tag-triggered publish workflow
+then uploads the crates in dependency order: `hisi-rf-link`, `ws63-radio-blob`, and
+finally `ws63-radio-sys`. It waits for each dependency to become visible on crates.io
+before publishing the next package, and safely skips a version that is already present.
+Manual workflow runs are package-only dry runs; registry upload occurs only for a
+matching tag. Cargo cannot prepare the final `ws63-radio-sys` package until its exact
+`ws63-radio-blob` version is indexed, so CI packages that final crate after publishing
+the dependency layer.
+
+Local release checks do not upload artifacts:
+
+```console
+uv run scripts/check-release-unit.py --tag v0.1.0-alpha.1
+cargo package -p hisi-rf-link --locked --no-verify
+cargo package -p ws63-radio-blob --locked --no-verify
+cargo package -p ws63-radio-sys --locked --no-verify --list
+```
+
 The language-neutral `ws63-RF` submodule remains the provenance/oracle input. Consumer
 builds use the hash-bound payload in `ws63-radio-blob`; they do not read the submodule,
 an SDK checkout, or a host-specific path. Redistribution terms for the binary payload
