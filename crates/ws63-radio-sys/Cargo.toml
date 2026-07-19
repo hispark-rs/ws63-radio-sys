@@ -1,6 +1,6 @@
 [package]
 name = "ws63-radio-sys"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
@@ -11,7 +11,7 @@ links = "ws63_radio_sys"
 build = "build.rs"
 
 [build-dependencies]
-hisi-rf-link = { path = "../hisi-rf-link", version = "=0.1.0-alpha.2", default-features = false }
+hisi-rf-link = { path = "../hisi-rf-link", version = "=0.1.0-alpha.3", default-features = false }
 object = { version = "0.37", default-features = false, features = ["write"] }
 serde = { version = "1", default-features = false, features = ["alloc", "derive"] }
 sha2 = { version = "0.10", default-features = false }
@@ -19,7 +19,7 @@ toml = { version = "0.9", default-features = false, features = ["parse", "serde"
 
 [dependencies]
 hisi-rom-sys-ws63 = "=0.1.0-alpha.1"
-ws63-radio-blob = { path = "../ws63-radio-blob", version = "=0.1.0-alpha.2" }
+ws63-radio-blob = { path = "../ws63-radio-blob", version = "=0.1.0-alpha.3" }
 
 [features]
 default = ["wifi"]

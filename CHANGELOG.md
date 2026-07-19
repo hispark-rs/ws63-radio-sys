@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.3] - 2026-07-19
+
+### Added
+
+- Added a pure Rust `hisi-rf-link rebuild-native-supplicant` maintainer command
+  that reconstructs the pinned WPA2 and WPA3 hostap target archives and rejects
+  compiler, archiver, source, manifest, size, hash, or byte drift.
+- Added canonical macOS release CI that pins GCC 15.1.0, GNU binutils 2.45 and
+  `cc-rs 1.2.67`, rebuilds both target archives, and gates publication on an
+  exact byte-for-byte match with the Cargo payload.
+
+## [0.1.0-alpha.2] - 2026-07-19
+
 ### Added
 
 - Initial `ws63-radio-sys` archive-profile and Cargo metadata contract.

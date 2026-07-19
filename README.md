@@ -32,7 +32,7 @@ the dependency layer.
 Local release checks do not upload artifacts:
 
 ```console
-uv run scripts/check-release-unit.py --tag v0.1.0-alpha.2
+uv run scripts/check-release-unit.py --tag v0.1.0-alpha.3
 uv run scripts/check-release-artifacts.py
 cargo run -p hisi-rf-link --target <host-target> --locked -- \
   rebuild-native-supplicant \

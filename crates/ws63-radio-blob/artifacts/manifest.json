@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "normalizer": "hisi-rf-link 0.1.0-alpha.2",
+  "normalizer": "hisi-rf-link 0.1.0-alpha.3",
   "profile_revision": "ws63-wifi-base-v1",
   "artifacts": [
     {
