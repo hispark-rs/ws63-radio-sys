@@ -177,8 +177,8 @@
       "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
       "canonical_runner": "macos-15",
       "homebrew_tap": "riscv-software-src/riscv",
-      "homebrew_tap_commit": "05d4faf21cadbfa8864a84e5f4e0d3a61caf2f77",
-      "arm64_sequoia_bottle_sha256": "1de79406735be04e644eda497aae7d84529770ac99ae5a7b5f44b96f6d79a633"
+      "homebrew_tap_commit": "2434aac00803d570c1b04190c76f647e7d1661e7",
+      "arm64_sequoia_bottle_sha256": "95917aa644e53aba86f8d6e840e281e4cb8b782153e5c6e3fd5788f19a572ada"
     },
     "profiles": [
       {

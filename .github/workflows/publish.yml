@@ -18,7 +18,7 @@ jobs:
     runs-on: macos-15
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
-      RISCV_HOMEBREW_TAP_COMMIT: 05d4faf21cadbfa8864a84e5f4e0d3a61caf2f77
+      RISCV_HOMEBREW_TAP_COMMIT: 2434aac00803d570c1b04190c76f647e7d1661e7
     steps:
       - uses: actions/checkout@v4
         with:
