@@ -36,6 +36,34 @@ compat_profile = tomllib.loads(COMPAT_PROFILE.read_text())
 if compat_profile["archive_profile_revision"] != archive_profile["revision"]:
     fail("archive profile revision drift")
 
+semantics = compat_profile.get("semantics", {})
+priority = semantics.get("priority", {})
+if priority != {
+    "minimum": 0,
+    "maximum": 31,
+    "ordering": "lower-number-higher",
+}:
+    fail("priority conversion semantics drift")
+
+time = semantics.get("time", {})
+if time != {
+    "ticks_per_second": 100,
+    "wait_forever": 0xFFFFFFFF,
+    "milliseconds_to_ticks": "ceil-saturating-u32",
+    "ticks_to_milliseconds": "floor-saturating-u32",
+    "duration_overflow": "saturate-u32-max",
+}:
+    fail("tick conversion semantics drift")
+
+return_codes = semantics.get("return_codes", {})
+if return_codes != {
+    "success": 0x00000000,
+    "failure": 0x00000001,
+    "semaphore_timeout": 0x02000707,
+    "mutex_timeout": 0x02001D07,
+}:
+    fail("return-code conversion semantics drift")
+
 patterns = [re.compile(pattern) for pattern in compat_profile["namespace_patterns"]]
 entries = compat_profile["symbols"]
 names = [entry["name"] for entry in entries]
@@ -79,6 +107,13 @@ if actual != expected:
         "archive namespace drift: "
         f"missing={sorted(expected - actual)}, unexpected={sorted(actual - expected)}"
     )
+
+classifications = {entry["name"]: entry["classification"] for entry in entries}
+for conversion_symbol in ("LOS_MS2Tick", "LOS_Tick2MS"):
+    if classifications.get(conversion_symbol) != "off-path":
+        fail(
+            f"{conversion_symbol} became reachable without a reviewed adapter provider"
+        )
 
 provided = sum(entry["classification"] == "provided" for entry in entries)
 off_path = len(entries) - provided

@@ -8,6 +8,27 @@ archive_profile_revision = "ws63-rf-2026-07-13"
 # not define them.
 namespace_patterns = ["^Arch", "^LOS_", "^Os", "^reg_rw_check_addr$"]
 
+# Adapter-only semantics derived from the exact WS63 LiteOS configuration and
+# headers used by the payload oracle. These values do not define the generic
+# hisi-rf-rtos-driver contract.
+[semantics.priority]
+minimum = 0
+maximum = 31
+ordering = "lower-number-higher"
+
+[semantics.time]
+ticks_per_second = 100
+wait_forever = 0xffffffff
+milliseconds_to_ticks = "ceil-saturating-u32"
+ticks_to_milliseconds = "floor-saturating-u32"
+duration_overflow = "saturate-u32-max"
+
+[semantics.return_codes]
+success = 0x00000000
+failure = 0x00000001
+semaphore_timeout = 0x02000707
+mutex_timeout = 0x02001d07
+
 [[symbols]]
 name = "ArchIntLock"
 classification = "provided"
