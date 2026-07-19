@@ -18,3 +18,6 @@
   install/remove, with host/RV32 and object-symbol drift gates.
 - Versioned the WS63 driver hook table and exposed its raw install lifecycle so
   the Rust integration can own registration without relying on private C state.
+- Release CI now rebuilds every normalized vendor archive from the pinned
+  `ws63-RF` input and compares its bytes, hashes, sizes, and relocation counts
+  with the Cargo-delivered payload before packaging or publishing the unit.

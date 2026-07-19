@@ -27,6 +27,8 @@ jobs:
       - run: uv run scripts/check-upstream-hostap.py
       - run: uv run scripts/check-runtime-compat-profile.py
       - run: uv run scripts/check-supplicant-boundary-profile.py
+      - name: Rebuild normalized release artifacts
+        run: uv run scripts/check-release-artifacts.py
       - name: Check supplicant C ABI
         run: |
           printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
