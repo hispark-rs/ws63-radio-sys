@@ -32,6 +32,7 @@ jobs:
           tap="$(brew --repository riscv-software-src/riscv)"
           git -C "$tap" checkout "$RISCV_HOMEBREW_TAP_COMMIT"
           brew trust riscv-software-src/riscv
+          brew uninstall --force riscv-gnu-toolchain || true
           brew install riscv-software-src/riscv/riscv-gnu-toolchain
       - name: Rebuild and compare target archives
         run: |
@@ -70,7 +71,7 @@ jobs:
       - name: Install maintainer toolchains
         run: |
           sudo apt-get update
-          sudo apt-get install --yes libssl-dev pkg-config
+          sudo apt-get install --yes gcc-riscv64-unknown-elf libssl-dev pkg-config
 
       - name: Check release-unit version
         env:

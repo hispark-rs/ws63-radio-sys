@@ -17,10 +17,10 @@ jobs:
         with:
           toolchain: nightly-2026-07-09
           components: clippy,rustfmt,rust-src
-      - name: Install native and RISC-V C toolchains
+      - name: Install native and RISC-V inspection toolchains
         run: |
           sudo apt-get update
-          sudo apt-get install --yes libssl-dev pkg-config
+          sudo apt-get install --yes gcc-riscv64-unknown-elf libssl-dev pkg-config
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --target x86_64-unknown-linux-gnu --locked -- -D warnings
       - run: cargo test --workspace --target x86_64-unknown-linux-gnu --locked
@@ -73,6 +73,7 @@ jobs:
           tap="$(brew --repository riscv-software-src/riscv)"
           git -C "$tap" checkout "$RISCV_HOMEBREW_TAP_COMMIT"
           brew trust riscv-software-src/riscv
+          brew uninstall --force riscv-gnu-toolchain || true
           brew install riscv-software-src/riscv/riscv-gnu-toolchain
       - name: Rebuild and compare target archives
         run: |
