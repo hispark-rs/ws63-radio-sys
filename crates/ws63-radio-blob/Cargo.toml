@@ -1,0 +1,25 @@
+[package]
+name = "ws63-radio-blob"
+version = "0.1.0-alpha.1"
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Redistributable normalized WS63 Wi-Fi target archives"
+license-file = "LICENSE-BLOB.md"
+links = "ws63_radio_blob"
+build = "build.rs"
+include = [
+    "artifacts/*.zst",
+    "artifacts/manifest.json",
+    "src/lib.rs",
+    "build.rs",
+    "Cargo.toml",
+    "LICENSE-BLOB.md",
+    "README.md",
+]
+
+[build-dependencies]
+ruzstd = "0.8.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"

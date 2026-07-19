@@ -1,9 +1,12 @@
 [workspace]
 resolver = "3"
-members = ["crates/ws63-radio-sys", "crates/hisi-rf-link"]
+members = [
+    "crates/ws63-radio-blob",
+    "crates/ws63-radio-sys",
+    "crates/hisi-rf-link",
+]
 
 [workspace.package]
 edition = "2024"
 authors = ["sanchuanhehe"]
 repository = "https://github.com/hispark-rs/ws63-radio-sys"
-

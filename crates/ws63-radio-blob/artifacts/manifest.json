@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "normalizer": "hisi-rf-link 0.1.0-alpha.1",
+  "profile_revision": "ws63-wifi-base-v1",
+  "artifacts": [
+    {
+      "archive": "libwifi_driver_hmac.a",
+      "input_sha256": "7207440084992ccd14c56c3c291ae0cebc915459deed9300911e4adbaf71169f",
+      "output_sha256": "79642b77d90b3a8524b39818210c97bfac9ed6a9c0a2cd2f73a03abdd0de3dc6",
+      "input_size": 33027332,
+      "output_size": 33027332,
+      "transformations": {
+        "llui48_to_riscv32": 908,
+        "branchi_same_section_encoded": 2190,
+        "relax_markers_removed_from_branchi_sections": 4812,
+        "llui_rep_markers_removed": 3005
+      }
+    },
+    {
+      "archive": "libwifi_driver_dmac.a",
+      "input_sha256": "7dc4f56cf236f9003a0f3080c188dcfd71dd72ffc3d9596233cc8eafac4c096e",
+      "output_sha256": "3960b6285e3cd801baf216d7a5c3e886d525e94c8fd74fa68824b9bc870c0c3c",
+      "input_size": 629262,
+      "output_size": 629262,
+      "transformations": {
+        "llui48_to_riscv32": 380,
+        "branchi_same_section_encoded": 521,
+        "relax_markers_removed_from_branchi_sections": 1077,
+        "llui_rep_markers_removed": 302
+      }
+    },
+    {
+      "archive": "libwifi_driver_tcm.a",
+      "input_sha256": "89a6c999c51740ea947f79573edd82a988432fa32c9fe12afb56d638b4d6de86",
+      "output_sha256": "d0563f779957eb6df24cb27e102806105b09414991e60efcbe96f8e392a356e0",
+      "input_size": 6272746,
+      "output_size": 6272746,
+      "transformations": {
+        "llui48_to_riscv32": 123,
+        "branchi_same_section_encoded": 282,
+        "relax_markers_removed_from_branchi_sections": 612,
+        "llui_rep_markers_removed": 263
+      }
+    },
+    {
+      "archive": "libbg_common.a",
+      "input_sha256": "40c671a542c3d1a9be413786f1d75b7dcd9635d7985b507c64efa7b3ff713dcd",
+      "output_sha256": "1fec27bb80d62fee6e9497a5494d5574318fd82e81c0b075711a3cfa8209ac3d",
+      "input_size": 218616,
+      "output_size": 218616,
+      "transformations": {
+        "llui48_to_riscv32": 229,
+        "branchi_same_section_encoded": 145,
+        "relax_markers_removed_from_branchi_sections": 308,
+        "llui_rep_markers_removed": 244
+      }
+    },
+    {
+      "archive": "libwifi_alg_anti_interference.a",
+      "input_sha256": "dce096f1572cfe0809d4b2a7ad9224fdebc524c969fcb8ce6b3bfe865feee44f",
+      "output_sha256": "f8a9cb9379a1fd014424304ab75b81b9d70052bad9038f3b986c7a70ea358bd5",
+      "input_size": 510752,
+      "output_size": 510752,
+      "transformations": {
+        "llui48_to_riscv32": 17,
+        "branchi_same_section_encoded": 65,
+        "relax_markers_removed_from_branchi_sections": 106,
+        "llui_rep_markers_removed": 57
+      }
+    },
+    {
+      "archive": "libwifi_alg_cca_opt.a",
+      "input_sha256": "c7285766f72f0eb9eb544d7d3d64cb807b8a1726ad86330eb92ee14a22e4ca7c",
+      "output_sha256": "18a3b80432049ce46124ae67f44d52a1bc47c6f3b32c403cadb23dc0e3b27e40",
+      "input_size": 484266,
+      "output_size": 484266,
+      "transformations": {
+        "llui48_to_riscv32": 17,
+        "branchi_same_section_encoded": 44,
+        "relax_markers_removed_from_branchi_sections": 48,
+        "llui_rep_markers_removed": 14
+      }
+    },
+    {
+      "archive": "libwifi_alg_edca_opt.a",
+      "input_sha256": "e4b74cd3f0188f522611b904197e2a470763424720202f21c181cb63186a6c1d",
+      "output_sha256": "8798f3e61525e7d93d756861b8d447a88162543d929e77a6e123eb41ee204fbb",
+      "input_size": 829656,
+      "output_size": 829656,
+      "transformations": {
+        "llui48_to_riscv32": 14,
+        "branchi_same_section_encoded": 68,
+        "relax_markers_removed_from_branchi_sections": 68,
+        "llui_rep_markers_removed": 38
+      }
+    },
+    {
+      "archive": "libwifi_alg_temp_protect.a",
+      "input_sha256": "df67d93de7364fcb53984430c6a64a99ebe7019b4552bd810282d90c0ea072c8",
+      "output_sha256": "ff79eadcaa9793d059e391bf2c814006d375cbf782035f26589c1dd162930620",
+      "input_size": 394340,
+      "output_size": 394340,
+      "transformations": {
+        "llui48_to_riscv32": 18,
+        "branchi_same_section_encoded": 40,
+        "relax_markers_removed_from_branchi_sections": 72,
+        "llui_rep_markers_removed": 40
+      }
+    },
+    {
+      "archive": "libwifi_alg_txbf.a",
+      "input_sha256": "8bc118e3dd701b94e133aa9fde15356661cc0109ead850e6e471b29a38e68a4c",
+      "output_sha256": "8fe8609662e73a05d340cb222a525929484fa316821d1f4ffdbc0d75d2c9ef57",
+      "input_size": 383526,
+      "output_size": 383526,
+      "transformations": {
+        "llui48_to_riscv32": 12,
+        "branchi_same_section_encoded": 10,
+        "relax_markers_removed_from_branchi_sections": 18,
+        "llui_rep_markers_removed": 7
+      }
+    },
+    {
+      "archive": "libwifi_rom_data.a",
+      "input_sha256": "a45480c15a1ae3a138a13d1dd86575a6eaa0a07ce08d3de8ae2c1975c3834d3c",
+      "output_sha256": "a45480c15a1ae3a138a13d1dd86575a6eaa0a07ce08d3de8ae2c1975c3834d3c",
+      "input_size": 3056,
+      "output_size": 3056,
+      "transformations": {
+        "llui48_to_riscv32": 0,
+        "branchi_same_section_encoded": 0,
+        "relax_markers_removed_from_branchi_sections": 0,
+        "llui_rep_markers_removed": 0
+      }
+    }
+  ]
+}
