@@ -124,13 +124,13 @@ jobs:
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
         run: >-
-          cargo check -Zbuild-std=core,alloc
+          cargo check "-Zbuild-std=core,alloc"
           --target riscv32imfc-unknown-none-elf
           -p ws63-radio-sys --features upstream-supplicant-port --locked
       - name: Build WPA3 Cargo consumer contract
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
         run: >-
-          cargo check -Zbuild-std=core,alloc
+          cargo check "-Zbuild-std=core,alloc"
           --target riscv32imfc-unknown-none-elf
           -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
