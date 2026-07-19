@@ -26,7 +26,7 @@ the dependency layer.
 Local release checks do not upload artifacts:
 
 ```console
-uv run scripts/check-release-unit.py --tag v0.1.0-alpha.1
+uv run scripts/check-release-unit.py --tag v0.1.0-alpha.2
 cargo package -p hisi-rf-link --locked --no-verify
 cargo package -p ws63-radio-blob --locked --no-verify
 cargo package -p ws63-radio-sys --locked --no-verify --list

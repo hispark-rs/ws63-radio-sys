@@ -45,8 +45,10 @@ jobs:
       - name: Verify release unit
         run: |
           cargo fmt --all -- --check
-          cargo clippy --workspace --all-targets --locked -- -D warnings
-          cargo test --workspace --locked
+          cargo clippy --workspace --all-targets \
+            --target x86_64-unknown-linux-gnu --locked -- -D warnings
+          cargo test --workspace \
+            --target x86_64-unknown-linux-gnu --locked
           uv run scripts/check-upstream-hostap.py
           uv run scripts/check-runtime-compat-profile.py
           uv run scripts/check-supplicant-boundary-profile.py

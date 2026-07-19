@@ -1,5 +1,6 @@
 //! Deterministic host-side transforms for HiSilicon radio artifacts.
 
+#[cfg(feature = "tool")]
 pub mod normalize;
 
 /// Link order and archive-selection contract for the WS63 Wi-Fi payload.

@@ -22,8 +22,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes gcc-riscv64-unknown-elf libssl-dev pkg-config
       - run: cargo fmt --all -- --check
-      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - run: cargo test --workspace --locked
+      - run: cargo clippy --workspace --all-targets --target x86_64-unknown-linux-gnu --locked -- -D warnings
+      - run: cargo test --workspace --target x86_64-unknown-linux-gnu --locked
       - run: uv run scripts/check-upstream-hostap.py
       - run: uv run scripts/check-runtime-compat-profile.py
       - run: uv run scripts/check-supplicant-boundary-profile.py
