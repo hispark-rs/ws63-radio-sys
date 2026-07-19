@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -21,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE_PROFILE = ROOT / "crates/hisi-rf-link/profiles/ws63.toml"
 BOUNDARY_PROFILE = ROOT / "crates/hisi-rf-link/profiles/ws63-supplicant-boundary.toml"
 BUILD_RS = ROOT / "crates/ws63-radio-sys/build.rs"
+ARTIFACT_MANIFEST = ROOT / "crates/ws63-radio-blob/artifacts/manifest.json"
 
 
 def fail(message: str) -> None:
@@ -53,12 +55,40 @@ for symbol in symbols:
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol):
         fail(f"invalid provider symbol: {symbol}")
 
-native_archive = boundary["native_archive"]
-if not re.fullmatch(r"lib[A-Za-z0-9_]+\.a", native_archive):
-    fail(f"invalid native archive: {native_archive}")
-compile_name = native_archive.removeprefix("lib").removesuffix(".a")
-if f'build.compile("{compile_name}")' not in BUILD_RS.read_text():
-    fail(f"cc-rs output drift: expected build.compile(\"{compile_name}\")")
+native_archives = boundary["native_archives"]
+artifact_manifest = json.loads(ARTIFACT_MANIFEST.read_text())
+artifact_profiles = {
+    profile["id"]: (profile["archive"], profile["revision"])
+    for profile in artifact_manifest["native_supplicant"]["profiles"]
+}
+expected_profiles: dict[str, tuple[str, str]] = {}
+for entry in native_archives:
+    profile = entry["profile"]
+    archive = entry["archive"]
+    revision = entry["revision"]
+    if profile in expected_profiles:
+        fail(f"duplicate native profile: {profile}")
+    if not re.fullmatch(r"lib[A-Za-z0-9_]+\.a", archive):
+        fail(f"invalid native archive: {archive}")
+    expected_profiles[profile] = (archive, revision)
+if expected_profiles != artifact_profiles:
+    fail(
+        "Cargo artifact profile drift: "
+        f"boundary={expected_profiles}, artifact={artifact_profiles}"
+    )
+
+build_rs = BUILD_RS.read_text()
+for forbidden in ("cc::Build", "build.compile(", "riscv64-unknown-elf-gcc", "riscv64-unknown-elf-ar"):
+    if forbidden in build_rs:
+        fail(f"consumer build reintroduced host tool: {forbidden}")
+for required in (
+    "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_ARCHIVE",
+    "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_ARCHIVE",
+    "native supplicant artifact/profile revision mismatch",
+    "cargo:rustc-link-lib=static={link_name}",
+):
+    if required not in build_rs:
+        fail(f"Cargo-delivered native link contract drift: {required}")
 native_object_markers = boundary["native_object_markers"]
 if len(native_object_markers) != len(set(native_object_markers)):
     fail("duplicate native object marker")
@@ -72,6 +102,6 @@ for marker in native_object_markers:
 
 print(
     "supplicant boundary profile OK: "
-    f"native={native_archive}, legacy_archives={len(legacy_archives)}, "
+    f"native_profiles={len(native_archives)}, legacy_archives={len(legacy_archives)}, "
     f"native_markers={len(native_object_markers)}, legacy_symbols={len(symbols)}"
 )
