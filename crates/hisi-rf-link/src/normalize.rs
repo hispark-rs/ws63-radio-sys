@@ -1,13 +1,22 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeMap, fmt, fs, path::Path};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt, fs,
+    path::Path,
+};
 
 const ELF_MAGIC: &[u8; 4] = b"\x7fELF";
 const AR_MAGIC: &[u8; 8] = b"!<arch>\n";
 const AR_HEADER_SIZE: usize = 60;
 const SHT_SYMTAB: u32 = 2;
 const SHT_RELA: u32 = 4;
+const SHF_MERGE: u32 = 0x10;
+const SHF_STRINGS: u32 = 0x20;
 const SHN_UNDEF: u16 = 0;
+const R_RISCV_NONE: u32 = 0;
+const R_RISCV_32: u32 = 1;
+const R_RISCV_RELAX: u32 = 51;
 
 pub const R_RISCV_48_LLUI: u32 = 58;
 pub const R_RISCV_BRANCHI: u32 = 59;
@@ -34,6 +43,8 @@ impl std::error::Error for Error {}
 struct Section {
     name: String,
     section_type: u32,
+    flags: u32,
+    address: u32,
     offset: usize,
     size: usize,
     entry_size: usize,
@@ -82,6 +93,32 @@ pub struct RelocationSummary {
     pub branchi_same_section: usize,
     pub branchi_cross_section: usize,
     pub debug: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct TransformationCounts {
+    pub llui48_to_riscv32: usize,
+    pub branchi_same_section_encoded: usize,
+    pub relax_markers_removed_from_branchi_sections: usize,
+    pub llui_rep_markers_removed: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NormalizedArtifact {
+    pub archive: String,
+    pub input_sha256: String,
+    pub output_sha256: String,
+    pub input_size: usize,
+    pub output_size: usize,
+    pub transformations: TransformationCounts,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NormalizationManifest {
+    pub schema_version: u32,
+    pub normalizer: String,
+    pub profile_revision: String,
+    pub artifacts: Vec<NormalizedArtifact>,
 }
 
 pub fn summarize(inventories: &[ArchiveInventory]) -> RelocationSummary {
@@ -151,6 +188,12 @@ fn i32(data: &[u8], offset: usize, context: &str) -> Result<i32, Error> {
     Ok(i32::from_le_bytes(data[range].try_into().unwrap()))
 }
 
+fn put_u32(data: &mut [u8], offset: usize, value: u32, context: &str) -> Result<(), Error> {
+    let range = checked_range(data, offset, 4, context)?;
+    data[range].copy_from_slice(&value.to_le_bytes());
+    Ok(())
+}
+
 fn c_string(data: &[u8], offset: usize, context: &str) -> Result<String, Error> {
     if offset >= data.len() {
         return Err(Error::new(format!(
@@ -199,6 +242,8 @@ fn parse_sections(data: &[u8], context: &str) -> Result<Vec<Section>, Error> {
         raw.push((
             u32(data, header, context)? as usize,
             u32(data, header + 4, context)?,
+            u32(data, header + 8, context)?,
+            u32(data, header + 12, context)?,
             u32(data, header + 16, context)? as usize,
             u32(data, header + 20, context)? as usize,
             u32(data, header + 24, context)? as usize,
@@ -208,14 +253,16 @@ fn parse_sections(data: &[u8], context: &str) -> Result<Vec<Section>, Error> {
     }
 
     let names = raw[names_index];
-    let names_range = checked_range(data, names.2, names.3, context)?;
+    let names_range = checked_range(data, names.4, names.5, context)?;
     let names_data = &data[names_range];
     raw.into_iter()
         .map(
-            |(name, section_type, offset, size, link, info, entry_size)| {
+            |(name, section_type, flags, address, offset, size, link, info, entry_size)| {
                 Ok(Section {
                     name: c_string(names_data, name, context)?,
                     section_type,
+                    flags,
+                    address,
                     offset,
                     size,
                     entry_size,
@@ -352,6 +399,175 @@ fn inspect_object(
     Ok(records)
 }
 
+fn encode_branchi(word: u32, offset: i64, context: &str) -> Result<u32, Error> {
+    if offset & 1 != 0 {
+        return Err(Error::new(format!(
+            "{context}: R_RISCV_BRANCHI displacement {offset} is not halfword aligned"
+        )));
+    }
+    if !(-0x200..=0x1fe).contains(&offset) {
+        return Err(Error::new(format!(
+            "{context}: R_RISCV_BRANCHI displacement {offset} is out of range"
+        )));
+    }
+    let encoded = (offset as i32 as u32) & 0x3ff;
+    let immediate_mask = 0x00f0_0f80;
+    let immediate = ((encoded & 0x03e) << 6) | ((encoded & 0x3c0) << 14);
+    Ok((word & !immediate_mask) | immediate)
+}
+
+fn normalize_object(
+    data: &mut [u8],
+    archive: &str,
+    member: &str,
+) -> Result<TransformationCounts, Error> {
+    let context = format!("{archive}({member})");
+    let sections = parse_sections(data, &context)?;
+    let mut branchi_sections = BTreeSet::new();
+    for relocation_section in sections
+        .iter()
+        .filter(|section| section.section_type == SHT_RELA)
+    {
+        let entry_size = if relocation_section.entry_size == 0 {
+            12
+        } else {
+            relocation_section.entry_size
+        };
+        if entry_size < 12 || relocation_section.size % entry_size != 0 {
+            return Err(Error::new(format!(
+                "{context}: {} has invalid RELA entry size",
+                relocation_section.name
+            )));
+        }
+        for index in 0..relocation_section.size / entry_size {
+            let entry = relocation_section.offset + index * entry_size;
+            if u32(data, entry + 4, &context)? & 0xff == R_RISCV_BRANCHI {
+                branchi_sections.insert(relocation_section.info);
+            }
+        }
+    }
+    let mut counts = TransformationCounts {
+        llui48_to_riscv32: 0,
+        branchi_same_section_encoded: 0,
+        relax_markers_removed_from_branchi_sections: 0,
+        llui_rep_markers_removed: 0,
+    };
+    for relocation_section in sections
+        .iter()
+        .filter(|section| section.section_type == SHT_RELA)
+    {
+        let target = sections.get(relocation_section.info).ok_or_else(|| {
+            Error::new(format!(
+                "{context}: {} has invalid target section",
+                relocation_section.name
+            ))
+        })?;
+        let symbols = parse_symbols(data, &sections, relocation_section.link, &context)?;
+        let entry_size = if relocation_section.entry_size == 0 {
+            12
+        } else {
+            relocation_section.entry_size
+        };
+        if entry_size < 12 || relocation_section.size % entry_size != 0 {
+            return Err(Error::new(format!(
+                "{context}: {} has invalid RELA entry size",
+                relocation_section.name
+            )));
+        }
+        for index in 0..relocation_section.size / entry_size {
+            let entry = relocation_section.offset + index * entry_size;
+            let relocation_offset = u32(data, entry, &context)?;
+            let info = u32(data, entry + 4, &context)?;
+            let relocation_type = info & 0xff;
+            let symbol_index = (info >> 8) as usize;
+            let addend = i32(data, entry + 8, &context)?;
+
+            match relocation_type {
+                R_RISCV_48_LLUI => {
+                    let relocated_offset = relocation_offset.checked_add(2).ok_or_else(|| {
+                        Error::new(format!("{context}: R_RISCV_48_LLUI offset overflow"))
+                    })?;
+                    let write_end = relocated_offset.checked_add(4).ok_or_else(|| {
+                        Error::new(format!("{context}: R_RISCV_48_LLUI range overflow"))
+                    })?;
+                    if write_end as usize > target.size {
+                        return Err(Error::new(format!(
+                            "{context}: R_RISCV_48_LLUI at {}+0x{relocation_offset:x} exceeds its target section",
+                            target.name
+                        )));
+                    }
+                    put_u32(data, entry, relocated_offset, &context)?;
+                    put_u32(data, entry + 4, (info & !0xff) | R_RISCV_32, &context)?;
+                    counts.llui48_to_riscv32 += 1;
+                }
+                R_RISCV_BRANCHI => {
+                    let symbol = symbols.get(symbol_index).ok_or_else(|| {
+                        Error::new(format!(
+                            "{context}: R_RISCV_BRANCHI references symbol {symbol_index}"
+                        ))
+                    })?;
+                    if symbol.section_index as usize != relocation_section.info {
+                        let symbol_section = if symbol.section_index == SHN_UNDEF {
+                            "UND".to_owned()
+                        } else {
+                            sections
+                                .get(symbol.section_index as usize)
+                                .map(|section| section.name.clone())
+                                .unwrap_or_else(|| format!("SHN_{:x}", symbol.section_index))
+                        };
+                        return Err(Error::new(format!(
+                            "{context}: cross-section R_RISCV_BRANCHI at {}+0x{relocation_offset:x} targets {} ({symbol_section}); no standard fixed-size conversion is declared",
+                            target.name, symbol.name
+                        )));
+                    }
+                    let instruction_offset = target
+                        .offset
+                        .checked_add(relocation_offset as usize)
+                        .ok_or_else(|| Error::new(format!("{context}: branch offset overflow")))?;
+                    let word = u32(data, instruction_offset, &context)?;
+                    let displacement =
+                        i64::from(symbol.value) + i64::from(addend) - i64::from(relocation_offset);
+                    let encoded = encode_branchi(word, displacement, &context)?;
+                    put_u32(data, instruction_offset, encoded, &context)?;
+                    put_u32(data, entry + 4, (info & !0xff) | R_RISCV_NONE, &context)?;
+                    counts.branchi_same_section_encoded += 1;
+                }
+                R_RISCV_LLUI_REP => {
+                    if symbol_index != 0 || addend != 0 {
+                        return Err(Error::new(format!(
+                            "{context}: R_RISCV_LLUI_REP at {}+0x{relocation_offset:x} is not the proven zero-symbol/zero-addend marker form",
+                            target.name
+                        )));
+                    }
+                    let instruction_end = relocation_offset.checked_add(6).ok_or_else(|| {
+                        Error::new(format!("{context}: R_RISCV_LLUI_REP range overflow"))
+                    })?;
+                    if instruction_end as usize > target.size {
+                        return Err(Error::new(format!(
+                            "{context}: R_RISCV_LLUI_REP at {}+0x{relocation_offset:x} exceeds its target section",
+                            target.name
+                        )));
+                    }
+                    put_u32(data, entry + 4, (info & !0xff) | R_RISCV_NONE, &context)?;
+                    counts.llui_rep_markers_removed += 1;
+                }
+                R_RISCV_RELAX if branchi_sections.contains(&relocation_section.info) => {
+                    put_u32(data, entry + 4, (info & !0xff) | R_RISCV_NONE, &context)?;
+                    counts.relax_markers_removed_from_branchi_sections += 1;
+                }
+                60 => {
+                    return Err(Error::new(format!(
+                        "{context}: undeclared vendor relocation type 60 at {}+0x{relocation_offset:x}",
+                        target.name
+                    )));
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(counts)
+}
+
 fn parse_decimal(field: &[u8], context: &str) -> Result<usize, Error> {
     let text = std::str::from_utf8(field)
         .map_err(|_| Error::new(format!("{context}: invalid archive decimal field")))?
@@ -384,56 +600,343 @@ fn archive_member_name(field: &[u8], long_names: &[u8], context: &str) -> Result
     Ok(raw.strip_suffix('/').unwrap_or(&raw).to_owned())
 }
 
-pub fn inspect_archive(path: &Path) -> Result<ArchiveInventory, Error> {
-    let data =
-        fs::read(path).map_err(|error| Error::new(format!("read {}: {error}", path.display())))?;
+fn archive_members(data: &[u8], archive: &str) -> Result<Vec<(String, usize, usize)>, Error> {
     if data.get(..AR_MAGIC.len()) != Some(AR_MAGIC) {
-        return Err(Error::new(format!(
-            "{}: expected GNU ar archive",
-            path.display()
-        )));
+        return Err(Error::new(format!("{archive}: expected GNU ar archive")));
     }
-    let archive = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .unwrap_or("<archive>")
-        .to_owned();
     let mut offset = AR_MAGIC.len();
     let mut long_names = Vec::new();
-    let mut records = Vec::new();
+    let mut members = Vec::new();
     while offset < data.len() {
-        let header_range = checked_range(&data, offset, AR_HEADER_SIZE, &archive)?;
+        let header_range = checked_range(data, offset, AR_HEADER_SIZE, archive)?;
         let header = &data[header_range];
         if &header[58..60] != b"`\n" {
             return Err(Error::new(format!(
                 "{archive}: invalid member header at 0x{offset:x}"
             )));
         }
-        let size = parse_decimal(&header[48..58], &archive)?;
+        let size = parse_decimal(&header[48..58], archive)?;
         let member_start = offset + AR_HEADER_SIZE;
-        let member_range = checked_range(&data, member_start, size, &archive)?;
+        let member_range = checked_range(data, member_start, size, archive)?;
         let raw_name = String::from_utf8_lossy(&header[..16]).trim().to_owned();
         if raw_name == "//" {
             long_names = data[member_range.clone()].to_vec();
         }
-        let member = archive_member_name(&header[..16], &long_names, &archive)?;
-        let member_data = &data[member_range];
+        let member = archive_member_name(&header[..16], &long_names, archive)?;
+        members.push((member, member_range.start, member_range.end));
+        offset = member_start + size + (size & 1);
+    }
+    Ok(members)
+}
+
+fn sha256(data: &[u8]) -> String {
+    Sha256::digest(data)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+pub fn inspect_archive(path: &Path) -> Result<ArchiveInventory, Error> {
+    let data =
+        fs::read(path).map_err(|error| Error::new(format!("read {}: {error}", path.display())))?;
+    let archive = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("<archive>")
+        .to_owned();
+    let mut records = Vec::new();
+    for (member, start, end) in archive_members(&data, &archive)? {
+        let member_data = &data[start..end];
         if member_data.get(..4) == Some(ELF_MAGIC) {
             records.extend(inspect_object(member_data, &archive, &member)?);
         }
-        offset = member_start + size + (size & 1);
     }
-
-    let input_sha256 = Sha256::digest(&data)
-        .iter()
-        .map(|byte| format!("{byte:02x}"))
-        .collect();
     Ok(ArchiveInventory {
         schema_version: 1,
         archive,
-        input_sha256,
+        input_sha256: sha256(&data),
         vendor_relocations: records,
     })
+}
+
+pub fn normalize_archive(input: &Path, output: &Path) -> Result<NormalizedArtifact, Error> {
+    let mut data = fs::read(input)
+        .map_err(|error| Error::new(format!("read {}: {error}", input.display())))?;
+    let input_sha256 = sha256(&data);
+    let input_size = data.len();
+    let archive = input
+        .file_name()
+        .and_then(|name| name.to_str())
+        .ok_or_else(|| Error::new(format!("{}: archive name is not UTF-8", input.display())))?
+        .to_owned();
+    let members = archive_members(&data, &archive)?;
+    let mut transformations = TransformationCounts {
+        llui48_to_riscv32: 0,
+        branchi_same_section_encoded: 0,
+        relax_markers_removed_from_branchi_sections: 0,
+        llui_rep_markers_removed: 0,
+    };
+    for (member, start, end) in members {
+        if data[start..end].get(..4) != Some(ELF_MAGIC) {
+            continue;
+        }
+        let counts = normalize_object(&mut data[start..end], &archive, &member)?;
+        transformations.llui48_to_riscv32 += counts.llui48_to_riscv32;
+        transformations.branchi_same_section_encoded += counts.branchi_same_section_encoded;
+        transformations.relax_markers_removed_from_branchi_sections +=
+            counts.relax_markers_removed_from_branchi_sections;
+        transformations.llui_rep_markers_removed += counts.llui_rep_markers_removed;
+    }
+    if let Some(parent) = output.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|error| Error::new(format!("create {}: {error}", parent.display())))?;
+    }
+    fs::write(output, &data)
+        .map_err(|error| Error::new(format!("write {}: {error}", output.display())))?;
+    Ok(NormalizedArtifact {
+        archive,
+        input_sha256,
+        output_sha256: sha256(&data),
+        input_size,
+        output_size: data.len(),
+        transformations,
+    })
+}
+
+pub fn verify_normalized_archive(path: &Path, expected: &NormalizedArtifact) -> Result<(), Error> {
+    let data =
+        fs::read(path).map_err(|error| Error::new(format!("read {}: {error}", path.display())))?;
+    if data.len() != expected.output_size {
+        return Err(Error::new(format!(
+            "{}: size {}, expected {}",
+            path.display(),
+            data.len(),
+            expected.output_size
+        )));
+    }
+    let actual_hash = sha256(&data);
+    if actual_hash != expected.output_sha256 {
+        return Err(Error::new(format!(
+            "{}: SHA-256 {}, expected {}",
+            path.display(),
+            actual_hash,
+            expected.output_sha256
+        )));
+    }
+    let inventory = inspect_archive(path)?;
+    if let Some(relocation) = inventory.vendor_relocations.first() {
+        return Err(Error::new(format!(
+            "{}: vendor relocation {} remains in {}({}) {}+0x{:x}",
+            path.display(),
+            relocation.relocation_name,
+            relocation.archive,
+            relocation.member,
+            relocation.target_section,
+            relocation.offset
+        )));
+    }
+    Ok(())
+}
+
+#[derive(Debug, Deserialize)]
+struct GuardedSite {
+    relocation: String,
+    rel_vma: u32,
+    imm32: Option<u32>,
+    instruction: Option<u32>,
+    archive: String,
+    member: String,
+    section: String,
+    symbol: String,
+    symbol_shndx: u16,
+    symbol_value: u32,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+pub struct GuardedParity {
+    pub llui48_exact: usize,
+    pub llui48_merged_string_equivalent: usize,
+    pub llui48_legacy_merged_string_corrections: usize,
+    pub branchi_exact: usize,
+}
+
+fn bytes_at_vma<'a>(
+    elf: &'a [u8],
+    sections: &[Section],
+    address: u32,
+    length: usize,
+    context: &str,
+) -> Result<&'a [u8], Error> {
+    for section in sections.iter().filter(|section| section.flags & 0x2 != 0) {
+        let Some(relative) = address.checked_sub(section.address) else {
+            continue;
+        };
+        let Some(relative_end) = relative.checked_add(length as u32) else {
+            continue;
+        };
+        if relative_end as usize > section.size {
+            continue;
+        }
+        let offset = section
+            .offset
+            .checked_add(relative as usize)
+            .ok_or_else(|| Error::new(format!("{context}: ELF offset overflow")))?;
+        let range = checked_range(elf, offset, length, context)?;
+        return Ok(&elf[range]);
+    }
+    Err(Error::new(format!(
+        "{context}: address 0x{address:08x} is not in an allocated ELF section"
+    )))
+}
+
+fn source_merged_string(
+    archive_directory: &Path,
+    site: &GuardedSite,
+    context: &str,
+) -> Result<Vec<u8>, Error> {
+    let archive_path = archive_directory.join(&site.archive);
+    let archive = fs::read(&archive_path)
+        .map_err(|error| Error::new(format!("read {}: {error}", archive_path.display())))?;
+    let members = archive_members(&archive, &site.archive)?;
+    let (_, start, end) = members
+        .into_iter()
+        .find(|(member, _, _)| member == &site.member)
+        .ok_or_else(|| {
+            Error::new(format!(
+                "{context}: member {} is missing from {}",
+                site.member,
+                archive_path.display()
+            ))
+        })?;
+    let object = &archive[start..end];
+    let sections = parse_sections(object, context)?;
+    let section = sections
+        .get(site.symbol_shndx as usize)
+        .ok_or_else(|| Error::new(format!("{context}: invalid symbol section index")))?;
+    if section.flags & (SHF_MERGE | SHF_STRINGS) != SHF_MERGE | SHF_STRINGS {
+        return Err(Error::new(format!(
+            "{context}: {} points to {}, which is not a mergeable string section",
+            site.symbol, section.name
+        )));
+    }
+    let value = site.symbol_value as usize;
+    if value >= section.size {
+        return Err(Error::new(format!(
+            "{context}: {} value 0x{value:x} exceeds {}",
+            site.symbol, section.name
+        )));
+    }
+    let source_offset = section
+        .offset
+        .checked_add(value)
+        .ok_or_else(|| Error::new(format!("{context}: source string offset overflow")))?;
+    let source = &object[checked_range(object, source_offset, section.size - value, context)?];
+    let length = source
+        .iter()
+        .position(|byte| *byte == 0)
+        .map(|index| index + 1)
+        .ok_or_else(|| Error::new(format!("{context}: {} is not NUL terminated", site.symbol)))?;
+    Ok(source[..length].to_vec())
+}
+
+pub fn verify_guarded_sites(
+    manifest: &Path,
+    final_elf: &Path,
+    archive_directory: &Path,
+) -> Result<GuardedParity, Error> {
+    let elf = fs::read(final_elf)
+        .map_err(|error| Error::new(format!("read {}: {error}", final_elf.display())))?;
+    let sections = parse_sections(&elf, &final_elf.display().to_string())?;
+    let manifest_text = fs::read_to_string(manifest)
+        .map_err(|error| Error::new(format!("read {}: {error}", manifest.display())))?;
+    let mut parity = GuardedParity {
+        llui48_exact: 0,
+        llui48_merged_string_equivalent: 0,
+        llui48_legacy_merged_string_corrections: 0,
+        branchi_exact: 0,
+    };
+    for (line_index, line) in manifest_text.lines().enumerate() {
+        let site: GuardedSite = serde_json::from_str(line).map_err(|error| {
+            Error::new(format!(
+                "parse {} line {}: {error}",
+                manifest.display(),
+                line_index + 1
+            ))
+        })?;
+        let context = format!(
+            "{} line {} {}({}) {}",
+            manifest.display(),
+            line_index + 1,
+            site.archive,
+            site.member,
+            site.section
+        );
+        match site.relocation.as_str() {
+            "R_RISCV_48_LLUI" => {
+                let expected = site
+                    .imm32
+                    .ok_or_else(|| Error::new(format!("{context}: missing imm32")))?;
+                let address = site
+                    .rel_vma
+                    .checked_add(2)
+                    .ok_or_else(|| Error::new(format!("{context}: relocation address overflow")))?;
+                let actual = u32::from_le_bytes(
+                    bytes_at_vma(&elf, &sections, address, 4, &context)?
+                        .try_into()
+                        .unwrap(),
+                );
+                if actual == expected {
+                    parity.llui48_exact += 1;
+                    continue;
+                }
+                let source = source_merged_string(archive_directory, &site, &context)?;
+                let normalized = bytes_at_vma(&elf, &sections, actual, source.len(), &context)?;
+                if normalized != source {
+                    return Err(Error::new(format!(
+                        "{context}: normalized R58 target 0x{actual:08x} does not contain the source mergeable string"
+                    )));
+                }
+                let guarded = bytes_at_vma(&elf, &sections, expected, source.len(), &context)?;
+                if guarded == source {
+                    parity.llui48_merged_string_equivalent += 1;
+                } else {
+                    parity.llui48_legacy_merged_string_corrections += 1;
+                }
+            }
+            "R_RISCV_BRANCHI" => {
+                let expected = site
+                    .instruction
+                    .ok_or_else(|| Error::new(format!("{context}: missing branch instruction")))?;
+                let actual = u32::from_le_bytes(
+                    bytes_at_vma(&elf, &sections, site.rel_vma, 4, &context)?
+                        .try_into()
+                        .unwrap(),
+                );
+                if actual != expected {
+                    return Err(Error::new(format!(
+                        "{context}: normalized R59 encoded 0x{actual:08x}, guarded lane encoded 0x{expected:08x}"
+                    )));
+                }
+                parity.branchi_exact += 1;
+            }
+            relocation => {
+                return Err(Error::new(format!(
+                    "{context}: undeclared guarded relocation {relocation}"
+                )));
+            }
+        }
+    }
+    let llui48 = parity.llui48_exact
+        + parity.llui48_merged_string_equivalent
+        + parity.llui48_legacy_merged_string_corrections;
+    if llui48 == 0 || parity.branchi_exact == 0 {
+        return Err(Error::new(format!(
+            "{}: expected both R58 and R59 guarded sites, found R58={llui48} R59={}",
+            manifest.display(),
+            parity.branchi_exact
+        )));
+    }
+    Ok(parity)
 }
 
 #[cfg(test)]
@@ -473,5 +976,17 @@ mod tests {
         let summary = summarize(&[inventory]);
         assert_eq!(summary.branchi_same_section, 1);
         assert_eq!(summary.branchi_cross_section, 1);
+    }
+
+    #[test]
+    fn branchi_encoding_checks_range_and_alignment() {
+        let instruction = 0x0105_89bb;
+        assert_eq!(
+            encode_branchi(instruction, 0, "test").unwrap(),
+            instruction & !0x00f0_0f80
+        );
+        assert!(encode_branchi(instruction, 1, "test").is_err());
+        assert!(encode_branchi(instruction, 0x200, "test").is_err());
+        assert!(encode_branchi(instruction, -0x202, "test").is_err());
     }
 }
