@@ -11,7 +11,6 @@ build = "build.rs"
 publish = false
 
 [build-dependencies]
-cc = "1"
 serde = { version = "1", features = ["derive"] }
 sha2 = "0.10"
 toml = "0.9"
@@ -24,10 +23,12 @@ default = ["wifi"]
 wifi = []
 wpa2-personal = ["wifi"]
 wpa3-personal = ["wifi"]
+# Link the Cargo-delivered pinned upstream hostap target archive. Maintainer
+# source rebuilds are separate from the consumer build and are not run here.
 upstream-supplicant-port = []
-# Compile the pinned upstream hostap SAE/PMF closure. This does not select the
-# legacy vendor WPA3 archives; the Rust integration must provide the explicit
-# P-256 and entropy capabilities required by this profile.
+# Select the Cargo-delivered SAE/PMF archive. This does not select the legacy
+# vendor WPA3 archives; the Rust integration must provide the explicit P-256
+# and entropy capabilities required by this profile.
 upstream-supplicant-wpa3 = ["upstream-supplicant-port"]
 ble = []
 sle = []

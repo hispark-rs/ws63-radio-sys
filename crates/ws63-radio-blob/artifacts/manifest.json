@@ -132,6 +132,42 @@
         "relax_markers_removed_from_branchi_sections": 0,
         "llui_rep_markers_removed": 0
       }
+    },
+    {
+      "archive": "libhisi_wpa_native_port_wpa2.a",
+      "output_sha256": "1d8f0ab90a830a438cac3bde3d395a6e03b57ce2f904a9e1e32fff4733235cb8",
+      "output_size": 1026062,
+      "kind": "upstream-hostap-target-archive",
+      "profile_revision": "hostap-2.11-personal-v1"
+    },
+    {
+      "archive": "libhisi_wpa_native_port_wpa3.a",
+      "output_sha256": "0b9916371de8112d4d7641673e16d1839611b056d02ecb2442f24d9f3cf11fb8",
+      "output_size": 1115218,
+      "kind": "upstream-hostap-target-archive",
+      "profile_revision": "hostap-2.11-personal-wpa3-v1"
     }
-  ]
+  ],
+  "native_supplicant": {
+    "upstream": {
+      "version": "2.11",
+      "tag": "hostap_2_11",
+      "commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+      "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
+    },
+    "target": "riscv32imfc-unknown-none-elf",
+    "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
+    "profiles": [
+      {
+        "id": "wpa2",
+        "revision": "hostap-2.11-personal-v1",
+        "archive": "libhisi_wpa_native_port_wpa2.a"
+      },
+      {
+        "id": "wpa3",
+        "revision": "hostap-2.11-personal-wpa3-v1",
+        "archive": "libhisi_wpa_native_port_wpa3.a"
+      }
+    ]
+  }
 }

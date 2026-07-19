@@ -13,6 +13,7 @@ struct Manifest {
     schema_version: u32,
     profile_revision: String,
     artifacts: Vec<Artifact>,
+    native_supplicant: NativeSupplicant,
 }
 
 #[derive(Deserialize)]
@@ -20,6 +21,18 @@ struct Artifact {
     archive: String,
     output_sha256: String,
     output_size: usize,
+}
+
+#[derive(Deserialize)]
+struct NativeSupplicant {
+    profiles: Vec<NativeSupplicantProfile>,
+}
+
+#[derive(Deserialize)]
+struct NativeSupplicantProfile {
+    id: String,
+    revision: String,
+    archive: String,
 }
 
 fn sha256(path: &Path) -> String {
@@ -86,4 +99,24 @@ fn main() {
     println!("cargo:lib_dir={}", output.display());
     println!("cargo:manifest={}", manifest_path.display());
     println!("cargo:profile_revision={}", manifest.profile_revision);
+    for profile in &manifest.native_supplicant.profiles {
+        assert!(
+            manifest
+                .artifacts
+                .iter()
+                .any(|artifact| artifact.archive == profile.archive),
+            "native supplicant profile {} references an unknown archive",
+            profile.id
+        );
+        let archive = output.join(&profile.archive);
+        println!(
+            "cargo:native_supplicant_{}_archive={}",
+            profile.id,
+            archive.display()
+        );
+        println!(
+            "cargo:native_supplicant_{}_revision={}",
+            profile.id, profile.revision
+        );
+    }
 }

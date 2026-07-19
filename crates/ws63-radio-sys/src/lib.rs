@@ -4,7 +4,9 @@
 //!
 //! The Cargo `links = "ws63_radio_sys"` build script exports the normalized
 //! archive directory supplied by `ws63-radio-blob` and the machine-owned link
-//! profile. This crate contains no safe radio API, scheduler policy, or
+//! profile. Upstream-supplicant features select a Cargo-delivered target
+//! archive; they never compile C or discover a cross compiler on the consumer
+//! machine. This crate contains no safe radio API, scheduler policy, or
 //! duplicate archive inventory.
 
 #[cfg(all(

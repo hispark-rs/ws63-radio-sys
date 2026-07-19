@@ -52,14 +52,6 @@ struct TaskProfile {
     wpa_profile: Option<String>,
 }
 
-#[derive(Deserialize)]
-struct NativeSupplicantProfile {
-    revision: String,
-    upstream_sources: Vec<String>,
-    port_sources: Vec<String>,
-    defines: Vec<String>,
-}
-
 fn sha256(path: &std::path::Path) -> String {
     let digest = Sha256::digest(fs::read(path).unwrap_or_else(|error| {
         panic!(
@@ -68,10 +60,6 @@ fn sha256(path: &std::path::Path) -> String {
         )
     }));
     digest.iter().map(|byte| format!("{byte:02x}")).collect()
-}
-
-fn environment_override_exists(names: &[&str]) -> bool {
-    names.iter().any(|name| env::var_os(name).is_some())
 }
 
 fn validate_scheduling_profile(profile: &SchedulingProfile, root: &std::path::Path) {
@@ -162,18 +150,7 @@ fn main() {
         manifest.join("../hisi-rf-link/profiles/ws63-supplicant-boundary.toml");
     let scheduling_profile_path = manifest.join("../hisi-rf-link/profiles/ws63-scheduling.toml");
     let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
-    let supplicant_header = manifest.join("../../include/hisi_wpa_supplicant.h");
-    let supplicant_source = manifest.join("../../upstream/hostap-2.11.json");
-    let upstream_hostap_relative = PathBuf::from("../../third-party/hostap");
-    let native_port_relative = PathBuf::from("../../port/hostap");
-    let upstream_hostap = manifest.join(&upstream_hostap_relative);
-    let native_port = manifest.join(&native_port_relative);
     let native_wpa3 = env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3").is_some();
-    let native_profile_path = native_port.join(if native_wpa3 {
-        "personal-wpa3.toml"
-    } else {
-        "personal.toml"
-    });
     let profile: Profile =
         toml::from_str(&fs::read_to_string(&profile_path).expect("read WS63 archive profile"))
             .expect("parse WS63 archive profile");
@@ -232,11 +209,6 @@ fn main() {
         ),
         ("task_profile", scheduling_profile_path),
         ("nvs_linker", nvs_linker),
-        ("supplicant_header", supplicant_header),
-        ("supplicant_source", supplicant_source),
-        ("upstream_hostap", upstream_hostap.clone()),
-        ("native_supplicant_port", native_port.clone()),
-        ("native_supplicant_profile", native_profile_path.clone()),
     ] {
         if !path.exists() {
             panic!("WS63 radio payload is incomplete: {}", path.display());
@@ -289,112 +261,46 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
 
     if env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT").is_some() {
-        let native_profile: NativeSupplicantProfile = toml::from_str(
-            &fs::read_to_string(&native_profile_path)
-                .expect("read native supplicant source profile"),
-        )
-        .expect("parse native supplicant source profile");
-        assert!(
-            !native_profile.revision.is_empty(),
-            "empty native supplicant profile revision"
+        let (archive_variable, revision_variable, expected_revision) = if native_wpa3 {
+            (
+                "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_ARCHIVE",
+                "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_REVISION",
+                "hostap-2.11-personal-wpa3-v1",
+            )
+        } else {
+            (
+                "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_ARCHIVE",
+                "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_REVISION",
+                "hostap-2.11-personal-v1",
+            )
+        };
+        let archive = PathBuf::from(
+            env::var_os(archive_variable)
+                .unwrap_or_else(|| panic!("ws63-radio-blob did not export {archive_variable}")),
         );
-        let mut source_paths = Vec::new();
-        let mut unique_sources = BTreeSet::new();
-        for source in &native_profile.upstream_sources {
-            assert!(
-                unique_sources.insert(format!("upstream:{source}")),
-                "duplicate native supplicant source: {source}"
-            );
-            let path = upstream_hostap_relative.join(source);
-            assert!(
-                manifest.join(&path).is_file(),
-                "missing upstream source: {}",
-                manifest.join(&path).display()
-            );
-            println!("cargo:rerun-if-changed={}", manifest.join(&path).display());
-            source_paths.push(path);
-        }
-        for source in &native_profile.port_sources {
-            assert!(
-                unique_sources.insert(format!("port:{source}")),
-                "duplicate native supplicant source: {source}"
-            );
-            let path = native_port_relative.join(source);
-            assert!(
-                manifest.join(&path).is_file(),
-                "missing port source: {}",
-                manifest.join(&path).display()
-            );
-            println!("cargo:rerun-if-changed={}", manifest.join(&path).display());
-            source_paths.push(path);
-        }
-        let mut build = cc::Build::new();
-        build
-            .files(source_paths)
-            .include("../../include")
-            .include(&native_port_relative)
-            .include(upstream_hostap_relative.join("wpa_supplicant"))
-            .include(upstream_hostap_relative.join("src/utils"))
-            .include(upstream_hostap_relative.join("src"))
-            .flag("-include")
-            .flag(native_port_relative.join("hisi_wpa_hostap_compat.h"))
-            .flag_if_supported("-std=c11")
-            .flag_if_supported("-ffreestanding")
-            .flag_if_supported("-fno-builtin")
-            // The distributed target archive is a release artifact, not a
-            // host-debug object. Relative source paths plus these mappings
-            // keep checkout-specific paths out of __FILE__ and diagnostics.
-            .flag("-g0")
-            .flag("-ffile-prefix-map=../..=ws63-radio-sys")
-            .flag("-fmacro-prefix-map=../..=ws63-radio-sys")
-            .flag("-Wno-unused-parameter")
-            // CONFIG_NO_STDOUT_DEBUG compiles wpa_printf() arguments away;
-            // a few upstream notification helpers then intentionally retain
-            // values that are only consumed by logging.
-            .flag_if_supported("-Wno-unused-but-set-variable")
-            .flag_if_supported("-Wno-unused-variable")
-            // GCC 15 at -O3 reports a conservative maybe-uninitialized path
-            // in upstream scan.c. The EHT pointer is consumed only after its
-            // matching element is found; keep warnings-as-errors elsewhere.
-            .flag_if_supported("-Wno-maybe-uninitialized")
-            .flag_if_supported("-Wno-variadic-macros")
-            .flag_if_supported("-Wno-zero-length-array")
-            .flag_if_supported("-Wno-flexible-array-extensions")
-            .warnings_into_errors(true);
-        for definition in &native_profile.defines {
-            if let Some((name, value)) = definition.split_once('=') {
-                build.define(name, value);
-            } else {
-                build.define(definition, None);
-            }
-        }
+        let revision = env::var(revision_variable)
+            .unwrap_or_else(|_| panic!("ws63-radio-blob did not export {revision_variable}"));
+        assert_eq!(
+            revision, expected_revision,
+            "native supplicant artifact/profile revision mismatch"
+        );
+        let file_name = archive
+            .file_name()
+            .and_then(|name| name.to_str())
+            .expect("native supplicant archive has a non-UTF-8 file name");
+        let link_name = file_name
+            .strip_prefix("lib")
+            .and_then(|name| name.strip_suffix(".a"))
+            .expect("native supplicant artifact must be named lib*.a");
         if env::var("TARGET").is_ok_and(|target| target.starts_with("riscv32imfc-")) {
-            // cc-rs otherwise pairs an explicitly selected cross GCC with the
-            // host archiver. On macOS, host ranlib cannot index RISC-V ELF and
-            // leaves a deceptively successful empty archive. Keep compiler and
-            // archiver from one toolchain unless the caller overrides either.
-            if !environment_override_exists(&[
-                "CC_riscv32imfc_unknown_none_elf",
-                "CC_riscv32imfc-unknown-none-elf",
-                "TARGET_CC",
-                "CC",
-            ]) {
-                build.compiler("riscv64-unknown-elf-gcc");
-            }
-            if !environment_override_exists(&[
-                "AR_riscv32imfc_unknown_none_elf",
-                "AR_riscv32imfc-unknown-none-elf",
-                "TARGET_AR",
-                "AR",
-            ]) {
-                build.archiver("riscv64-unknown-elf-ar");
-            }
-            // Rust's official target is hardware-single-float ILP32F. Clang's
-            // generic RISC-V default is soft-float ILP32, which produces ELF
-            // attributes that rust-lld correctly refuses to mix with Rust.
-            build.flag("-march=rv32imfc").flag("-mabi=ilp32f");
+            println!(
+                "cargo:rustc-link-search=native={}",
+                archive.parent().expect("native archive parent").display()
+            );
+            println!("cargo:rustc-link-lib=static={link_name}");
         }
-        build.compile("hisi_wpa_native_port");
+        println!("cargo:native_supplicant_archive={}", archive.display());
+        println!("cargo:native_supplicant_profile_revision={revision}");
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3");
