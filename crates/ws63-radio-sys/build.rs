@@ -164,8 +164,10 @@ fn main() {
     let nvs_linker = manifest.join("../../linker/ws63-nvs.x");
     let supplicant_header = manifest.join("../../include/hisi_wpa_supplicant.h");
     let supplicant_source = manifest.join("../../upstream/hostap-2.11.json");
-    let upstream_hostap = manifest.join("../../third-party/hostap");
-    let native_port = manifest.join("../../port/hostap");
+    let upstream_hostap_relative = PathBuf::from("../../third-party/hostap");
+    let native_port_relative = PathBuf::from("../../port/hostap");
+    let upstream_hostap = manifest.join(&upstream_hostap_relative);
+    let native_port = manifest.join(&native_port_relative);
     let native_wpa3 = env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3").is_some();
     let native_profile_path = native_port.join(if native_wpa3 {
         "personal-wpa3.toml"
@@ -303,13 +305,13 @@ fn main() {
                 unique_sources.insert(format!("upstream:{source}")),
                 "duplicate native supplicant source: {source}"
             );
-            let path = upstream_hostap.join(source);
+            let path = upstream_hostap_relative.join(source);
             assert!(
-                path.is_file(),
+                manifest.join(&path).is_file(),
                 "missing upstream source: {}",
-                path.display()
+                manifest.join(&path).display()
             );
-            println!("cargo:rerun-if-changed={}", path.display());
+            println!("cargo:rerun-if-changed={}", manifest.join(&path).display());
             source_paths.push(path);
         }
         for source in &native_profile.port_sources {
@@ -317,30 +319,44 @@ fn main() {
                 unique_sources.insert(format!("port:{source}")),
                 "duplicate native supplicant source: {source}"
             );
-            let path = native_port.join(source);
-            assert!(path.is_file(), "missing port source: {}", path.display());
-            println!("cargo:rerun-if-changed={}", path.display());
+            let path = native_port_relative.join(source);
+            assert!(
+                manifest.join(&path).is_file(),
+                "missing port source: {}",
+                manifest.join(&path).display()
+            );
+            println!("cargo:rerun-if-changed={}", manifest.join(&path).display());
             source_paths.push(path);
         }
         let mut build = cc::Build::new();
         build
             .files(source_paths)
-            .include(manifest.join("../../include"))
-            .include(&native_port)
-            .include(upstream_hostap.join("wpa_supplicant"))
-            .include(manifest.join("../../third-party/hostap/src/utils"))
-            .include(manifest.join("../../third-party/hostap/src"))
+            .include("../../include")
+            .include(&native_port_relative)
+            .include(upstream_hostap_relative.join("wpa_supplicant"))
+            .include(upstream_hostap_relative.join("src/utils"))
+            .include(upstream_hostap_relative.join("src"))
             .flag("-include")
-            .flag(native_port.join("hisi_wpa_hostap_compat.h"))
+            .flag(native_port_relative.join("hisi_wpa_hostap_compat.h"))
             .flag_if_supported("-std=c11")
             .flag_if_supported("-ffreestanding")
             .flag_if_supported("-fno-builtin")
+            // The distributed target archive is a release artifact, not a
+            // host-debug object. Relative source paths plus these mappings
+            // keep checkout-specific paths out of __FILE__ and diagnostics.
+            .flag("-g0")
+            .flag("-ffile-prefix-map=../..=ws63-radio-sys")
+            .flag("-fmacro-prefix-map=../..=ws63-radio-sys")
             .flag("-Wno-unused-parameter")
             // CONFIG_NO_STDOUT_DEBUG compiles wpa_printf() arguments away;
             // a few upstream notification helpers then intentionally retain
             // values that are only consumed by logging.
             .flag_if_supported("-Wno-unused-but-set-variable")
             .flag_if_supported("-Wno-unused-variable")
+            // GCC 15 at -O3 reports a conservative maybe-uninitialized path
+            // in upstream scan.c. The EHT pointer is consumed only after its
+            // matching element is found; keep warnings-as-errors elsewhere.
+            .flag_if_supported("-Wno-maybe-uninitialized")
             .flag_if_supported("-Wno-variadic-macros")
             .flag_if_supported("-Wno-zero-length-array")
             .flag_if_supported("-Wno-flexible-array-extensions")
