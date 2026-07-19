@@ -26,6 +26,15 @@ manifest with `nm -u` output, while the parent integration verifies both the
 Rust provider and final ELF. This is a compatibility profile, not a LiteOS
 backend.
 
+`crates/hisi-rf-link/profiles/ws63-supplicant-boundary.toml` owns the exact
+legacy WPA archive closure, the native hostap archive name, and the bounded
+native object markers and legacy-provider symbol set. Cargo merges the cc-rs
+archive into the `ws63-radio-sys` rlib, so the object markers preserve its
+provenance in the final rust-lld map. Parent final-link checks consume this
+profile so an upstream-supplicant image cannot silently pull the vendor
+supplicant, vendor mbedTLS, or its LiteOS compatibility provider back into the
+firmware.
+
 The WPA archive profile is explicit. `wpa2-personal` preserves the verified
 supplicant/security/libc closure; `wpa3-personal` additionally selects the vendor
 mbedTLS 3.6.0 oracle used for migration parity. The upstream profiles select

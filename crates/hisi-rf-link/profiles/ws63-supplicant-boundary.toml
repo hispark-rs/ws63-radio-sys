@@ -1,0 +1,37 @@
+revision = "ws63-supplicant-boundary-2026-07-19"
+archive_profile_revision = "ws63-rf-2026-07-13"
+
+# cc-rs emits the pinned upstream hostap sources and the native WS63 port as
+# one archive. Final upstream-supplicant links must contain this archive and
+# must not contain any archive selected by the legacy WPA profile.
+native_archive = "libhisi_wpa_native_port.a"
+native_object_markers = [
+  "hisi_wpa_port.o",
+  "eloop_hisi_rtos.o",
+  "driver_ws63.o",
+  "supplicant_ws63.o",
+]
+legacy_archives = [
+  "libwpa_supplicant.a",
+  "libdrv_security_unified.a",
+  "libhal_security_unified.a",
+  "libmbedtls_v3.6.0.a",
+  "libmbedtls_harden.a",
+  "libc.a",
+  "libm.a",
+]
+
+# These symbols are provided only by ws63-rf-rs::wpa_compat for the legacy
+# vendor archive closure. Their presence in an upstream final ELF proves that
+# the oracle compatibility provider became reachable again.
+legacy_provider_symbols = [
+  "wifi_is_need_psk",
+  "LOS_TaskResRecycle",
+  "UartVprintf",
+  "IntActive",
+  "LOS_CurTaskIDGet",
+  "g_intheap_begin",
+  "LOS_MemAlloc",
+  "LOS_MemFree",
+  "LOS_MemRealloc",
+]
