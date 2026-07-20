@@ -14,6 +14,13 @@ native_object_markers = [
   "driver_ws63.o",
   "supplicant_ws63.o",
 ]
+native_root_symbols = [
+  "eloop_init",
+  "hisi_wpa_create",
+  "hisi_wpa_driver_install",
+  "hisi_wpa_poll",
+  "wpa_supplicant_init",
+]
 legacy_archives = [
   "libwpa_supplicant.a",
   "libdrv_security_unified.a",

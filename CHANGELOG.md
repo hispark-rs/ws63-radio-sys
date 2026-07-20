@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.6] - 2026-07-20
+
+### Changed
+
+- Export the runtime-compatibility and upstream-supplicant root-symbol sets as
+  versioned Cargo metadata so the selected chip backend can own final native
+  link closure without a consumer `build.rs`.
+- Stop linking the native hostap archive directly from the raw sys crate; the
+  chip backend now composes it with the normalized Wi-Fi archive closure.
+- Record the pinned upstream hostap roots in the supplicant boundary profile,
+  keeping the final-link and drift validators on one fact source.
+
 ## [0.1.0-alpha.5] - 2026-07-20
 
 ### Fixed

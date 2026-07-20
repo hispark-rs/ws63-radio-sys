@@ -55,6 +55,13 @@ for symbol in symbols:
     if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol):
         fail(f"invalid provider symbol: {symbol}")
 
+native_roots = boundary["native_root_symbols"]
+if len(native_roots) != len(set(native_roots)):
+    fail("duplicate native root symbol")
+for symbol in native_roots:
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", symbol):
+        fail(f"invalid native root symbol: {symbol}")
+
 native_archives = boundary["native_archives"]
 artifact_manifest = json.loads(ARTIFACT_MANIFEST.read_text())
 artifact_profiles = {
@@ -85,7 +92,8 @@ for required in (
     "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_ARCHIVE",
     "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_ARCHIVE",
     "native supplicant artifact/profile revision mismatch",
-    "cargo:rustc-link-lib=static={link_name}",
+    "cargo:native_supplicant_archive={}",
+    "cargo:native_supplicant_root_symbols={}",
 ):
     if required not in build_rs:
         fail(f"Cargo-delivered native link contract drift: {required}")
@@ -103,5 +111,6 @@ for marker in native_object_markers:
 print(
     "supplicant boundary profile OK: "
     f"native_profiles={len(native_archives)}, legacy_archives={len(legacy_archives)}, "
-    f"native_markers={len(native_object_markers)}, legacy_symbols={len(symbols)}"
+    f"native_markers={len(native_object_markers)}, native_roots={len(native_roots)}, "
+    f"legacy_symbols={len(symbols)}"
 )

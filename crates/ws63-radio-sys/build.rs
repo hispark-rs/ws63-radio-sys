@@ -65,6 +65,22 @@ struct TaskProfile {
     wpa_profile: Option<String>,
 }
 
+#[derive(Deserialize)]
+struct RuntimeCompatibilityProfile {
+    symbols: Vec<RuntimeCompatibilitySymbol>,
+}
+
+#[derive(Deserialize)]
+struct RuntimeCompatibilitySymbol {
+    name: String,
+    classification: String,
+}
+
+#[derive(Deserialize)]
+struct SupplicantBoundaryProfile {
+    native_root_symbols: Vec<String>,
+}
+
 fn sha256(path: &std::path::Path) -> String {
     let digest = Sha256::digest(fs::read(path).unwrap_or_else(|error| {
         panic!(
@@ -370,6 +386,12 @@ fn main() {
         toml::from_str(hisi_rf_link::WS63_SCHEDULING_PROFILE)
             .expect("parse WS63 task scheduling profile");
     validate_scheduling_profile(&scheduling_profile, oracle_root.as_deref());
+    let runtime_compatibility: RuntimeCompatibilityProfile =
+        toml::from_str(hisi_rf_link::WS63_RUNTIME_COMPAT_PROFILE)
+            .expect("parse WS63 runtime compatibility profile");
+    let supplicant_boundary: SupplicantBoundaryProfile =
+        toml::from_str(hisi_rf_link::WS63_SUPPLICANT_BOUNDARY_PROFILE)
+            .expect("parse WS63 supplicant boundary profile");
 
     let rom_callback_archive = PathBuf::from(
         env::var_os("DEP_WS63_RADIO_BLOB_ROM_CALLBACK_ARCHIVE")
@@ -435,6 +457,16 @@ fn main() {
         profile.rom_callback_root_symbols.join(",")
     );
     println!(
+        "cargo:runtime_compat_symbols={}",
+        runtime_compatibility
+            .symbols
+            .iter()
+            .filter(|symbol| symbol.classification == "provided")
+            .map(|symbol| symbol.name.as_str())
+            .collect::<Vec<_>>()
+            .join(",")
+    );
+    println!(
         "cargo:wpa_archives={}",
         wpa.iter()
             .map(|archive| archive.name.as_str())
@@ -478,15 +510,13 @@ fn main() {
             .strip_prefix("lib")
             .and_then(|name| name.strip_suffix(".a"))
             .expect("native supplicant artifact must be named lib*.a");
-        if env::var("TARGET").is_ok_and(|target| target.starts_with("riscv32imfc-")) {
-            println!(
-                "cargo:rustc-link-search=native={}",
-                archive.parent().expect("native archive parent").display()
-            );
-            println!("cargo:rustc-link-lib=static={link_name}");
-        }
+        let _ = link_name;
         println!("cargo:native_supplicant_archive={}", archive.display());
         println!("cargo:native_supplicant_profile_revision={revision}");
+        println!(
+            "cargo:native_supplicant_root_symbols={}",
+            supplicant_boundary.native_root_symbols.join(",")
+        );
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3");
