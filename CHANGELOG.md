@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.5] - 2026-07-20
+
+### Fixed
+
+- Updated the exact WS63 ROM backend dependency to
+  `hisi-rom-sys-ws63 0.1.0-alpha.2`, so radio and PKE crypto consumers resolve
+  one compatible crates.io backend without relying on a parent workspace patch.
+
 ## [0.1.0-alpha.4] - 2026-07-20
 
 ### Security
