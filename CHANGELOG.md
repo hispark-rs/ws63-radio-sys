@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Security
+
+- Backported the official hostap 2026-1, 2026-2, and 2026-3 fixes onto the
+  pinned 2.11 release. This closes MLO bounds validation, PMKSA network/AKMP
+  context validation, and the SAE H2E anti-clogging token NULL dereference.
+- Added an executable SAE H2E regression that parses a token-container commit
+  through the same NULL output-parameter shape used by SME/PASN callers.
+
+### Changed
+
+- Rebuilt both redistributable WPA2/WPA3 target archives from the hash-bound
+  security maintenance commit and advanced their profile revisions.
+- Moved the nested source pin to the public `hispark-rs/hostap` mirror while
+  retaining the official 2.11 tag, release tarball hash, advisory URLs, and
+  exact seven-commit backport inventory as provenance.
+
 ## [0.1.0-alpha.3] - 2026-07-19
 
 ### Added

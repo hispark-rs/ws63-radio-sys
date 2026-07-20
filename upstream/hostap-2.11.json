@@ -1,14 +1,47 @@
 {
-  "schema": "hispark-rs/upstream-hostap/v1",
+  "schema": "hispark-rs/upstream-hostap/v2",
   "project": "hostap",
   "version": "2.11",
-  "repository": "https://git.w1.fi/hostap.git",
+  "repository": "https://github.com/hispark-rs/hostap.git",
+  "upstream_repository": "https://git.w1.fi/hostap.git",
   "tag": "hostap_2_11",
-  "commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+  "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+  "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
   "submodule": "third-party/hostap",
   "release_archive": {
     "url": "https://w1.fi/releases/wpa_supplicant-2.11.tar.gz",
     "sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
+  },
+  "security_backports": [
+    {
+      "advisory": "2026-1",
+      "url": "https://w1.fi/security/2026-1/",
+      "applied_commits": [
+        "b03be8295b61c81d1e6d1a9bec8d18aed8b487ce",
+        "1c3935033f8cbe1f28bbd914109c0d590643305a",
+        "fdadcc0d98665421a045d9ce8994436042cb40f7",
+        "02cc582fe87fab32e68025be2a1a36b5a7ce839a",
+        "be09f505657e11d4093f32b4105dd95a0a3211d3"
+      ]
+    },
+    {
+      "advisory": "2026-2",
+      "url": "https://w1.fi/security/2026-2/",
+      "applied_commits": [
+        "91e07de36fd11a4c05fc6519f4aa7f302947ed22"
+      ]
+    },
+    {
+      "advisory": "2026-3",
+      "url": "https://w1.fi/security/2026-3/",
+      "applied_commits": [
+        "f735d907a3fdc423747db1e7fa4aaf61676baa82"
+      ]
+    }
+  ],
+  "security_radar": {
+    "index": "https://w1.fi/security/",
+    "advisory_floor_exclusive": "2024-2"
   },
   "vendor_oracle": {
     "version": "2.10-derived",

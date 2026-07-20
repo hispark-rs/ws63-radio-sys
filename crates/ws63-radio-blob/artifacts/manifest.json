@@ -149,24 +149,26 @@
     },
     {
       "archive": "libhisi_wpa_native_port_wpa2.a",
-      "output_sha256": "1d8f0ab90a830a438cac3bde3d395a6e03b57ce2f904a9e1e32fff4733235cb8",
-      "output_size": 1026062,
+      "output_sha256": "c968178a040a409d96b66a109c5ddbf061cf280e90730e9fd8146f18665bd1c3",
+      "output_size": 1026282,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-personal-v1"
+      "profile_revision": "hostap-2.11-security-2026-07-personal-v2"
     },
     {
       "archive": "libhisi_wpa_native_port_wpa3.a",
-      "output_sha256": "0b9916371de8112d4d7641673e16d1839611b056d02ecb2442f24d9f3cf11fb8",
-      "output_size": 1115218,
+      "output_sha256": "c6285db803fcb485fd0746d958b1fd7d4ddc2386f4883eea7beedbc037f4c18c",
+      "output_size": 1115518,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-personal-wpa3-v1"
+      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v2"
     }
   ],
   "native_supplicant": {
     "upstream": {
       "version": "2.11",
       "tag": "hostap_2_11",
-      "commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+      "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+      "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
+      "security_advisories": ["2026-1", "2026-2", "2026-3"],
       "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
     },
     "target": "riscv32imfc-unknown-none-elf",
@@ -183,12 +185,12 @@
     "profiles": [
       {
         "id": "wpa2",
-        "revision": "hostap-2.11-personal-v1",
+        "revision": "hostap-2.11-security-2026-07-personal-v2",
         "archive": "libhisi_wpa_native_port_wpa2.a"
       },
       {
         "id": "wpa3",
-        "revision": "hostap-2.11-personal-wpa3-v1",
+        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v2",
         "archive": "libhisi_wpa_native_port_wpa3.a"
       }
     ]

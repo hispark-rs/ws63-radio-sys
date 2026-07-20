@@ -1,4 +1,4 @@
-# Exact external ABI of hostap-2.11-personal-wpa3-v1. The baseline crypto,
+# Exact external ABI of hostap-2.11-security-2026-07-personal-wpa3-v2. The baseline crypto,
 # compiler and memory symbols match the WPA2 profile; P-256 additions below are
 # supplied explicitly by the selected hisi-crypto suite.
 __floatunsidf

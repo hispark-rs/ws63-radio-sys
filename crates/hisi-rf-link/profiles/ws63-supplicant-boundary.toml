@@ -5,8 +5,8 @@ archive_profile_revision = "ws63-rf-2026-07-13"
 # port into deterministic target archives. Consumer builds receive these from
 # ws63-radio-blob and must not invoke a C compiler or archiver.
 native_archives = [
-  { profile = "wpa2", archive = "libhisi_wpa_native_port_wpa2.a", revision = "hostap-2.11-personal-v1" },
-  { profile = "wpa3", archive = "libhisi_wpa_native_port_wpa3.a", revision = "hostap-2.11-personal-wpa3-v1" },
+  { profile = "wpa2", archive = "libhisi_wpa_native_port_wpa2.a", revision = "hostap-2.11-security-2026-07-personal-v2" },
+  { profile = "wpa3", archive = "libhisi_wpa_native_port_wpa3.a", revision = "hostap-2.11-security-2026-07-personal-wpa3-v2" },
 ]
 native_object_markers = [
   "hisi_wpa_port.o",

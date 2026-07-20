@@ -29,6 +29,11 @@ matching tag. Cargo cannot prepare the final `ws63-radio-sys` package until its 
 `ws63-radio-blob` version is indexed, so CI packages that final crate after publishing
 the dependency layer.
 
+The weekly `Hostap security radar` workflow compares the official
+`w1.fi/security/` advisory index with the versioned source manifest. New advisories
+produce an artifact, open or update a tracking issue, and fail the scheduled run;
+normal PR CI runs the same parser against an offline fixture.
+
 Local release checks do not upload artifacts:
 
 ```console
@@ -105,7 +110,8 @@ mbedTLS 3.6.0 oracle used for migration parity. The upstream profiles select
 neither vendor supplicant archive. The vendor profiles remain explicit oracle
 features during the migration window and are not the default architecture.
 
-The replacement path is pinned upstream hostap 2.11, not the SDK's LiteOS-derived
+The replacement path is pinned upstream hostap 2.11 with the official 2026-1,
+2026-2, and 2026-3 security fixes backported, not the SDK's LiteOS-derived
 2.10 fork. `include/hisi_wpa_supplicant.h` and `ws63_radio_sys::supplicant`
 define the same narrow, versioned ABI for a single runner-owned context. The
 vendor archive remains a behavior and silicon-parity oracle while the upstream

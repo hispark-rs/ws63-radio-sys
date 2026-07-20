@@ -1,0 +1,49 @@
+name: Hostap security radar
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: hostap-security-radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: astral-sh/setup-uv@v7
+      - name: Compare official advisories with the pinned source manifest
+        id: radar
+        continue-on-error: true
+        run: uv run scripts/check-hostap-security-radar.py --report hostap-security-radar.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hostap-security-radar
+          path: hostap-security-radar.md
+          if-no-files-found: error
+          retention-days: 30
+      - name: Open or update the security tracking issue
+        if: steps.radar.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Hostap security radar detected an untracked advisory
+        run: |
+          issue="$(gh issue list --state open --search "${TITLE} in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body-file hostap-security-radar.md
+          else
+            gh label create security --color B60205 --description "Security maintenance" --force
+            gh issue create --title "$TITLE" --body-file hostap-security-radar.md --label security
+          fi
+      - name: Enforce the radar result
+        if: steps.radar.outcome == 'failure'
+        run: exit 1

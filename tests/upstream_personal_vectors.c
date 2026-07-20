@@ -146,6 +146,7 @@ static void run_sae_roundtrip(bool hash_to_element)
     struct wpabuf *commit_b = NULL;
     struct wpabuf *confirm_a = NULL;
     struct wpabuf *confirm_b = NULL;
+    struct wpabuf *anti_clogging = NULL;
     const uint8_t *token = NULL;
     size_t token_len = 0;
     int groups[] = { 19, 0 };
@@ -173,14 +174,32 @@ static void run_sae_roundtrip(bool hash_to_element)
     confirm_b = wpabuf_alloc(SAE_CONFIRM_MAX_LEN);
     assert(commit_a != NULL && commit_b != NULL);
     assert(confirm_a != NULL && confirm_b != NULL);
-    assert(sae_write_commit(&a, commit_a, NULL, NULL) == 0);
+    if (hash_to_element) {
+        static const uint8_t anti_clogging_value[] = {
+            0x11, 0x22, 0x33, 0x44,
+        };
+
+        anti_clogging = wpabuf_alloc_copy(anti_clogging_value,
+            sizeof(anti_clogging_value));
+        assert(anti_clogging != NULL);
+    }
+    assert(sae_write_commit(&a, commit_a, anti_clogging, NULL) == 0);
     assert(sae_write_commit(&b, commit_b, NULL, NULL) == 0);
     assert(sae_parse_commit(&a, wpabuf_head(commit_b),
         wpabuf_len(commit_b), &token, &token_len, groups,
         hash_to_element, NULL) == WLAN_STATUS_SUCCESS);
-    assert(sae_parse_commit(&b, wpabuf_head(commit_a),
-        wpabuf_len(commit_a), &token, &token_len, groups,
-        hash_to_element, NULL) == WLAN_STATUS_SUCCESS);
+    if (hash_to_element) {
+        /* Regression for hostap advisory 2026-3: SME/PASN callers do not
+         * request the parsed token, so a valid H2E token container must not
+         * dereference NULL token output pointers. */
+        assert(sae_parse_commit(&b, wpabuf_head(commit_a),
+            wpabuf_len(commit_a), NULL, NULL, groups, 1, NULL) ==
+            WLAN_STATUS_SUCCESS);
+    } else {
+        assert(sae_parse_commit(&b, wpabuf_head(commit_a),
+            wpabuf_len(commit_a), &token, &token_len, groups, 0, NULL) ==
+            WLAN_STATUS_SUCCESS);
+    }
     assert(sae_process_commit(&a) == 0);
     assert(sae_process_commit(&b) == 0);
     assert(a.pmk_len == SAE_PMK_LEN && b.pmk_len == SAE_PMK_LEN);
@@ -198,6 +217,7 @@ static void run_sae_roundtrip(bool hash_to_element)
     wpabuf_free(confirm_a);
     wpabuf_free(commit_b);
     wpabuf_free(commit_a);
+    wpabuf_free(anti_clogging);
     sae_deinit_pt(pt);
     sae_clear_data(&b);
     sae_clear_data(&a);

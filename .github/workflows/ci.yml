@@ -25,6 +25,7 @@ jobs:
       - run: cargo clippy --workspace --all-targets --target x86_64-unknown-linux-gnu --locked -- -D warnings
       - run: cargo test --workspace --target x86_64-unknown-linux-gnu --locked
       - run: uv run scripts/check-upstream-hostap.py
+      - run: uv run scripts/check-hostap-security-radar.py --self-test
       - run: uv run scripts/check-runtime-compat-profile.py
       - run: uv run scripts/check-supplicant-boundary-profile.py
       - name: Rebuild normalized release artifacts
