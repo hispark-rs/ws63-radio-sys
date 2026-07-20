@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.4] - 2026-07-20
+
 ### Security
 
 - Backported the official hostap 2026-1, 2026-2, and 2026-3 fixes onto the
