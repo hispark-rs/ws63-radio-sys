@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Fetch auditable hostap history
+        run: git -C third-party/hostap fetch --unshallow --tags origin
       - uses: astral-sh/setup-uv@v7
       - uses: dtolnay/rust-toolchain@master
         with:
