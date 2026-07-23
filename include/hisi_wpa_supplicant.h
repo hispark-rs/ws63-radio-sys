@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_ABI_VERSION 8u
+#define HISI_WPA_ABI_VERSION 9u
 #define HISI_WPA_MAX_SSID_LEN 32u
 #define HISI_WPA_MAX_SCAN_FREQUENCIES 14u
 #define HISI_WPA_MAX_SCAN_IE_LEN 2304u
@@ -203,7 +203,9 @@ struct hisi_wpa_event {
 
 struct hisi_wpa_poll_result {
     int32_t status;
-    uint32_t work_pending;
+    uint32_t work_completed;
+    uint32_t output_pending;
+    uint32_t reserved;
     uint64_t next_deadline_ms;
 };
 
@@ -322,7 +324,7 @@ _Static_assert(sizeof(struct hisi_wpa_external_auth_status) == 28,
     "hisi_wpa_external_auth_status ABI drift");
 _Static_assert(sizeof(struct hisi_wpa_event) == 144,
     "hisi_wpa_event ABI drift");
-_Static_assert(sizeof(struct hisi_wpa_poll_result) == 16,
+_Static_assert(sizeof(struct hisi_wpa_poll_result) == 24,
     "hisi_wpa_poll_result ABI drift");
 _Static_assert(offsetof(struct hisi_wpa_os_hooks, context) == sizeof(void *),
     "hisi_wpa_os_hooks prefix drift");

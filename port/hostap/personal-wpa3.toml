@@ -1,4 +1,4 @@
-revision = "hostap-2.11-security-2026-07-personal-wpa3-v2"
+revision = "hostap-2.11-security-2026-07-personal-wpa3-v3"
 sscanf_formats = ["%u:%u"]
 
 # Upstream-native STA profile for WPA3-Personal. This deliberately does not

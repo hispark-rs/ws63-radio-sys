@@ -6,7 +6,7 @@
 
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 8;
+pub const ABI_VERSION: u16 = 9;
 pub const MAX_SSID_LEN: usize = 32;
 pub const MAX_SCAN_FREQUENCIES: usize = 14;
 pub const MAX_SCAN_IE_LEN: usize = 2304;
@@ -221,7 +221,11 @@ pub struct Event {
 #[repr(C)]
 pub struct PollResult {
     pub status: i32,
-    pub work_pending: u32,
+    /// Number of due eloop timeout callbacks executed in this call.
+    pub work_completed: u32,
+    /// Whether at least one output event is ready for [`hisi_wpa_next_event`].
+    pub output_pending: u32,
+    pub reserved: u32,
     pub next_deadline_ms: u64,
 }
 
@@ -375,7 +379,8 @@ const _: () = {
     assert!(core::mem::size_of::<ExternalAuthEvent>() == 68);
     assert!(core::mem::size_of::<ExternalAuthStatus>() == 28);
     assert!(core::mem::size_of::<Event>() == 144);
-    assert!(core::mem::size_of::<PollResult>() == 16);
+    assert!(core::mem::size_of::<PollResult>() == 24);
+    assert!(core::mem::offset_of!(PollResult, next_deadline_ms) == 16);
     assert!(core::mem::offset_of!(OsHooks, context) == core::mem::size_of::<usize>());
     assert!(core::mem::size_of::<OsHooks>() == 11 * core::mem::size_of::<usize>());
     assert!(core::mem::offset_of!(DriverHooks, driver) == core::mem::size_of::<usize>());

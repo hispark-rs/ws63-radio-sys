@@ -149,17 +149,17 @@
     },
     {
       "archive": "libhisi_wpa_native_port_wpa2.a",
-      "output_sha256": "c968178a040a409d96b66a109c5ddbf061cf280e90730e9fd8146f18665bd1c3",
-      "output_size": 1026282,
+      "output_sha256": "89fbf22b094457e550474d5837397ee5c18f99bdb2310790811d0518ae9259a4",
+      "output_size": 1025526,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-personal-v2"
+      "profile_revision": "hostap-2.11-security-2026-07-personal-v3"
     },
     {
       "archive": "libhisi_wpa_native_port_wpa3.a",
-      "output_sha256": "c6285db803fcb485fd0746d958b1fd7d4ddc2386f4883eea7beedbc037f4c18c",
-      "output_size": 1115518,
+      "output_sha256": "73fd1dd468a68a90051acde144cc5adce5236c0777c095f33a1fc52757725843",
+      "output_size": 1114758,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v2"
+      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v3"
     }
   ],
   "native_supplicant": {
@@ -185,12 +185,12 @@
     "profiles": [
       {
         "id": "wpa2",
-        "revision": "hostap-2.11-security-2026-07-personal-v2",
+        "revision": "hostap-2.11-security-2026-07-personal-v3",
         "archive": "libhisi_wpa_native_port_wpa2.a"
       },
       {
         "id": "wpa3",
-        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v2",
+        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v3",
         "archive": "libhisi_wpa_native_port_wpa3.a"
       }
     ]

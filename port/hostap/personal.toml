@@ -1,4 +1,4 @@
-revision = "hostap-2.11-security-2026-07-personal-v2"
+revision = "hostap-2.11-security-2026-07-personal-v3"
 sscanf_formats = ["%u:%u"]
 
 # This is the complete upstream source closure for the native Personal STA

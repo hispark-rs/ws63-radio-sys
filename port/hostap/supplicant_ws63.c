@@ -583,13 +583,12 @@ struct hisi_wpa_poll_result hisi_wpa_poll(struct hisi_wpa_context *context,
         result.status = -1;
         return result;
     }
-    result.work_pending = hisi_wpa_eloop_run_once(work_budget);
+    result.work_completed = hisi_wpa_eloop_run_once(work_budget);
     observe_state(context);
     deadline = hisi_wpa_eloop_next_deadline_us();
     result.next_deadline_ms = deadline == UINT64_MAX ? UINT64_MAX :
         (deadline + 999u) / 1000u;
-    if (context->event_read != context->event_write)
-        result.work_pending++;
+    result.output_pending = context->event_read != context->event_write;
     return result;
 }
 

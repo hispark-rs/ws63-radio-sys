@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Advanced the native supplicant ABI to v9 and split bounded poll accounting
+  into an exact completed-work count plus an independent output-event-ready
+  flag. This removes the ambiguous `work_pending` value before the WS63
+  incremental backend starts enforcing per-poll work budgets.
+- Rebuilt the redistributable WPA2/WPA3 target archives with the pinned release
+  toolchain and advanced both artifact profile revisions to v3.
+
 ## [0.1.0-alpha.6] - 2026-07-20
 
 ### Changed

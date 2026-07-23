@@ -1,4 +1,4 @@
-# Exact external ABI of the merged hostap-2.11-security-2026-07-personal-v2 RV32 archive.
+# Exact external ABI of the merged hostap-2.11-security-2026-07-personal-v3 RV32 archive.
 # Compiler helpers are supplied by Rust compiler_builtins; crypto symbols are
 # supplied explicitly by the selected hisi-crypto suite. memcpy/memset are the
 # conventional compiler memory builtins, not a general libc dependency.

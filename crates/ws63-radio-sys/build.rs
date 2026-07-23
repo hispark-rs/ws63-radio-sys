@@ -483,13 +483,13 @@ fn main() {
             (
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_ARCHIVE",
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_REVISION",
-                "hostap-2.11-security-2026-07-personal-wpa3-v2",
+                "hostap-2.11-security-2026-07-personal-wpa3-v3",
             )
         } else {
             (
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_ARCHIVE",
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_REVISION",
-                "hostap-2.11-security-2026-07-personal-v2",
+                "hostap-2.11-security-2026-07-personal-v3",
             )
         };
         let archive = PathBuf::from(
