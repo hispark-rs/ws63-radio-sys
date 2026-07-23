@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.7] - 2026-07-23
+
 ### Changed
 
 - Advanced the native supplicant ABI to v9 and split bounded poll accounting
