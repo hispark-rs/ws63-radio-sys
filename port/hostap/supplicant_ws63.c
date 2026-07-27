@@ -13,6 +13,7 @@
 #define HISI_WPA_EVENT_CAPACITY 8u
 #define HISI_WPA_IFNAME "wlan0"
 #define HISI_WPA_FIRST_EAPOL_TIMEOUT_SECONDS 3
+#define HISI_WPA_VENDOR_ASSOC_REJECT_TEMPORARILY 8030u
 
 extern int32_t hisi_wpa_l2_feed(const uint8_t source[6],
     const uint8_t *frame, size_t frame_len);
@@ -37,6 +38,10 @@ struct hisi_wpa_context {
     uint8_t first_eapol_local_disconnects;
     uint8_t first_eapol_cached_retries;
     uint8_t first_eapol_scan_retries;
+    uint8_t temporary_reject_retries;
+    uint8_t temporary_reject_cached_retries;
+    uint8_t temporary_reject_scan_retries;
+    uint8_t temporary_reject_retry_pending;
 };
 
 static void increment_diagnostic(uint8_t *value)
@@ -120,6 +125,32 @@ static void hisi_wpa_first_eapol_timeout(void *eloop_ctx, void *timeout_ctx)
         context, NULL);
     (void) eloop_register_timeout(1, 0,
         hisi_wpa_first_eapol_disconnect_fallback, context, NULL);
+}
+
+static void hisi_wpa_temporary_reject_retry(void *eloop_ctx,
+    void *timeout_ctx)
+{
+    struct hisi_wpa_context *context = eloop_ctx;
+    struct wpa_bss *bss;
+    (void) timeout_ctx;
+    if (context == NULL || context->interface == NULL ||
+        !context->temporary_reject_retry_pending)
+        return;
+    context->temporary_reject_retry_pending = 0;
+    context->interface->reassociate = 1;
+    if (context->network != NULL && context->network->bssid_set) {
+        bss = wpa_bss_get_bssid(context->interface,
+            context->network->bssid);
+        if (bss != NULL) {
+            increment_diagnostic(
+                &context->temporary_reject_cached_retries);
+            wpa_supplicant_associate(context->interface, bss,
+                context->network);
+            return;
+        }
+    }
+    increment_diagnostic(&context->temporary_reject_scan_retries);
+    wpa_supplicant_req_scan(context->interface, 0, 100000);
 }
 
 static uint64_t timestamp_ms(void)
@@ -381,6 +412,9 @@ int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context)
         context, NULL);
     (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_complete,
         context, NULL);
+    context->temporary_reject_retry_pending = 0;
+    (void) eloop_cancel_timeout(hisi_wpa_temporary_reject_retry,
+        context, NULL);
     wpa_supplicant_deauthenticate(context->interface,
         WLAN_REASON_DEAUTH_LEAVING);
     observe_state(context);
@@ -433,6 +467,17 @@ uint32_t hisi_wpa_recovery_diagnostic_word(
         (((uint32_t) context->first_eapol_cached_retries & 0x0fu) << 16) |
         (((uint32_t) context->first_eapol_scan_retries & 0x0fu) << 20) |
         (context->first_eapol_retry_pending ? 1u << 24 : 0);
+}
+
+uint32_t hisi_wpa_temporary_reject_recovery_diagnostic_word(
+    const struct hisi_wpa_context *context)
+{
+    if (context == NULL)
+        return UINT32_MAX;
+    return ((uint32_t) context->temporary_reject_retries & 0xffu) |
+        (((uint32_t) context->temporary_reject_cached_retries & 0xffu) << 8) |
+        (((uint32_t) context->temporary_reject_scan_retries & 0xffu) << 16) |
+        (context->temporary_reject_retry_pending ? 1u << 24 : 0);
 }
 
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
@@ -555,6 +600,23 @@ int32_t hisi_wpa_feed_disconnect(struct hisi_wpa_context *context,
         return -1;
     status = hisi_wpa_driver_feed_disconnect(context->interface->drv_priv,
         event);
+    if (status == 0 &&
+        event->reason == HISI_WPA_VENDOR_ASSOC_REJECT_TEMPORARILY) {
+        /*
+         * Rust has already cleared the WS63 MAC's stale station state before
+         * feeding this event. EVENT_DISASSOC unwinds first; the owner eloop
+         * then retries the explicitly selected cached BSS. Without this
+         * continuation hostap remains in SCANNING with no scan request and the
+         * caller eventually exhausts its connect deadline.
+         */
+        increment_diagnostic(&context->temporary_reject_retries);
+        context->temporary_reject_retry_pending = 1;
+        (void) eloop_cancel_timeout(hisi_wpa_temporary_reject_retry,
+            context, NULL);
+        if (eloop_register_timeout(0, 0,
+            hisi_wpa_temporary_reject_retry, context, NULL) != 0)
+            return -1;
+    }
     if (status == 0 && context->first_eapol_retry_pending) {
         increment_diagnostic(&context->first_eapol_disconnect_events);
         (void) eloop_cancel_timeout(hisi_wpa_first_eapol_disconnect_fallback,
