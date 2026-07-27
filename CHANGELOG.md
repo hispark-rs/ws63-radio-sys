@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.8] - 2026-07-28
+
+### Fixed
+
+- Normalize vendor association status `8030` to IEEE status 30 and schedule a
+  bounded cached-BSS retry through the native event loop. The retry diagnostics
+  are exported through the versioned C/Rust ABI so the WS63 backend can
+  distinguish temporary association rejection from authentication and EAPOL
+  failures.
+
 ## [0.1.0-alpha.7] - 2026-07-23
 
 ### Changed
