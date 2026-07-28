@@ -42,6 +42,9 @@ static struct hisi_wpa_key installed_key;
 static uint8_t installed_material[32];
 static size_t installed_material_len;
 static struct hisi_wpa_key removed_key;
+static unsigned int key_install_count;
+static unsigned int key_remove_count;
+static bool key_active;
 static uint8_t sent_mgmt[64];
 static size_t sent_mgmt_len;
 static uint32_t sent_mgmt_frequency;
@@ -218,6 +221,8 @@ static int32_t install_key(void *driver, const struct hisi_wpa_key *key,
     installed_key = *key;
     memcpy(installed_material, material, material_len);
     installed_material_len = material_len;
+    key_install_count++;
+    key_active = true;
     return 0;
 }
 
@@ -226,6 +231,10 @@ static int32_t remove_key(void *driver, const struct hisi_wpa_key *key)
     assert(driver == (void *) 0x4567u);
     assert(key != NULL && key->abi_version == HISI_WPA_ABI_VERSION);
     removed_key = *key;
+    key_remove_count++;
+    if (!key_active)
+        return -17;
+    key_active = false;
     return 0;
 }
 
@@ -466,6 +475,9 @@ static void test_ws63_driver_bridge(void)
     assert(memcmp(installed_key.sequence, sequence, sizeof(sequence)) == 0);
     assert(installed_material_len == sizeof(material));
     assert(memcmp(installed_material, material, sizeof(material)) == 0);
+    assert(key_install_count == 1);
+    assert(key_remove_count == 0);
+    assert(key_active);
 
     params.key_flag = KEY_FLAG_PMK;
     assert(wpa_driver_ws63_ops.set_key(driver, &params) == -1);
@@ -479,6 +491,12 @@ static void test_ws63_driver_bridge(void)
     params.key_len = 0;
     assert(wpa_driver_ws63_ops.set_key(driver, &params) == 0);
     assert(removed_key.cipher == HISI_WPA_CIPHER_NONE);
+    assert(key_install_count == 1);
+    assert(key_remove_count == 1);
+    assert(!key_active);
+    assert(wpa_driver_ws63_ops.set_key(driver, &params) == -17);
+    assert(key_remove_count == 2);
+    assert(!key_active);
 
     assert(wpa_driver_ws63_ops.send_mlme(driver, management,
         sizeof(management), 0, 2412, NULL, 0, 0, 0, -1) == 0);
