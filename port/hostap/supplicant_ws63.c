@@ -1,6 +1,7 @@
 #include "hisi_wpa_hostap_compat.h"
 #include "hisi_wpa_supplicant.h"
 #include "hisi_wpa_driver_port.h"
+#include "hisi_wpa_context_internal.h"
 
 #include "common/defs.h"
 #include "drivers/driver.h"
@@ -10,39 +11,12 @@
 #include "bss.h"
 #include "scan.h"
 
-#define HISI_WPA_EVENT_CAPACITY 8u
 #define HISI_WPA_IFNAME "wlan0"
 #define HISI_WPA_FIRST_EAPOL_TIMEOUT_SECONDS 3
 #define HISI_WPA_VENDOR_ASSOC_REJECT_TEMPORARILY 8030u
 
 extern int32_t hisi_wpa_l2_feed(const uint8_t source[6],
     const uint8_t *frame, size_t frame_len);
-
-struct hisi_wpa_context {
-    struct wpa_global *global;
-    struct wpa_supplicant *interface;
-    struct wpa_ssid *network;
-    void *driver_owner;
-    enum wpa_states observed_state;
-    struct hisi_wpa_event events[HISI_WPA_EVENT_CAPACITY];
-    uint32_t dropped_events;
-    uint32_t total_dropped_events;
-    uint8_t event_read;
-    uint8_t event_write;
-    uint8_t max_event_depth;
-    uint8_t initialized;
-    uint8_t first_eapol_retry_pending;
-    uint8_t first_eapol_timeouts;
-    uint8_t first_eapol_disconnect_events;
-    uint8_t first_eapol_fallbacks;
-    uint8_t first_eapol_local_disconnects;
-    uint8_t first_eapol_cached_retries;
-    uint8_t first_eapol_scan_retries;
-    uint8_t temporary_reject_retries;
-    uint8_t temporary_reject_cached_retries;
-    uint8_t temporary_reject_scan_retries;
-    uint8_t temporary_reject_retry_pending;
-};
 
 static void increment_diagnostic(uint8_t *value)
 {

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Tests
+
+- Link the complete pinned WPA2 hostap source profile into a native lifecycle
+  test and prove that an installed pairwise key is removed through
+  `hisi_wpa_disconnect` and upstream `wpa_clear_keys`. Repeated disconnect is
+  idempotent, while the existing WPA2/WPA3 driver and RV32 ABI gates remain in
+  the same executable contract.
+
 ## [0.1.0-alpha.8] - 2026-07-28
 
 ### Fixed

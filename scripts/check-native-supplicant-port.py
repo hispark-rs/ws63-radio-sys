@@ -214,6 +214,40 @@ def main() -> None:
             )
             run([str(executable)])
 
+        lifecycle_profile = PORT / "personal.toml"
+        lifecycle_executable = output / "native-supplicant-lifecycle"
+        lifecycle_defines = [
+            f"-D{definition}"
+            for definition in profile_array(lifecycle_profile, "defines")
+        ]
+        lifecycle_flags = [
+            flag for flag in COMMON if flag != "-DOS_NO_C_LIB_DEFINES"
+        ]
+        lifecycle_flags.extend([
+            "-Wno-zero-length-array",
+            "-Wno-flexible-array-extensions",
+            "-Wno-unused-but-set-variable",
+            "-Wno-unused-variable",
+            "-include",
+            str(PORT / "hisi_wpa_hostap_compat.h"),
+            *lifecycle_defines,
+        ])
+        if os.environ.get("HISI_WPA_HOST_ASAN") == "1":
+            lifecycle_flags.extend(
+                ["-fsanitize=address", "-fno-omit-frame-pointer"]
+            )
+        run(
+            [
+                host_cc,
+                *lifecycle_flags,
+                *map(str, profile_sources(lifecycle_profile)),
+                str(ROOT / "tests" / "native_supplicant_lifecycle.c"),
+                "-o",
+                str(lifecycle_executable),
+            ]
+        )
+        run([str(lifecycle_executable)])
+
         for profile_index, (profile, manifest) in enumerate(PROFILE_SPECS):
             native_sources = profile_sources(profile)
             profile_defines = [
