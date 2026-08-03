@@ -42,6 +42,11 @@ int hisi_wpa_sscanf(const char *input, const char *format, ...);
 int hisi_wpa_vsnprintf(char *buffer, size_t size, const char *format,
     va_list arguments);
 void hisi_wpa_abort(void) __attribute__((noreturn));
+extern int hisi_wpa_errno;
+FILE *hisi_wpa_fopen(const char *path, const char *mode);
+char *hisi_wpa_fgets(char *buffer, int size, FILE *file);
+int hisi_wpa_fclose(FILE *file);
+int hisi_wpa_rand(void);
 
 /* newlib/Zephyr-compatible values used by hostap's internal negative errno
  * returns. These are part of the WS63 driver shim contract, not a claim that
@@ -57,6 +62,12 @@ void hisi_wpa_abort(void) __attribute__((noreturn));
 #endif
 #ifndef EIO
 #define EIO 5
+#endif
+#ifndef ENOENT
+#define ENOENT 2
+#endif
+#ifndef ENOMEM
+#define ENOMEM 12
 #endif
 #ifndef EOPNOTSUPP
 #define EOPNOTSUPP 95
@@ -80,6 +91,24 @@ void hisi_wpa_abort(void) __attribute__((noreturn));
 #define sscanf hisi_wpa_sscanf
 #define strtol hisi_wpa_strtol
 #define vsnprintf hisi_wpa_vsnprintf
+#define errno hisi_wpa_errno
+#define fopen hisi_wpa_fopen
+#define fgets hisi_wpa_fgets
+#define fclose hisi_wpa_fclose
+#define rand hisi_wpa_rand
+
+#ifndef htonl
+#define htonl(value) __builtin_bswap32((uint32_t) (value))
+#endif
+#ifndef ntohl
+#define ntohl(value) __builtin_bswap32((uint32_t) (value))
+#endif
+#ifndef htons
+#define htons(value) __builtin_bswap16((uint16_t) (value))
+#endif
+#ifndef ntohs
+#define ntohs(value) __builtin_bswap16((uint16_t) (value))
+#endif
 
 /* Upstream includes.h pulls POSIX networking headers even when no socket,
  * file, or daemon backend is selected. The native profile injects this header
@@ -87,6 +116,15 @@ void hisi_wpa_abort(void) __attribute__((noreturn));
  * below. */
 #ifndef INCLUDES_H
 #define INCLUDES_H
+#endif
+
+/* ap_config.c needs only the IANA port defaults from common/dhcp.h in the
+ * Personal AP profile. The packet structs belong to DHCP snooping/FILS and
+ * stay outside this freestanding build. */
+#ifndef DHCP_H
+#define DHCP_H
+#define DHCP_SERVER_PORT 67
+#define DHCP_CLIENT_PORT 68
 #endif
 
 #if !defined(__APPLE__) && !defined(__linux__) && !defined(__GLIBC__) && \

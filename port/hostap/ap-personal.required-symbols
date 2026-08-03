@@ -1,0 +1,18 @@
+# Exact external ABI of hostap-2.11-security-2026-07-ap-personal-v1.
+__udivdi3
+__umoddi3
+aes_decrypt
+aes_decrypt_deinit
+aes_decrypt_init
+aes_encrypt
+aes_encrypt_deinit
+aes_encrypt_init
+aes_wrap
+hmac_sha1
+hmac_sha1_vector
+hmac_sha256_vector
+l2_packet_send
+memcpy
+memset
+pbkdf2_sha1
+rc4_skip

@@ -1,5 +1,37 @@
 #include "hisi_wpa_hostap_compat.h"
 
+int hisi_wpa_errno;
+
+FILE *hisi_wpa_fopen(const char *path, const char *mode)
+{
+    (void) path;
+    (void) mode;
+    hisi_wpa_errno = ENOENT;
+    return NULL;
+}
+
+char *hisi_wpa_fgets(char *buffer, int size, FILE *file)
+{
+    (void) buffer;
+    (void) size;
+    (void) file;
+    return NULL;
+}
+
+int hisi_wpa_fclose(FILE *file)
+{
+    (void) file;
+    return 0;
+}
+
+int hisi_wpa_rand(void)
+{
+    unsigned int value = 0;
+    if (os_get_random((unsigned char *) &value, sizeof(value)) != 0)
+        return 0;
+    return (int) (value & INT_MAX);
+}
+
 enum length_modifier {
     LENGTH_DEFAULT,
     LENGTH_LONG,

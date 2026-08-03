@@ -6,6 +6,7 @@
 
 import os
 import pathlib
+import tomllib
 import shutil
 import subprocess
 import tempfile
@@ -20,6 +21,8 @@ TEST = ROOT / "tests" / "native_authenticator_port.c"
 MANIFEST = PORT / "ap-driver.required-symbols"
 DRIVER_MANIFEST = PORT / "driver-ws63-ap.required-symbols"
 HOSTAP = ROOT / "third-party" / "hostap"
+PROFILE = PORT / "ap-personal.toml"
+PROFILE_MANIFEST = PORT / "ap-personal.required-symbols"
 
 
 def run(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -81,6 +84,15 @@ def actual_symbols(nm: str, object_path: pathlib.Path) -> set[tuple[str, str]]:
     return result
 
 
+def external_symbols(nm: str, objects: list[pathlib.Path]) -> set[str]:
+    defined = set()
+    undefined = set()
+    for object_path in objects:
+        for kind, symbol in actual_symbols(nm, object_path):
+            (defined if kind == "defined" else undefined).add(symbol)
+    return undefined - defined
+
+
 def main() -> None:
     clang = riscv_clang()
     with tempfile.TemporaryDirectory(prefix="hisi-wpa-ap-port-") as directory:
@@ -109,6 +121,47 @@ def main() -> None:
                 f"missing={sorted(expected - actual)}, "
                 f"extra={sorted(actual - expected)}"
             )
+
+        profile = tomllib.loads(PROFILE.read_text())
+        profile_sources = [
+            HOSTAP / source for source in profile["upstream_sources"]
+        ] + [PORT / source for source in profile["port_sources"]]
+        missing = [str(source) for source in profile_sources if not source.is_file()]
+        if missing:
+            raise RuntimeError(f"missing authenticator profile sources: {missing}")
+        profile_flags = [f"-D{definition}" for definition in profile["defines"]]
+        profile_objects = []
+        for index, source in enumerate(profile_sources):
+            profile_object = output / f"ap-{index:02d}-{source.stem}.o"
+            run([
+                clang, "--target=riscv32-unknown-none-elf", "-ffreestanding",
+                "-fno-builtin", "-march=rv32imfc", "-mabi=ilp32f",
+                "-std=c11", "-Wall", "-Wextra", "-Werror",
+                "-Wno-zero-length-array", "-Wno-flexible-array-extensions",
+                "-Wno-unused-parameter", "-Wno-unused-but-set-variable",
+                "-Wno-unused-variable", f"-I{INCLUDE}", f"-I{PORT}",
+                f"-I{HOSTAP / 'hostapd'}", f"-I{HOSTAP / 'src' / 'utils'}",
+                f"-I{HOSTAP / 'src'}", "-include",
+                str(PORT / "hisi_wpa_hostap_compat.h"), *profile_flags,
+                "-c", str(source), "-o", str(profile_object),
+            ])
+            profile_objects.append(profile_object)
+        actual_external = external_symbols(nm, profile_objects)
+        expected_external = {
+            line.strip()
+            for line in PROFILE_MANIFEST.read_text().splitlines()
+            if line.strip() and not line.startswith("#")
+        }
+        if actual_external != expected_external:
+            raise RuntimeError(
+                "AP profile external symbol drift: "
+                f"missing={sorted(expected_external - actual_external)}, "
+                f"extra={sorted(actual_external - expected_external)}"
+            )
+        print(
+            "native authenticator profile ap-personal: "
+            f"{len(profile_sources)} RV32 objects compiled"
+        )
 
         driver_object = output / "driver_ws63_ap.o"
         run([
