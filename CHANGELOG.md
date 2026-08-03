@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.10] - 2026-08-03
+
 ### Added
 
 - Added a separate upstream hostapd WPA2-Personal authenticator archive,
