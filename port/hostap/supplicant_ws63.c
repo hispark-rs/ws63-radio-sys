@@ -4,6 +4,7 @@
 #include "hisi_wpa_context_internal.h"
 
 #include "common/defs.h"
+#include "common/wpa_common.h"
 #include "drivers/driver.h"
 #include "eloop.h"
 #include "config.h"
@@ -328,7 +329,11 @@ int32_t hisi_wpa_configure(struct hisi_wpa_context *context,
     network->key_mgmt = is_wpa3 ? WPA_KEY_MGMT_SAE : WPA_KEY_MGMT_PSK;
     network->proto = WPA_PROTO_RSN;
     network->pairwise_cipher = WPA_CIPHER_CCMP;
-    network->group_cipher = WPA_CIPHER_CCMP;
+    /* Keep unicast data on CCMP, while accepting WPA2 APs that advertise
+     * TKIP for the group cipher. WPA3 does not permit that compatibility
+     * mode and remains CCMP-only. */
+    network->group_cipher = is_wpa3 ? WPA_CIPHER_CCMP :
+        WPA_CIPHER_CCMP | WPA_CIPHER_TKIP;
     network->ieee80211w = config->pmf == HISI_WPA_PMF_REQUIRED ?
         MGMT_FRAME_PROTECTION_REQUIRED :
         config->pmf == HISI_WPA_PMF_OPTIONAL ?
@@ -413,6 +418,68 @@ uint32_t hisi_wpa_context_diagnostic_word(
     word |= wpa_s->p2p_mgmt ? 1u << 9 : 0;
     word |= wpa_s->last_scan_res_used != 0 ? 1u << 10 : 0;
     word |= wpa_s->connect_without_scan != NULL ? 1u << 11 : 0;
+    return word;
+}
+
+uint32_t hisi_wpa_match_diagnostic_word(
+    const struct hisi_wpa_context *context)
+{
+    const struct wpa_supplicant *wpa_s;
+    const struct wpa_ssid *network;
+    struct wpa_bss *bss;
+    const uint8_t *rsn_ie;
+    struct wpa_ie_data ie;
+    uint32_t word = 0;
+    int pmf_ok;
+    int privacy;
+
+    if (context == NULL || context->interface == NULL ||
+        context->network == NULL)
+        return UINT32_MAX;
+    wpa_s = context->interface;
+    network = context->network;
+    if (wpa_s->last_scan_res_used != 0)
+        word |= 1u << 0;
+    if (!network->bssid_set)
+        return word;
+    bss = wpa_bss_get_bssid(context->interface, network->bssid);
+    if (bss == NULL)
+        return word;
+    word |= 1u << 1;
+    if (bss->ssid_len == network->ssid_len &&
+        os_memcmp(bss->ssid, network->ssid, bss->ssid_len) == 0)
+        word |= 1u << 2;
+    rsn_ie = wpa_bss_get_ie(bss, WLAN_EID_RSN);
+    if (rsn_ie == NULL)
+        return word;
+    word |= 1u << 3;
+    if (wpa_parse_wpa_ie_rsn(rsn_ie, 2 + rsn_ie[1], &ie) != 0)
+        return word;
+    word |= 1u << 4;
+    if ((ie.proto & network->proto) != 0)
+        word |= 1u << 5;
+    if ((ie.pairwise_cipher & network->pairwise_cipher) != 0)
+        word |= 1u << 6;
+    if ((ie.group_cipher & network->group_cipher) != 0)
+        word |= 1u << 7;
+    if ((ie.key_mgmt & network->key_mgmt) != 0)
+        word |= 1u << 8;
+    pmf_ok = (!(ie.capabilities & WPA_CAPABILITY_MFPC) &&
+        network->ieee80211w == MGMT_FRAME_PROTECTION_REQUIRED) ? 0 :
+        ((ie.capabilities & WPA_CAPABILITY_MFPR) &&
+        network->ieee80211w == NO_MGMT_FRAME_PROTECTION) ? 0 : 1;
+    if (pmf_ok)
+        word |= 1u << 9;
+    privacy = (bss->caps & IEEE80211_CAP_PRIVACY) != 0;
+    if (privacy == !!wpa_key_mgmt_wpa(network->key_mgmt))
+        word |= 1u << 10;
+    if ((bss->caps & IEEE80211_CAP_ESS) != 0)
+        word |= 1u << 11;
+    if (wpa_scan_res_match(context->interface, 0, bss,
+        context->network, 1, 0) == context->network)
+        word |= 1u << 12;
+    word |= ((uint32_t) (wpa_s->last_scan_res_used > UINT8_MAX ?
+        UINT8_MAX : wpa_s->last_scan_res_used)) << 16;
     return word;
 }
 

@@ -272,6 +272,9 @@ int32_t hisi_wpa_connect(struct hisi_wpa_context *context);
 int32_t hisi_wpa_disconnect(struct hisi_wpa_context *context);
 uint32_t hisi_wpa_context_diagnostic_word(
     const struct hisi_wpa_context *context);
+/* Secret-free cached-BSS match bitmap used only for failed-connect triage. */
+uint32_t hisi_wpa_match_diagnostic_word(
+    const struct hisi_wpa_context *context);
 
 /* Diagnostic-only event-ring snapshot: current depth, maximum depth, and the
  * saturated cumulative drop count in bits 0..7, 8..15, and 16..31. */
