@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.9] - 2026-08-03
+
+### Fixed
+
+- Preserve association-response diagnostics across the upstream hostap driver
+  event boundary, including raw/status codes and bounded response IE metadata.
+- Accept the transition-compatible WPA2 group-cipher set while retaining CCMP
+  as the required pairwise cipher.
+
 ### Tests
 
 - Link the complete pinned WPA2 hostap source profile into a native lifecycle
