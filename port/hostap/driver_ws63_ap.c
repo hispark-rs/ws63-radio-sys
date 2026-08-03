@@ -188,10 +188,12 @@ static int ws63_ap_set_beacon(void *private_data,
     if (driver == NULL || params == NULL || params->freq == NULL ||
         params->ssid == NULL || params->ssid_len == 0 ||
         params->ssid_len > HISI_WPA_MAX_SSID_LEN ||
-        params->beacon_int <= 0 || params->beacon_int > UINT16_MAX ||
-        params->dtim_period <= 0 || params->dtim_period > UINT8_MAX ||
+        params->beacon_int <= 0 ||
+        (unsigned int) params->beacon_int > UINT16_MAX ||
+        params->dtim_period <= 0 ||
+        (unsigned int) params->dtim_period > UINT8_MAX ||
         params->freq->freq <= 0 || params->freq->channel <= 0 ||
-        params->freq->channel > UINT8_MAX ||
+        (unsigned int) params->freq->channel > UINT8_MAX ||
         (params->head_len != 0 && params->head == NULL) ||
         (params->tail_len != 0 && params->tail == NULL))
         return -1;
