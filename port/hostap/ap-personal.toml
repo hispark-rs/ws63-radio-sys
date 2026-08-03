@@ -63,6 +63,7 @@ port_sources = [
   "hisi_wpa_ap_driver_port.c",
   "driver_ws63_ap.c",
   "drivers_ws63_ap.c",
+  "authenticator_ws63.c",
 ]
 
 defines = [
