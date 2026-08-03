@@ -15,14 +15,23 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PORT = ROOT / "port" / "hostap"
 INCLUDE = ROOT / "include"
 SOURCE = PORT / "hisi_wpa_ap_driver_port.c"
+DRIVER_SOURCE = PORT / "driver_ws63_ap.c"
 TEST = ROOT / "tests" / "native_authenticator_port.c"
 MANIFEST = PORT / "ap-driver.required-symbols"
+DRIVER_MANIFEST = PORT / "driver-ws63-ap.required-symbols"
+HOSTAP = ROOT / "third-party" / "hostap"
 
 
 def run(command: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        command, cwd=ROOT, check=True, capture_output=True, text=True
+    result = subprocess.run(
+        command, cwd=ROOT, check=False, capture_output=True, text=True
     )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"command failed ({result.returncode}): {command[0]}\n"
+            f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
+    return result
 
 
 def riscv_clang() -> str:
@@ -52,9 +61,9 @@ def llvm_nm(clang: str) -> str:
     raise RuntimeError("llvm-nm is required for the AP ABI drift gate")
 
 
-def expected_symbols() -> set[tuple[str, str]]:
+def expected_symbols(manifest: pathlib.Path) -> set[tuple[str, str]]:
     result = set()
-    for line in MANIFEST.read_text().splitlines():
+    for line in manifest.read_text().splitlines():
         line = line.strip()
         if line and not line.startswith("#"):
             result.add(tuple(line.split()))
@@ -91,11 +100,34 @@ def main() -> None:
             f"-I{INCLUDE}", f"-I{PORT}", "-c", str(SOURCE),
             "-o", str(object_path),
         ])
-        actual = actual_symbols(llvm_nm(clang), object_path)
-        expected = expected_symbols()
+        nm = llvm_nm(clang)
+        actual = actual_symbols(nm, object_path)
+        expected = expected_symbols(MANIFEST)
         if actual != expected:
             raise RuntimeError(
                 "AP driver symbol drift: "
+                f"missing={sorted(expected - actual)}, "
+                f"extra={sorted(actual - expected)}"
+            )
+
+        driver_object = output / "driver_ws63_ap.o"
+        run([
+            clang, "--target=riscv32-unknown-none-elf", "-ffreestanding",
+            "-fno-builtin", "-march=rv32imfc", "-mabi=ilp32f",
+            "-std=c11", "-Wall", "-Wextra", "-Werror",
+            "-Wno-zero-length-array", "-Wno-flexible-array-extensions",
+            "-Wno-unused-parameter",
+            "-DOS_NO_C_LIB_DEFINES", f"-I{INCLUDE}", f"-I{PORT}",
+            f"-I{HOSTAP / 'wpa_supplicant'}",
+            f"-I{HOSTAP / 'src' / 'utils'}", f"-I{HOSTAP / 'src'}",
+            "-include", str(PORT / "hisi_wpa_hostap_compat.h"),
+            "-c", str(DRIVER_SOURCE), "-o", str(driver_object),
+        ])
+        actual = actual_symbols(nm, driver_object)
+        expected = expected_symbols(DRIVER_MANIFEST)
+        if actual != expected:
+            raise RuntimeError(
+                "WS63 AP driver symbol drift: "
                 f"missing={sorted(expected - actual)}, "
                 f"extra={sorted(actual - expected)}"
             )

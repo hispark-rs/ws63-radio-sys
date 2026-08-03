@@ -1,0 +1,11 @@
+# Exact global ABI of the freestanding RV32 driver_ws63_ap object.
+defined wpa_driver_ws63_ap_ops
+undefined hisi_wpa_ap_driver_acquire
+undefined hisi_wpa_ap_driver_release
+undefined memcpy
+undefined memset
+undefined os_free
+undefined os_memcmp
+undefined os_memcpy
+undefined os_memset
+undefined os_zalloc

@@ -26,6 +26,12 @@ struct hisi_wpa_ap_beacon {
     uint8_t dtim_period;
     uint8_t channel;
     uint32_t frequency_mhz;
+    uint32_t auth_algorithms;
+    uint32_t wpa_versions;
+    uint8_t privacy;
+    uint8_t ssid_len;
+    uint8_t reserved[2];
+    uint8_t ssid[HISI_WPA_MAX_SSID_LEN];
     const uint8_t *head;
     size_t head_len;
     const uint8_t *tail;
