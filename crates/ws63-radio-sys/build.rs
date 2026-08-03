@@ -520,9 +520,25 @@ fn main() {
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3");
-    if env::var_os("CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA2").is_some() {
-        let archive_variable = "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA2_ARCHIVE";
-        let revision_variable = "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA2_REVISION";
+    let native_authenticator_wpa2 =
+        env::var_os("CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA2").is_some();
+    let native_authenticator_wpa3 =
+        env::var_os("CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA3").is_some();
+    if native_authenticator_wpa2 || native_authenticator_wpa3 {
+        let (archive_variable, revision_variable, expected_revision) = if native_authenticator_wpa3
+        {
+            (
+                "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA3_ARCHIVE",
+                "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA3_REVISION",
+                "hostap-2.11-security-2026-08-ap-personal-wpa3-v1",
+            )
+        } else {
+            (
+                "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA2_ARCHIVE",
+                "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA2_REVISION",
+                "hostap-2.11-security-2026-07-ap-personal-v4",
+            )
+        };
         let archive = PathBuf::from(
             env::var_os(archive_variable)
                 .unwrap_or_else(|| panic!("ws63-radio-blob did not export {archive_variable}")),
@@ -530,7 +546,7 @@ fn main() {
         let revision = env::var(revision_variable)
             .unwrap_or_else(|_| panic!("ws63-radio-blob did not export {revision_variable}"));
         assert_eq!(
-            revision, "hostap-2.11-security-2026-07-ap-personal-v4",
+            revision, expected_revision,
             "native authenticator artifact/profile revision mismatch"
         );
         println!("cargo:native_authenticator_archive={}", archive.display());
@@ -553,4 +569,5 @@ fn main() {
         );
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA2");
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA3");
 }

@@ -1,0 +1,20 @@
+revision = "hostap-2.11-security-2026-08-ap-personal-wpa3-v1"
+extends = "ap-personal.toml"
+
+# WPA3-Personal extends the separately packaged AP profile with only the SAE
+# state machine and group-19 helpers. P-256/bignum symbols remain explicit
+# final-firmware capabilities supplied by hisi-crypto-ws63.
+upstream_sources = [
+  "src/common/sae.c",
+  "src/common/dragonfly.c",
+]
+
+port_sources = [
+  "dh_groups_hisi.c",
+]
+
+defines = [
+  "CONFIG_SAE",
+  "CONFIG_ECC",
+  "CONFIG_HMAC_SHA256_KDF",
+]

@@ -71,7 +71,7 @@ are recorded in `crates/ws63-radio-blob/LICENSE-BLOB.md`.
 The `consumer-artifacts` CI matrix checks this boundary on native Linux x86_64,
 macOS arm64, and Windows x86_64 runners without checking out submodules. Each host
 expands and hashes the packaged archives, then builds both upstream WPA2 and WPA3
-target contracts with the pinned official Rust nightly. Its target directory contains
+STA and AP target contracts with the pinned official Rust nightly. Its target directory contains
 spaces and non-ASCII text so accidental shell/path assumptions fail in CI. This matrix
 proves Cargo artifact consumption and target-crate compilation; final firmware linking
 and RF behavior remain separate parent-repository and silicon gates.

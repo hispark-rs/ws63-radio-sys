@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.11] - 2026-08-03
+
+### Added
+
+- Added a redistributable upstream hostapd WPA3-SAE authenticator archive and
+  an explicit Cargo selection contract for pure-WPA3 WS63 SoftAP firmware.
+- Added exact source-profile inheritance, RV32 external-symbol drift checks,
+  deterministic archive rebuilds, and cross-platform consumer checks for the
+  WPA3 authenticator profile.
+
 ## [0.1.0-alpha.10] - 2026-08-03
 
 ### Added

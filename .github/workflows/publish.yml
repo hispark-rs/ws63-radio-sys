@@ -50,7 +50,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: rebuilt-native-supplicant-archives
-          path: target/native-supplicant-rebuild/libhisi_wpa_native_port_*.a
+          path: target/native-supplicant-rebuild/libhisi_wpa_native_*.a
           if-no-files-found: error
           retention-days: 14
 
@@ -120,6 +120,9 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --features upstream-authenticator-wpa2 --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --features upstream-authenticator-wpa3 --locked
 
       # Cargo cannot package the facade until its exact-version dependencies are
       # visible in the registry. Build/package the dependency layer first; the

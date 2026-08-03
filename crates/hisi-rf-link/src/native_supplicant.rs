@@ -34,8 +34,13 @@ impl Error {
 #[derive(Deserialize)]
 struct SourceProfile {
     revision: String,
+    #[serde(default)]
+    extends: Option<String>,
+    #[serde(default)]
     upstream_sources: Vec<String>,
+    #[serde(default)]
     port_sources: Vec<String>,
+    #[serde(default)]
     defines: Vec<String>,
 }
 
@@ -180,6 +185,20 @@ fn load_json<T: for<'de> Deserialize<'de>>(path: &Path) -> Result<T, Error> {
         .map_err(|error| Error::new(format!("parse {}: {error}", path.display())))
 }
 
+fn load_source_profile(repository: &Path, name: &str) -> Result<SourceProfile, Error> {
+    let profile_path = repository.join("port/hostap").join(name);
+    let mut profile: SourceProfile = load_toml(&profile_path)?;
+    let Some(base_name) = profile.extends.take() else {
+        return Ok(profile);
+    };
+    let mut base = load_source_profile(repository, &base_name)?;
+    base.revision = profile.revision;
+    base.upstream_sources.extend(profile.upstream_sources);
+    base.port_sources.extend(profile.port_sources);
+    base.defines.extend(profile.defines);
+    Ok(base)
+}
+
 fn build_profile(
     repository: &Path,
     output: &Path,
@@ -196,8 +215,7 @@ fn build_profile(
             other => return Err(Error::new(format!("unsupported native profile {other}"))),
         }
     };
-    let source_profile: SourceProfile =
-        load_toml(&repository.join("port/hostap").join(profile_name))?;
+    let source_profile = load_source_profile(repository, profile_name)?;
     if source_profile.revision != profile.revision {
         return Err(Error::new(format!(
             "native profile {} revision drift: manifest={}, source={}",

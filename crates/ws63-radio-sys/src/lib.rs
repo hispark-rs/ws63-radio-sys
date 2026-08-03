@@ -16,12 +16,24 @@
 compile_error!("select either legacy vendor supplicant archives or the upstream hostap profile");
 
 #[cfg(all(
-    feature = "upstream-authenticator-wpa2",
+    any(
+        feature = "upstream-authenticator-wpa2",
+        feature = "upstream-authenticator-wpa3"
+    ),
     feature = "upstream-supplicant-port"
 ))]
 compile_error!("select either the AP authenticator or STA supplicant target archive");
 
-#[cfg(feature = "upstream-authenticator-wpa2")]
+#[cfg(all(
+    feature = "upstream-authenticator-wpa2",
+    feature = "upstream-authenticator-wpa3"
+))]
+compile_error!("select exactly one AP authenticator security profile");
+
+#[cfg(any(
+    feature = "upstream-authenticator-wpa2",
+    feature = "upstream-authenticator-wpa3"
+))]
 pub mod authenticator;
 pub mod supplicant;
 
