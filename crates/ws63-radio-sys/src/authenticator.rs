@@ -7,7 +7,7 @@
 use crate::supplicant::{Key, PollResult};
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 2;
+pub const ABI_VERSION: u16 = 3;
 pub const MAX_SSID_LEN: usize = 32;
 pub const MAX_CHANNELS: usize = 14;
 pub const MAX_BITRATES: usize = 12;
@@ -156,6 +156,14 @@ unsafe extern "C" {
         frame: *const u8,
         frame_len: usize,
     ) -> c_int;
+    pub fn hisi_wpa_ap_feed_associated(
+        context: *mut Context,
+        address: *const u8,
+        request_ies: *const u8,
+        request_ies_len: usize,
+        reassociated: u8,
+    ) -> c_int;
+    pub fn hisi_wpa_ap_feed_disassociated(context: *mut Context, address: *const u8) -> c_int;
     pub fn hisi_wpa_ap_stop(context: *mut Context) -> c_int;
     pub fn hisi_wpa_ap_destroy(context: *mut Context);
 }

@@ -1,4 +1,4 @@
-revision = "hostap-2.11-security-2026-07-ap-personal-v3"
+revision = "hostap-2.11-security-2026-07-ap-personal-v4"
 
 # Upstream-native WPA2-Personal authenticator. This is a distinct target
 # profile: it must never be folded into the default STA supplicant archive.

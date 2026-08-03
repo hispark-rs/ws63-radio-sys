@@ -262,6 +262,36 @@ int32_t hisi_wpa_ap_feed_mgmt(struct hisi_wpa_ap_context *context,
     return 0;
 }
 
+int32_t hisi_wpa_ap_feed_associated(struct hisi_wpa_ap_context *context,
+    const uint8_t address[6], const uint8_t *request_ies,
+    size_t request_ies_len, uint8_t reassociated)
+{
+    union wpa_event_data event;
+    if (context == NULL || !context->started || address == NULL ||
+        (request_ies_len != 0 && request_ies == NULL))
+        return -1;
+    os_memset(&event, 0, sizeof(event));
+    event.assoc_info.addr = address;
+    event.assoc_info.req_ies = request_ies;
+    event.assoc_info.req_ies_len = request_ies_len;
+    event.assoc_info.reassoc = reassociated != 0;
+    wpa_supplicant_event(context->interface->bss[0], EVENT_ASSOC, &event);
+    return 0;
+}
+
+int32_t hisi_wpa_ap_feed_disassociated(struct hisi_wpa_ap_context *context,
+    const uint8_t address[6])
+{
+    union wpa_event_data event;
+    if (context == NULL || !context->started || address == NULL)
+        return -1;
+    os_memset(&event, 0, sizeof(event));
+    event.disassoc_info.addr = address;
+    wpa_supplicant_event(context->interface->bss[0], EVENT_DISASSOC,
+        &event);
+    return 0;
+}
+
 int32_t hisi_wpa_ap_stop(struct hisi_wpa_ap_context *context)
 {
     if (context == NULL || !context->started || g_config_context != context)

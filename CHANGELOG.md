@@ -12,6 +12,9 @@
 
 ### Fixed
 
+- Extended the versioned authenticator input ABI with associated and
+  disassociated station events so the native hostapd state machine receives
+  the WS63 driver's `NEW_STA`/`DEL_STA` notifications.
 - Rebuilt the WPA2/WPA3 STA archives after the freestanding portability layer
   changed, advanced their profile revisions, and restored byte-for-byte source
   and Cargo-payload parity.

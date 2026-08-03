@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_AP_ABI_VERSION 2u
+#define HISI_WPA_AP_ABI_VERSION 3u
 #define HISI_WPA_AP_MAX_PASSPHRASE_LEN 63u
 #define HISI_WPA_AP_MAX_CHANNELS 14u
 #define HISI_WPA_AP_MAX_BITRATES 12u
@@ -118,6 +118,11 @@ int32_t hisi_wpa_ap_feed_eapol(struct hisi_wpa_ap_context *context,
 int32_t hisi_wpa_ap_feed_mgmt(struct hisi_wpa_ap_context *context,
     uint32_t frequency_mhz, int32_t rssi_dbm, const uint8_t *frame,
     size_t frame_len);
+int32_t hisi_wpa_ap_feed_associated(struct hisi_wpa_ap_context *context,
+    const uint8_t address[6], const uint8_t *request_ies,
+    size_t request_ies_len, uint8_t reassociated);
+int32_t hisi_wpa_ap_feed_disassociated(struct hisi_wpa_ap_context *context,
+    const uint8_t address[6]);
 int32_t hisi_wpa_ap_stop(struct hisi_wpa_ap_context *context);
 void hisi_wpa_ap_destroy(struct hisi_wpa_ap_context *context);
 
