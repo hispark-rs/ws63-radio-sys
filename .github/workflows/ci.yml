@@ -37,6 +37,7 @@ jobs:
           printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
             cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-abi.o -
       - run: uv run scripts/check-native-supplicant-port.py
+      - run: uv run scripts/check-native-authenticator-port.py
       - name: Replay upstream WPA Personal protocol vectors
         run: uv run scripts/check-upstream-personal-vectors.py
       - name: Check release-unit metadata

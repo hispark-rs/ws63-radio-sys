@@ -1,0 +1,7 @@
+# Exact global ABI of the freestanding AP driver capability object.
+defined hisi_wpa_ap_driver_acquire
+defined hisi_wpa_ap_driver_install
+defined hisi_wpa_ap_driver_release
+defined hisi_wpa_ap_driver_uninstall
+undefined memcpy
+undefined memset

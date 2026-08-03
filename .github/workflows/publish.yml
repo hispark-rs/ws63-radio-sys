@@ -98,6 +98,7 @@ jobs:
           uv run scripts/check-supplicant-boundary-profile.py
           uv run scripts/check-release-artifacts.py
           uv run scripts/check-native-supplicant-port.py
+          uv run scripts/check-native-authenticator-port.py
           uv run scripts/check-upstream-personal-vectors.py
           uv run crates/hisi-rf-link/python/test_relocations.py
 
