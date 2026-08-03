@@ -106,6 +106,80 @@ static void ws63_ap_deinit(void *private_data)
     hisi_wpa_ap_driver_release();
 }
 
+static void ws63_ap_free_hw_modes(struct hostapd_hw_modes *modes,
+    size_t count)
+{
+    size_t index;
+    if (modes == NULL)
+        return;
+    for (index = 0; index < count; index++) {
+        os_free(modes[index].channels);
+        os_free(modes[index].rates);
+    }
+    os_free(modes);
+}
+
+static struct hostapd_hw_modes *ws63_ap_get_hw_feature_data(
+    void *private_data, uint16_t *num_modes, uint16_t *flags,
+    uint8_t *dfs_region)
+{
+    static const struct {
+        enum hostapd_hw_mode mode;
+        int num_rates;
+    } profiles[] = {
+        { HOSTAPD_MODE_IEEE80211G, HISI_WPA_AP_MAX_BITRATES },
+        { HOSTAPD_MODE_IEEE80211B, 4 },
+    };
+    struct ws63_ap_driver_data *driver = private_data;
+    struct hisi_wpa_ap_hw_features features = { 0 };
+    struct hostapd_hw_modes *modes;
+    size_t profile;
+    size_t index;
+    if (driver == NULL || num_modes == NULL || flags == NULL ||
+        dfs_region == NULL ||
+        driver->hooks.get_hw_features(driver->hooks.driver, &features) != 0 ||
+        features.channel_count <= 0 ||
+        features.channel_count > (int32_t) HISI_WPA_AP_MAX_CHANNELS)
+        return NULL;
+
+    *num_modes = ARRAY_SIZE(profiles);
+    *flags = 0;
+    *dfs_region = 0;
+    modes = os_calloc(*num_modes, sizeof(*modes));
+    if (modes == NULL)
+        return NULL;
+    for (profile = 0; profile < *num_modes; profile++) {
+        modes[profile].mode = profiles[profile].mode;
+        modes[profile].num_channels = features.channel_count;
+        modes[profile].num_rates = profiles[profile].num_rates;
+        modes[profile].channels = os_calloc(
+            (size_t) features.channel_count,
+            sizeof(*modes[profile].channels));
+        modes[profile].rates = os_calloc(
+            (size_t) modes[profile].num_rates,
+            sizeof(*modes[profile].rates));
+        if (modes[profile].channels == NULL ||
+            modes[profile].rates == NULL) {
+            ws63_ap_free_hw_modes(modes, *num_modes);
+            return NULL;
+        }
+        for (index = 0; index < (size_t) features.channel_count; index++) {
+            modes[profile].channels[index].chan =
+                (int16_t) features.channels[index].channel;
+            modes[profile].channels[index].freq =
+                (int32_t) features.channels[index].frequency_mhz;
+            modes[profile].channels[index].flag =
+                (int32_t) features.channels[index].flags;
+            modes[profile].channels[index].allowed_bw =
+                HOSTAPD_CHAN_WIDTH_20;
+        }
+        for (index = 0; index < (size_t) modes[profile].num_rates; index++)
+            modes[profile].rates[index] = (int32_t) features.bitrates[index];
+    }
+    modes[0].ht_capab = features.ht_capabilities;
+    return modes;
+}
+
 static int ws63_ap_set_beacon(void *private_data,
     struct wpa_driver_ap_params *params)
 {
@@ -219,6 +293,7 @@ const struct wpa_driver_ops wpa_driver_ws63_ap_ops = {
     .name = "ws63-ap",
     .desc = "HiSilicon WS63 native AP driver",
     .set_key = ws63_ap_set_key,
+    .get_hw_feature_data = ws63_ap_get_hw_feature_data,
     .send_mlme = ws63_ap_send_mlme,
     .set_ap = ws63_ap_set_beacon,
     .hapd_init = ws63_ap_init,

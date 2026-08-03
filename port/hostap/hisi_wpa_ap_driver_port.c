@@ -9,6 +9,7 @@ static int hooks_valid(const struct hisi_wpa_ap_driver_hooks *hooks)
     return hooks != NULL && hooks->abi_version == HISI_WPA_AP_ABI_VERSION &&
         hooks->reserved == 0 && hooks->driver != NULL &&
         hooks->get_own_address != NULL &&
+        hooks->get_hw_features != NULL &&
         hooks->set_netdev_enabled != NULL &&
         hooks->configure_beacon != NULL && hooks->send_eapol != NULL &&
         hooks->send_mgmt != NULL && hooks->install_key != NULL &&
@@ -21,6 +22,7 @@ static int hooks_equal(const struct hisi_wpa_ap_driver_hooks *left,
     return left->abi_version == right->abi_version &&
         left->reserved == right->reserved && left->driver == right->driver &&
         left->get_own_address == right->get_own_address &&
+        left->get_hw_features == right->get_hw_features &&
         left->set_netdev_enabled == right->set_netdev_enabled &&
         left->configure_beacon == right->configure_beacon &&
         left->send_eapol == right->send_eapol &&

@@ -10,8 +10,10 @@
 extern "C" {
 #endif
 
-#define HISI_WPA_AP_ABI_VERSION 1u
+#define HISI_WPA_AP_ABI_VERSION 2u
 #define HISI_WPA_AP_MAX_PASSPHRASE_LEN 63u
+#define HISI_WPA_AP_MAX_CHANNELS 14u
+#define HISI_WPA_AP_MAX_BITRATES 12u
 
 struct hisi_wpa_ap_context;
 
@@ -56,6 +58,21 @@ struct hisi_wpa_ap_beacon {
     size_t tail_len;
 };
 
+struct hisi_wpa_ap_hw_channel {
+    uint16_t channel;
+    uint16_t reserved;
+    uint32_t frequency_mhz;
+    uint32_t flags;
+};
+
+struct hisi_wpa_ap_hw_features {
+    int32_t channel_count;
+    uint16_t bitrates[HISI_WPA_AP_MAX_BITRATES];
+    uint16_t ht_capabilities;
+    uint16_t reserved;
+    struct hisi_wpa_ap_hw_channel channels[HISI_WPA_AP_MAX_CHANNELS];
+};
+
 /*
  * WS63-specific AP driver capabilities consumed by the upstream hostapd port.
  * This is deliberately separate from hisi_wpa_driver_hooks: selecting an AP
@@ -66,6 +83,8 @@ struct hisi_wpa_ap_driver_hooks {
     uint16_t reserved;
     void *driver;
     int32_t (*get_own_address)(void *driver, uint8_t address[6]);
+    int32_t (*get_hw_features)(void *driver,
+        struct hisi_wpa_ap_hw_features *features);
     int32_t (*set_netdev_enabled)(void *driver, uint8_t enabled);
     int32_t (*configure_beacon)(void *driver,
         const struct hisi_wpa_ap_beacon *beacon);
@@ -104,10 +123,14 @@ void hisi_wpa_ap_destroy(struct hisi_wpa_ap_context *context);
 
 _Static_assert(offsetof(struct hisi_wpa_ap_driver_hooks, driver) ==
     sizeof(void *), "hisi_wpa_ap_driver_hooks prefix drift");
-_Static_assert(sizeof(struct hisi_wpa_ap_driver_hooks) == 10 * sizeof(void *),
+_Static_assert(sizeof(struct hisi_wpa_ap_driver_hooks) == 11 * sizeof(void *),
     "hisi_wpa_ap_driver_hooks ABI drift");
 _Static_assert(sizeof(struct hisi_wpa_ap_config) == 48,
     "hisi_wpa_ap_config ABI drift");
+_Static_assert(sizeof(struct hisi_wpa_ap_hw_channel) == 12,
+    "hisi_wpa_ap_hw_channel ABI drift");
+_Static_assert(sizeof(struct hisi_wpa_ap_hw_features) == 200,
+    "hisi_wpa_ap_hw_features ABI drift");
 
 #ifdef __cplusplus
 }

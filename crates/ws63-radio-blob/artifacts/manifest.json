@@ -163,10 +163,10 @@
     },
     {
       "archive": "libhisi_wpa_native_authenticator_wpa2.a",
-      "output_sha256": "d39d2b8569de28c1e6c53fa8c515db1db402d6fafcecd64f2de61b2d630c55bb",
-      "output_size": 1013692,
+      "output_sha256": "ae6174149048f1c7ce4719b0ce6c54b7ed5cdc3da61590bf6e37fcc91a7c20e4",
+      "output_size": 1016380,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-ap-personal-v2"
+      "profile_revision": "hostap-2.11-security-2026-07-ap-personal-v3"
     }
   ],
   "native_supplicant": {
@@ -225,7 +225,7 @@
     "profiles": [
       {
         "id": "wpa2",
-        "revision": "hostap-2.11-security-2026-07-ap-personal-v2",
+        "revision": "hostap-2.11-security-2026-07-ap-personal-v3",
         "archive": "libhisi_wpa_native_authenticator_wpa2.a",
         "source_profile": "ap-personal.toml"
       }

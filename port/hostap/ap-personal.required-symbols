@@ -1,4 +1,4 @@
-# Exact external ABI of hostap-2.11-security-2026-07-ap-personal-v2.
+# Exact external ABI of hostap-2.11-security-2026-07-ap-personal-v3.
 __udivdi3
 __umoddi3
 aes_decrypt

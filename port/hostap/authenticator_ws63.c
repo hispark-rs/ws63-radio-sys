@@ -174,7 +174,7 @@ int32_t hisi_wpa_ap_start(struct hisi_wpa_ap_context *context)
         return -1;
     g_config_context = context;
     if (eloop_init() != 0)
-        goto failed;
+        goto failed_eloop_init;
     os_memset(&context->interfaces, 0, sizeof(context->interfaces));
     context->interfaces.config_read_cb = memory_config_read;
     context->interfaces.driver_init = ws63_driver_init;
@@ -183,24 +183,36 @@ int32_t hisi_wpa_ap_start(struct hisi_wpa_ap_context *context)
     context->interface = hostapd_init(&context->interfaces,
         HISI_WPA_AP_CONFIG_NAME);
     if (context->interface == NULL)
-        goto failed_eloop;
+        goto failed_hostapd_init;
     context->interface->interfaces = &context->interfaces;
     context->interfaces.count = 1;
     context->interfaces.iface = &context->interface;
-    if (ws63_driver_init(context->interface) != 0 ||
-        hostapd_setup_interface(context->interface) != 0)
-        goto failed_interface;
+    if (ws63_driver_init(context->interface) != 0)
+        goto failed_driver_init;
+    if (hostapd_setup_interface(context->interface) != 0)
+        goto failed_setup_interface;
     context->started = 1;
     return 0;
 
-failed_interface:
+failed_setup_interface:
     hostapd_interface_deinit_free(context->interface);
     context->interface = NULL;
-failed_eloop:
     eloop_destroy();
-failed:
     g_config_context = NULL;
-    return -2;
+    return -24;
+failed_driver_init:
+    hostapd_interface_deinit_free(context->interface);
+    context->interface = NULL;
+    eloop_destroy();
+    g_config_context = NULL;
+    return -23;
+failed_hostapd_init:
+    eloop_destroy();
+    g_config_context = NULL;
+    return -22;
+failed_eloop_init:
+    g_config_context = NULL;
+    return -21;
 }
 
 struct hisi_wpa_poll_result hisi_wpa_ap_poll(

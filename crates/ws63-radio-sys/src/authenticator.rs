@@ -7,8 +7,10 @@
 use crate::supplicant::{Key, PollResult};
 use core::ffi::{c_int, c_void};
 
-pub const ABI_VERSION: u16 = 1;
+pub const ABI_VERSION: u16 = 2;
 pub const MAX_SSID_LEN: usize = 32;
+pub const MAX_CHANNELS: usize = 14;
+pub const MAX_BITRATES: usize = 12;
 
 #[repr(C)]
 pub struct Context {
@@ -61,7 +63,28 @@ pub struct Beacon {
     pub tail_len: usize,
 }
 
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct HardwareChannel {
+    pub channel: u16,
+    pub reserved: u16,
+    pub frequency_mhz: u32,
+    pub flags: u32,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct HardwareFeatures {
+    pub channel_count: i32,
+    pub bitrates: [u16; MAX_BITRATES],
+    pub ht_capabilities: u16,
+    pub reserved: u16,
+    pub channels: [HardwareChannel; MAX_CHANNELS],
+}
+
 pub type GetOwnAddress = unsafe extern "C" fn(driver: *mut c_void, address: *mut u8) -> c_int;
+pub type GetHardwareFeatures =
+    unsafe extern "C" fn(driver: *mut c_void, features: *mut HardwareFeatures) -> c_int;
 pub type SetNetdevEnabled = unsafe extern "C" fn(driver: *mut c_void, enabled: u8) -> c_int;
 pub type ConfigureBeacon =
     unsafe extern "C" fn(driver: *mut c_void, beacon: *const Beacon) -> c_int;
@@ -92,6 +115,7 @@ pub struct DriverHooks {
     pub reserved: u16,
     pub driver: *mut c_void,
     pub get_own_address: Option<GetOwnAddress>,
+    pub get_hw_features: Option<GetHardwareFeatures>,
     pub set_netdev_enabled: Option<SetNetdevEnabled>,
     pub configure_beacon: Option<ConfigureBeacon>,
     pub send_eapol: Option<SendEapol>,
@@ -138,6 +162,8 @@ unsafe extern "C" {
 
 const _: () = {
     assert!(core::mem::size_of::<Config>() == 48);
+    assert!(core::mem::size_of::<HardwareChannel>() == 12);
+    assert!(core::mem::size_of::<HardwareFeatures>() == 200);
     assert!(core::mem::offset_of!(DriverHooks, driver) == core::mem::size_of::<usize>());
-    assert!(core::mem::size_of::<DriverHooks>() == 10 * core::mem::size_of::<usize>());
+    assert!(core::mem::size_of::<DriverHooks>() == 11 * core::mem::size_of::<usize>());
 };

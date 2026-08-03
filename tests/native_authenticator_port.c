@@ -12,6 +12,20 @@ static int32_t get_own_address(void *driver, uint8_t address[6])
     return 0;
 }
 
+static int32_t get_hw_features(void *driver,
+    struct hisi_wpa_ap_hw_features *features)
+{
+    assert(driver == (void *) 0x1234u);
+    assert(features != NULL);
+    memset(features, 0, sizeof(*features));
+    features->channel_count = 1;
+    features->bitrates[0] = 10;
+    features->ht_capabilities = 1;
+    features->channels[0].channel = 6;
+    features->channels[0].frequency_mhz = 2437;
+    return 0;
+}
+
 static int32_t set_netdev_enabled(void *driver, uint8_t enabled)
 {
     assert(driver == (void *) 0x1234u);
@@ -69,6 +83,7 @@ static const struct hisi_wpa_ap_driver_hooks hooks = {
     .abi_version = HISI_WPA_AP_ABI_VERSION,
     .driver = (void *) 0x1234u,
     .get_own_address = get_own_address,
+    .get_hw_features = get_hw_features,
     .set_netdev_enabled = set_netdev_enabled,
     .configure_beacon = configure_beacon,
     .send_eapol = send_frame,
