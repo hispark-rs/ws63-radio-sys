@@ -1,4 +1,4 @@
-revision = "hostap-2.11-security-2026-07-ap-personal-v1"
+revision = "hostap-2.11-security-2026-07-ap-personal-v2"
 
 # Upstream-native WPA2-Personal authenticator. This is a distinct target
 # profile: it must never be folded into the default STA supplicant archive.
@@ -47,7 +47,9 @@ upstream_sources = [
   "src/utils/wpabuf.c",
   "src/utils/crc32.c",
   "src/crypto/aes-unwrap.c",
+  "src/crypto/aes-wrap.c",
   "src/crypto/aes-omac1.c",
+  "src/crypto/rc4.c",
   "src/crypto/md5.c",
   "src/crypto/md5-internal.c",
   "src/crypto/sha1-prf.c",
@@ -61,6 +63,7 @@ port_sources = [
   "os_hisi_rtos.c",
   "eloop_hisi_rtos.c",
   "hisi_wpa_ap_driver_port.c",
+  "l2_packet_ws63_ap.c",
   "driver_ws63_ap.c",
   "drivers_ws63_ap.c",
   "authenticator_ws63.c",

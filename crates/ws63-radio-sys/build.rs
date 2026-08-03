@@ -530,7 +530,7 @@ fn main() {
         let revision = env::var(revision_variable)
             .unwrap_or_else(|_| panic!("ws63-radio-blob did not export {revision_variable}"));
         assert_eq!(
-            revision, "hostap-2.11-security-2026-07-ap-personal-v1",
+            revision, "hostap-2.11-security-2026-07-ap-personal-v2",
             "native authenticator artifact/profile revision mismatch"
         );
         println!("cargo:native_authenticator_archive={}", archive.display());
