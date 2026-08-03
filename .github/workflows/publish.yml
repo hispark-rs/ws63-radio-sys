@@ -106,6 +106,8 @@ jobs:
         run: |
           printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
             cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-abi.o -
+          printf '#include "hisi_wpa_authenticator.h"\nint main(void) { return 0; }\n' |
+            cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-ap-abi.o -
 
       - name: Build WS63 supplicant profiles
         run: |
@@ -115,6 +117,9 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --features upstream-authenticator-wpa2 --locked
 
       # Cargo cannot package the facade until its exact-version dependencies are
       # visible in the registry. Build/package the dependency layer first; the

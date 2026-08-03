@@ -483,13 +483,13 @@ fn main() {
             (
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_ARCHIVE",
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA3_REVISION",
-                "hostap-2.11-security-2026-07-personal-wpa3-v4",
+                "hostap-2.11-security-2026-07-personal-wpa3-v5",
             )
         } else {
             (
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_ARCHIVE",
                 "DEP_WS63_RADIO_BLOB_NATIVE_SUPPLICANT_WPA2_REVISION",
-                "hostap-2.11-security-2026-07-personal-v4",
+                "hostap-2.11-security-2026-07-personal-v5",
             )
         };
         let archive = PathBuf::from(
@@ -520,4 +520,37 @@ fn main() {
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_SUPPLICANT_WPA3");
+    if env::var_os("CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA2").is_some() {
+        let archive_variable = "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA2_ARCHIVE";
+        let revision_variable = "DEP_WS63_RADIO_BLOB_NATIVE_AUTHENTICATOR_WPA2_REVISION";
+        let archive = PathBuf::from(
+            env::var_os(archive_variable)
+                .unwrap_or_else(|| panic!("ws63-radio-blob did not export {archive_variable}")),
+        );
+        let revision = env::var(revision_variable)
+            .unwrap_or_else(|_| panic!("ws63-radio-blob did not export {revision_variable}"));
+        assert_eq!(
+            revision, "hostap-2.11-security-2026-07-ap-personal-v1",
+            "native authenticator artifact/profile revision mismatch"
+        );
+        println!("cargo:native_authenticator_archive={}", archive.display());
+        println!("cargo:native_authenticator_profile_revision={revision}");
+        println!(
+            "cargo:native_authenticator_root_symbols={}",
+            [
+                "hisi_wpa_ap_context_size",
+                "hisi_wpa_ap_context_align",
+                "hisi_wpa_ap_create",
+                "hisi_wpa_ap_configure",
+                "hisi_wpa_ap_start",
+                "hisi_wpa_ap_poll",
+                "hisi_wpa_ap_feed_eapol",
+                "hisi_wpa_ap_feed_mgmt",
+                "hisi_wpa_ap_stop",
+                "hisi_wpa_ap_destroy",
+            ]
+            .join(",")
+        );
+    }
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_UPSTREAM_AUTHENTICATOR_WPA2");
 }

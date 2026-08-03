@@ -82,6 +82,13 @@ def main() -> int:
 
     artifact_manifest = json.loads(ARTIFACT_MANIFEST.read_text())
     builder = artifact_manifest["native_supplicant"]["builder"]
+    authenticator_builder = artifact_manifest["native_authenticator"]["builder"]
+    if authenticator_builder != builder:
+        print(
+            "native supplicant/authenticator builder contracts differ",
+            file=sys.stderr,
+        )
+        return 1
     cc_requirement = dependency_version(
         manifests["hisi-rf-link"], "dependencies", "cc"
     )

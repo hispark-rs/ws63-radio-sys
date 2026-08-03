@@ -15,6 +15,14 @@
 ))]
 compile_error!("select either legacy vendor supplicant archives or the upstream hostap profile");
 
+#[cfg(all(
+    feature = "upstream-authenticator-wpa2",
+    feature = "upstream-supplicant-port"
+))]
+compile_error!("select either the AP authenticator or STA supplicant target archive");
+
+#[cfg(feature = "upstream-authenticator-wpa2")]
+pub mod authenticator;
 pub mod supplicant;
 
 /// Marker type for the Cargo links contract.

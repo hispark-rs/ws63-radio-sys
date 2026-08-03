@@ -33,5 +33,8 @@ upstream-supplicant-port = []
 # vendor WPA3 archives; the Rust integration must provide the explicit P-256
 # and entropy capabilities required by this profile.
 upstream-supplicant-wpa3 = ["upstream-supplicant-port"]
+# Link the separately packaged upstream hostapd WPA2-Personal authenticator.
+# This is mutually exclusive with the STA supplicant profiles.
+upstream-authenticator-wpa2 = []
 ble = []
 sle = []

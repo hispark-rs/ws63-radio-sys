@@ -44,6 +44,7 @@ struct ArtifactManifest {
     schema_version: u32,
     artifacts: Vec<Artifact>,
     native_supplicant: NativeSupplicant,
+    native_authenticator: NativeSupplicant,
 }
 
 #[derive(Deserialize)]
@@ -72,6 +73,7 @@ struct NativeProfile {
     id: String,
     revision: String,
     archive: String,
+    source_profile: Option<String>,
 }
 
 struct CurrentDirectory(PathBuf);
@@ -185,10 +187,14 @@ fn build_profile(
     archiver: &Path,
     profile: &NativeProfile,
 ) -> Result<PathBuf, Error> {
-    let profile_name = match profile.id.as_str() {
-        "wpa2" => "personal.toml",
-        "wpa3" => "personal-wpa3.toml",
-        other => return Err(Error::new(format!("unsupported native profile {other}"))),
+    let profile_name = if let Some(source_profile) = profile.source_profile.as_deref() {
+        source_profile
+    } else {
+        match profile.id.as_str() {
+            "wpa2" => "personal.toml",
+            "wpa3" => "personal-wpa3.toml",
+            other => return Err(Error::new(format!("unsupported native profile {other}"))),
+        }
     };
     let source_profile: SourceProfile =
         load_toml(&repository.join("port/hostap").join(profile_name))?;
@@ -289,6 +295,88 @@ fn build_profile(
     Ok(destination)
 }
 
+fn validate_native_group(
+    group_name: &str,
+    group: &NativeSupplicant,
+    compiler: &Path,
+    archiver: &Path,
+) -> Result<(), Error> {
+    if group.target != TARGET {
+        return Err(Error::new(format!(
+            "{group_name} target drift: expected {TARGET}, got {}",
+            group.target
+        )));
+    }
+    if group.builder.cc_rs != CC_RS_VERSION {
+        return Err(Error::new(format!(
+            "{group_name} cc-rs contract drift: expected {CC_RS_VERSION}, got {}",
+            group.builder.cc_rs
+        )));
+    }
+    for (path, expected) in [
+        (compiler, group.builder.compiler_first_line.as_str()),
+        (archiver, group.builder.archiver_first_line.as_str()),
+    ] {
+        let actual = command_first_line(path)?;
+        if actual != expected {
+            return Err(Error::new(format!(
+                "{group_name} toolchain drift for {}: expected {expected:?}, got {actual:?}",
+                path.display()
+            )));
+        }
+    }
+    Ok(())
+}
+
+fn rebuild_group(
+    repository: &Path,
+    output: &Path,
+    compiler: &Path,
+    archiver: &Path,
+    artifacts: &[Artifact],
+    group_name: &str,
+    group: &NativeSupplicant,
+) -> Result<(), Error> {
+    validate_native_group(group_name, group, compiler, archiver)?;
+    for profile in &group.profiles {
+        let artifact = artifacts
+            .iter()
+            .find(|artifact| artifact.archive == profile.archive)
+            .ok_or_else(|| {
+                Error::new(format!(
+                    "{group_name} profile {} references missing artifact {}",
+                    profile.id, profile.archive
+                ))
+            })?;
+        let built_path = build_profile(repository, output, compiler, archiver, profile)?;
+        let built = fs::read(&built_path)
+            .map_err(|error| Error::new(format!("read {}: {error}", built_path.display())))?;
+        let packaged_path = repository
+            .join("crates/ws63-radio-blob/artifacts")
+            .join(format!("{}.zst", profile.archive));
+        if built.len() != artifact.output_size || sha256(&built) != artifact.output_sha256 {
+            return Err(Error::new(format!(
+                "rebuilt {} differs from manifest: size={}, sha256={}",
+                profile.archive,
+                built.len(),
+                sha256(&built)
+            )));
+        }
+        let packaged = expand_zstd(&packaged_path)?;
+        if built != packaged {
+            return Err(Error::new(format!(
+                "rebuilt {} differs byte-for-byte from the Cargo payload",
+                profile.archive
+            )));
+        }
+        println!(
+            "rebuilt {}: {} bytes, sha256={}, byte-for-byte Cargo payload match",
+            profile.archive, artifact.output_size, artifact.output_sha256
+        );
+    }
+    Ok(())
+}
+
 fn rebuild(
     repository: &Path,
     output: &Path,
@@ -303,84 +391,26 @@ fn rebuild(
             manifest.schema_version
         )));
     }
-    if manifest.native_supplicant.target != TARGET {
-        return Err(Error::new(format!(
-            "native target drift: expected {TARGET}, got {}",
-            manifest.native_supplicant.target
-        )));
-    }
-    if manifest.native_supplicant.builder.cc_rs != CC_RS_VERSION {
-        return Err(Error::new(format!(
-            "cc-rs contract drift: expected {CC_RS_VERSION}, got {}",
-            manifest.native_supplicant.builder.cc_rs
-        )));
-    }
-    for (path, expected) in [
-        (
-            compiler,
-            manifest
-                .native_supplicant
-                .builder
-                .compiler_first_line
-                .as_str(),
-        ),
-        (
-            archiver,
-            manifest
-                .native_supplicant
-                .builder
-                .archiver_first_line
-                .as_str(),
-        ),
-    ] {
-        let actual = command_first_line(path)?;
-        if actual != expected {
-            return Err(Error::new(format!(
-                "toolchain drift for {}: expected {expected:?}, got {actual:?}",
-                path.display()
-            )));
-        }
-    }
     fs::create_dir_all(output)
         .map_err(|error| Error::new(format!("create {}: {error}", output.display())))?;
-
-    for profile in &manifest.native_supplicant.profiles {
-        let artifact = manifest
-            .artifacts
-            .iter()
-            .find(|artifact| artifact.archive == profile.archive)
-            .ok_or_else(|| {
-                Error::new(format!(
-                    "native profile {} references missing artifact {}",
-                    profile.id, profile.archive
-                ))
-            })?;
-        let built_path = build_profile(repository, output, compiler, archiver, profile)?;
-        let built = fs::read(&built_path)
-            .map_err(|error| Error::new(format!("read {}: {error}", built_path.display())))?;
-        let packaged_path = repository
-            .join("crates/ws63-radio-blob/artifacts")
-            .join(format!("{}.zst", profile.archive));
-        let packaged = expand_zstd(&packaged_path)?;
-        if built.len() != artifact.output_size || sha256(&built) != artifact.output_sha256 {
-            return Err(Error::new(format!(
-                "rebuilt {} differs from manifest: size={}, sha256={}",
-                profile.archive,
-                built.len(),
-                sha256(&built)
-            )));
-        }
-        if built != packaged {
-            return Err(Error::new(format!(
-                "rebuilt {} differs byte-for-byte from the Cargo payload",
-                profile.archive
-            )));
-        }
-        println!(
-            "rebuilt {}: {} bytes, sha256={}, byte-for-byte Cargo payload match",
-            profile.archive, artifact.output_size, artifact.output_sha256
-        );
-    }
+    rebuild_group(
+        repository,
+        output,
+        compiler,
+        archiver,
+        &manifest.artifacts,
+        "native supplicant",
+        &manifest.native_supplicant,
+    )?;
+    rebuild_group(
+        repository,
+        output,
+        compiler,
+        archiver,
+        &manifest.artifacts,
+        "native authenticator",
+        &manifest.native_authenticator,
+    )?;
     Ok(())
 }
 

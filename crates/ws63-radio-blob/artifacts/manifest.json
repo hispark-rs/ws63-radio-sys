@@ -149,17 +149,24 @@
     },
     {
       "archive": "libhisi_wpa_native_port_wpa2.a",
-      "output_sha256": "204ab517f5dbc0ce3c73ca5421fe88a24d98980fb05eae1e0aa6c6833ec3883b",
-      "output_size": 1027896,
+      "output_sha256": "1e0986159bbf25f45031c4e9f5a7a453e589900f5a75d6ec6f95cc0e3dca1c75",
+      "output_size": 1028876,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-personal-v4"
+      "profile_revision": "hostap-2.11-security-2026-07-personal-v5"
     },
     {
       "archive": "libhisi_wpa_native_port_wpa3.a",
-      "output_sha256": "945059e07ace9fa79f05889b439783663f77ea8d48291ffaf036dc44417d6cd5",
-      "output_size": 1117004,
+      "output_sha256": "3b8c17b75e82d0ed072ab4ed5542b6e2422103f389dd34569b5728cdf8f4d983",
+      "output_size": 1117984,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v4"
+      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v5"
+    },
+    {
+      "archive": "libhisi_wpa_native_authenticator_wpa2.a",
+      "output_sha256": "04e84f977591b94bb5e7bc6eb1693d3df1a6c3ba0630a6aa7a34d49c5dc86cfe",
+      "output_size": 1006004,
+      "kind": "upstream-hostap-target-archive",
+      "profile_revision": "hostap-2.11-security-2026-07-ap-personal-v1"
     }
   ],
   "native_supplicant": {
@@ -185,13 +192,42 @@
     "profiles": [
       {
         "id": "wpa2",
-        "revision": "hostap-2.11-security-2026-07-personal-v4",
+        "revision": "hostap-2.11-security-2026-07-personal-v5",
         "archive": "libhisi_wpa_native_port_wpa2.a"
       },
       {
         "id": "wpa3",
-        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v4",
+        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v5",
         "archive": "libhisi_wpa_native_port_wpa3.a"
+      }
+    ]
+  },
+  "native_authenticator": {
+    "upstream": {
+      "version": "2.11",
+      "tag": "hostap_2_11",
+      "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+      "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
+      "security_advisories": ["2026-1", "2026-2", "2026-3"],
+      "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
+    },
+    "target": "riscv32imfc-unknown-none-elf",
+    "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
+    "builder": {
+      "cc_rs": "1.2.67",
+      "compiler_first_line": "riscv64-unknown-elf-gcc (g1b306039a) 15.1.0",
+      "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
+      "canonical_runner": "macos-15",
+      "homebrew_tap": "riscv-software-src/riscv",
+      "homebrew_tap_commit": "2434aac00803d570c1b04190c76f647e7d1661e7",
+      "arm64_sequoia_bottle_sha256": "95917aa644e53aba86f8d6e840e281e4cb8b782153e5c6e3fd5788f19a572ada"
+    },
+    "profiles": [
+      {
+        "id": "wpa2",
+        "revision": "hostap-2.11-security-2026-07-ap-personal-v1",
+        "archive": "libhisi_wpa_native_authenticator_wpa2.a",
+        "source_profile": "ap-personal.toml"
       }
     ]
   }

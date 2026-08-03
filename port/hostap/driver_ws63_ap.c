@@ -186,7 +186,7 @@ static int ws63_ap_send_mlme(void *private_data, const uint8_t *frame,
 
 static int ws63_ap_send_eapol(void *private_data,
     const uint8_t destination[6], const uint8_t *frame, size_t frame_len,
-    int encrypt, const uint8_t *own_address, uint32_t flags, int link_id)
+    int encrypt, const uint8_t *own_address, u32 flags, int link_id)
 {
     struct ws63_ap_driver_data *driver = private_data;
     (void) encrypt;

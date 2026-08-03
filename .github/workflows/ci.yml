@@ -36,6 +36,8 @@ jobs:
         run: |
           printf '#include "hisi_wpa_supplicant.h"\nint main(void) { return 0; }\n' |
             cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-abi.o -
+          printf '#include "hisi_wpa_authenticator.h"\nint main(void) { return 0; }\n' |
+            cc -std=c11 -Wall -Wextra -Werror -I include -x c -c -o /tmp/hisi-wpa-ap-abi.o -
       - run: uv run scripts/check-native-supplicant-port.py
       - run: uv run scripts/check-native-authenticator-port.py
       - name: Replay upstream WPA Personal protocol vectors
@@ -50,6 +52,9 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --features upstream-authenticator-wpa2 --locked
       - run: uv run crates/hisi-rf-link/python/test_relocations.py
       - name: Package release unit
         run: |
@@ -141,3 +146,10 @@ jobs:
           cargo check "-Zbuild-std=core,alloc"
           --target riscv32imfc-unknown-none-elf
           -p ws63-radio-sys --features upstream-supplicant-wpa3 --locked
+      - name: Build WPA2 AP Cargo consumer contract
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
+        run: >-
+          cargo check "-Zbuild-std=core,alloc"
+          --target riscv32imfc-unknown-none-elf
+          -p ws63-radio-sys --features upstream-authenticator-wpa2 --locked

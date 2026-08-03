@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a separate upstream hostapd WPA2-Personal authenticator archive,
+  in-memory AP lifecycle ABI, Rust raw bindings, and Cargo feature/metadata.
+  Consumer builds remain free of C compilers, configuration files, and host
+  scripts.
+- Added Ubuntu, macOS, and Windows consumer checks for the AP target archive.
+
+### Fixed
+
+- Rebuilt the WPA2/WPA3 STA archives after the freestanding portability layer
+  changed, advanced their profile revisions, and restored byte-for-byte source
+  and Cargo-payload parity.
+
 ## [0.1.0-alpha.9] - 2026-08-03
 
 ### Fixed

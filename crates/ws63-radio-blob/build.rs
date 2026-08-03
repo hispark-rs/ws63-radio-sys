@@ -14,6 +14,7 @@ struct Manifest {
     profile_revision: String,
     artifacts: Vec<Artifact>,
     native_supplicant: NativeSupplicant,
+    native_authenticator: NativeSupplicant,
 }
 
 #[derive(Deserialize)]
@@ -119,6 +120,26 @@ fn main() {
         );
         println!(
             "cargo:native_supplicant_{}_revision={}",
+            profile.id, profile.revision
+        );
+    }
+    for profile in &manifest.native_authenticator.profiles {
+        assert!(
+            manifest
+                .artifacts
+                .iter()
+                .any(|artifact| artifact.archive == profile.archive),
+            "native authenticator profile {} references an unknown archive",
+            profile.id
+        );
+        let archive = output.join(&profile.archive);
+        println!(
+            "cargo:native_authenticator_{}_archive={}",
+            profile.id,
+            archive.display()
+        );
+        println!(
+            "cargo:native_authenticator_{}_revision={}",
             profile.id, profile.revision
         );
     }
