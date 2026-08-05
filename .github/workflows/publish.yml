@@ -123,6 +123,9 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --features upstream-authenticator-wpa3 --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --no-default-features --features ble --locked
 
       # Cargo cannot package the facade until its exact-version dependencies are
       # visible in the registry. Build/package the dependency layer first; the
