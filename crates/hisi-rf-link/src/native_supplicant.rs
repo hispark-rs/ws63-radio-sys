@@ -381,10 +381,10 @@ fn rebuild_group(
     compiler: &Path,
     archiver: &Path,
     artifacts: &[Artifact],
-    group_name: &str,
-    group: &NativeSupplicant,
+    group: (&str, &NativeSupplicant),
     update_artifacts: bool,
 ) -> Result<(), Error> {
+    let (group_name, group) = group;
     validate_native_group(group_name, group, compiler, archiver)?;
     for profile in &group.profiles {
         let artifact = artifacts
@@ -455,8 +455,7 @@ fn rebuild(
             compiler,
             archiver,
             &manifest.artifacts,
-            "native supplicant",
-            &manifest.native_supplicant,
+            ("native supplicant", &manifest.native_supplicant),
             update_artifacts,
         )?;
     }
@@ -467,8 +466,7 @@ fn rebuild(
             compiler,
             archiver,
             &manifest.artifacts,
-            "native authenticator",
-            &manifest.native_authenticator,
+            ("native authenticator", &manifest.native_authenticator),
             update_artifacts,
         )?;
     }
