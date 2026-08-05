@@ -1,6 +1,6 @@
 [package]
 name = "ws63-radio-blob"
-version = "0.1.0-alpha.11"
+version = "0.1.0-alpha.12"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true

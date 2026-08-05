@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.12] - 2026-08-06
+
 ### Added
 
 - Add a hash-bound WS63 BLE B0 archive/ABI inventory, normalized redistributable
