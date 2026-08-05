@@ -1,0 +1,558 @@
+{
+  "schema_version": 1,
+  "revision": "ws63-ble-b0-archive-abi-v1",
+  "target": {
+    "class": "ELF32",
+    "endian": "little",
+    "machine": "RISC-V",
+    "e_flags": 3
+  },
+  "archives": [
+    {
+      "archive": "libbt_host.a",
+      "sha256": "5e74634a15bf348436de991fa9585bb198ae67ad7a22ed659af7586c8a6e62f3",
+      "size": 1126496,
+      "role": "BLE host: ATT/GATT/GAP/L2CAP/SMP and controller-facing host state",
+      "members": 87,
+      "defined_global_symbols": 1795,
+      "undefined_global_symbols": 1137,
+      "vendor_relocations": 3079
+    },
+    {
+      "archive": "libbt_app.a",
+      "sha256": "6fe84ddea4e02a444afe6d7b1ef1e63cd15e8d2b8d8ad648ea2525062308c9fc",
+      "size": 285718,
+      "role": "BLE application service and connection-management adapter",
+      "members": 28,
+      "defined_global_symbols": 287,
+      "undefined_global_symbols": 213,
+      "vendor_relocations": 1279
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "sha256": "dc3aef21864a97c6c053cb67654ea363e8e83aed4d07fcb2a60cd05054670378",
+      "size": 89886,
+      "role": "Public BLE SDK entry points and utilities",
+      "members": 9,
+      "defined_global_symbols": 102,
+      "undefined_global_symbols": 67,
+      "vendor_relocations": 382
+    },
+    {
+      "archive": "libbg_common.a",
+      "sha256": "40c671a542c3d1a9be413786f1d75b7dcd9635d7985b507c64efa7b3ff713dcd",
+      "size": 218616,
+      "role": "Shared Bluetooth transport, memory, task, crypto and diagnostics support",
+      "members": 44,
+      "defined_global_symbols": 389,
+      "undefined_global_symbols": 195,
+      "vendor_relocations": 618
+    }
+  ],
+  "excluded_sibling_archives": [
+    {
+      "archive": "libbth_gle.a",
+      "sha256": "e661741923073fb9a0b9e75b7cec8ac1da5b2b1b9a08bd05f384e127d4f51ff7",
+      "size": 821178,
+      "reason": "SLE/GLE host stack; kept out of the BLE-only B0 profile",
+      "vendor_relocations": 3542
+    }
+  ],
+  "aggregate": {
+    "defined_global_symbols": 2573,
+    "undefined_global_symbols": 1435,
+    "required_external_symbols": 120,
+    "vendor_relocations": {
+      "total": 5358,
+      "by_type": {
+        "R_RISCV_48_LLUI": 1404,
+        "R_RISCV_BRANCHI": 1298,
+        "R_RISCV_LLUI_REP": 2656
+      },
+      "branchi_same_section": 1298,
+      "branchi_cross_section": 0
+    }
+  },
+  "required_symbols": [
+    {
+      "name": "LOS_MS2Tick",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MemInfoGet",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxCreate",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxPend",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxPost",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemCreate",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemPend",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemPost",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SwtmrCreate",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SwtmrStart",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SwtmrStop",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_TaskDelay",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_Tick2MS",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_TickCountGet",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "__udivdi3",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "api_h2c_write",
+      "owner": "ws63-radio-controller-transport"
+    },
+    {
+      "name": "atoi",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "disable_sle",
+      "owner": "explicit-sle-boundary"
+    },
+    {
+      "name": "dts_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_malloc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_thread_set_sem",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "enable_sle",
+      "owner": "explicit-sle-boundary"
+    },
+    {
+      "name": "fsm_msg_alloc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_buf_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_dts_thread_chnl",
+      "owner": "ws63-radio-controller-transport"
+    },
+    {
+      "name": "g_intheap_begin",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "g_osSwtmrCBArray",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "gap_create_connectiona",
+      "owner": "ble-application-hook"
+    },
+    {
+      "name": "global_isr_time_statistics_get",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "global_thread_status_update",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "hci_if_bth_init",
+      "owner": "ws63-radio-controller-transport"
+    },
+    {
+      "name": "log_event_print0",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print1",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print2",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print3",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print4",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print_alterable_para_press",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "massdata_record_system_error",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "massdata_record_system_event",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "memcmp",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "memcpy",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "memcpy_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "memmove_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "memset",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "memset_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_dhkey",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_pubkey",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_seckey",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_set2",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_var_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_var_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "oal_mem_alloc",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "oal_mem_free",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "osDelay",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMessageQueueGet",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMessageQueueNew",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMessageQueuePut",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexAcquire",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexNew",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexRelease",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osTimerDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osTimerNew",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osTimerStart",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_create",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_lock",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_set_priority",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_unlock",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msecs_to_jiffies",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msg_queue_write_copy",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msleep",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_mutex_init",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_mutex_lock",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_mutex_unlock",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_sem_destroy",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_sem_down_timeout",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_sem_init",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_sem_up",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_vfree",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "osal_vmalloc",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "panic",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "print_str",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "s_pubkey_mpint_par",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "sapi_ble_hid_keyboard_input",
+      "owner": "ble-application-hook"
+    },
+    {
+      "name": "sapi_ble_low_latency_set_em_data",
+      "owner": "ble-application-hook"
+    },
+    {
+      "name": "smp_aes128reverse",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_csrk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_d1",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_f4",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_f5k",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_f6",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_g2",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_h6",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_irk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_resolvable_private_addr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_stk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_x_confirm",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_ecdh_public_key",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_ecdh_public_key_check_on_curve",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_fsminst",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_setbit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_truncat",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "sprintf_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strcat_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strcmp",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "strcpy_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strlen",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "strncpy_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strnlen",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "tolower",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "uapi_at_bt_register_cmd",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "uapi_at_print",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "uapi_drv_cipher_trng_get_random_bytes",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_nv_read",
+      "owner": "hisi-nvs"
+    },
+    {
+      "name": "uapi_nv_write",
+      "owner": "hisi-nvs"
+    },
+    {
+      "name": "uapi_systick_get_ms",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "uapi_tcxo_get_us",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "vsprintf_s",
+      "owner": "hisi-rom-sys-ws63"
+    }
+  ]
+}

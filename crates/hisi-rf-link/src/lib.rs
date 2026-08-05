@@ -1,6 +1,8 @@
 //! Deterministic host-side transforms for HiSilicon radio artifacts.
 
 #[cfg(feature = "tool")]
+pub mod ble_profile;
+#[cfg(feature = "tool")]
 pub mod native_supplicant;
 #[cfg(feature = "tool")]
 pub mod normalize;
@@ -14,3 +16,7 @@ pub const WS63_RUNTIME_COMPAT_PROFILE: &str = include_str!("../profiles/ws63-run
 /// Native hostap archive and legacy-boundary contract.
 pub const WS63_SUPPLICANT_BOUNDARY_PROFILE: &str =
     include_str!("../profiles/ws63-supplicant-boundary.toml");
+/// Hash-bound BLE archive and external-capability ownership contract.
+pub const WS63_BLE_B0_PROFILE: &str = include_str!("../profiles/ws63-ble-b0.toml");
+/// Generated BLE archive, ABI, relocation, and external-symbol inventory.
+pub const WS63_BLE_B0_REPORT: &str = include_str!("../profiles/ws63-ble-b0-report.json");

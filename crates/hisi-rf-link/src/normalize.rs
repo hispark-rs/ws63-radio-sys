@@ -57,6 +57,14 @@ struct Symbol {
     name: String,
     value: u32,
     section_index: u16,
+    info: u8,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct ArchiveSymbols {
+    pub members: usize,
+    pub defined_global: BTreeSet<String>,
+    pub undefined_global: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -303,6 +311,7 @@ fn parse_symbols(
             name: c_string(strings_data, u32(data, offset, context)? as usize, context)?,
             value: u32(data, offset + 4, context)?,
             section_index: u16(data, offset + 14, context)?,
+            info: data[offset + 12],
         });
     }
     Ok(symbols)
@@ -656,6 +665,49 @@ pub fn inspect_archive(path: &Path) -> Result<ArchiveInventory, Error> {
         archive,
         input_sha256: sha256(&data),
         vendor_relocations: records,
+    })
+}
+
+pub fn inspect_archive_symbols(path: &Path) -> Result<ArchiveSymbols, Error> {
+    let data =
+        fs::read(path).map_err(|error| Error::new(format!("read {}: {error}", path.display())))?;
+    let archive = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("<archive>")
+        .to_owned();
+    let mut members = 0;
+    let mut defined_global = BTreeSet::new();
+    let mut undefined_global = BTreeSet::new();
+    for (member, start, end) in archive_members(&data, &archive)? {
+        let member_data = &data[start..end];
+        if member_data.get(..4) != Some(ELF_MAGIC) {
+            continue;
+        }
+        members += 1;
+        let context = format!("{archive}({member})");
+        let sections = parse_sections(member_data, &context)?;
+        for (index, section) in sections.iter().enumerate() {
+            if section.section_type != SHT_SYMTAB {
+                continue;
+            }
+            for symbol in parse_symbols(member_data, &sections, index, &context)? {
+                let binding = symbol.info >> 4;
+                if symbol.name.is_empty() || !matches!(binding, 1 | 2) {
+                    continue;
+                }
+                if symbol.section_index == SHN_UNDEF {
+                    undefined_global.insert(symbol.name);
+                } else {
+                    defined_global.insert(symbol.name);
+                }
+            }
+        }
+    }
+    Ok(ArchiveSymbols {
+        members,
+        defined_global,
+        undefined_global,
     })
 }
 

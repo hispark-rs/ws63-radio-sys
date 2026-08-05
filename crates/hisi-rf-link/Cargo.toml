@@ -4,7 +4,7 @@ version = "0.1.0-alpha.11"
 edition.workspace = true
 authors.workspace = true
 repository.workspace = true
-description = "Host-side linker and post-link transforms for HiSilicon radio blobs"
+description = "Host-side linker, archive normalization, and ABI inventory for HiSilicon radio blobs"
 license = "MIT"
 include = ["src/**", "python/**", "profiles/**", "tests/**", "Cargo.toml", "README.md"]
 
