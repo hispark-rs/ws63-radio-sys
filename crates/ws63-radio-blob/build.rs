@@ -15,6 +15,13 @@ struct Manifest {
     artifacts: Vec<Artifact>,
     native_supplicant: NativeSupplicant,
     native_authenticator: NativeSupplicant,
+    ble_profile: BleProfile,
+}
+
+#[derive(Deserialize)]
+struct BleProfile {
+    revision: String,
+    archives: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -143,4 +150,23 @@ fn main() {
             profile.id, profile.revision
         );
     }
+    for archive in &manifest.ble_profile.archives {
+        assert!(
+            manifest
+                .artifacts
+                .iter()
+                .any(|artifact| artifact.archive == *archive),
+            "BLE profile references an unknown archive: {archive}"
+        );
+        let path = output.join(archive);
+        let key = archive
+            .strip_prefix("lib")
+            .and_then(|name| name.strip_suffix(".a"))
+            .expect("BLE artifact must be named lib*.a");
+        println!("cargo:ble_{key}_archive={}", path.display());
+    }
+    println!(
+        "cargo:ble_profile_revision={}",
+        manifest.ble_profile.revision
+    );
 }

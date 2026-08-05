@@ -1,6 +1,6 @@
 #![no_std]
 
-//! Redistributable normalized WS63 Wi-Fi target archives.
+//! Redistributable normalized WS63 radio target archives.
 //!
 //! The build script expands the Cargo-delivered payload into this package's
 //! private `OUT_DIR`, verifies every archive against the normalization

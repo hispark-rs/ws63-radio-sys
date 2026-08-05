@@ -174,6 +174,45 @@
       "output_size": 1109560,
       "kind": "upstream-hostap-target-archive",
       "profile_revision": "hostap-2.11-security-2026-08-ap-personal-wpa3-v1"
+    },
+    {
+      "archive": "libbt_host.a",
+      "input_sha256": "5e74634a15bf348436de991fa9585bb198ae67ad7a22ed659af7586c8a6e62f3",
+      "output_sha256": "a76fc6958aeaeb3ac8fb695b8bde02ba954c8fefef01e8bd345a70fa0ffdb702",
+      "input_size": 1126496,
+      "output_size": 1126496,
+      "transformations": {
+        "llui48_to_riscv32": 714,
+        "branchi_same_section_encoded": 969,
+        "relax_markers_removed_from_branchi_sections": 2570,
+        "llui_rep_markers_removed": 1396
+      }
+    },
+    {
+      "archive": "libbt_app.a",
+      "input_sha256": "6fe84ddea4e02a444afe6d7b1ef1e63cd15e8d2b8d8ad648ea2525062308c9fc",
+      "output_sha256": "7f52c92bdf1b5fc58a486d8a34895104f9cd3c0fd82f3ec90b02be2005b346de",
+      "input_size": 285718,
+      "output_size": 285718,
+      "transformations": {
+        "llui48_to_riscv32": 402,
+        "branchi_same_section_encoded": 109,
+        "relax_markers_removed_from_branchi_sections": 443,
+        "llui_rep_markers_removed": 768
+      }
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "input_sha256": "dc3aef21864a97c6c053cb67654ea363e8e83aed4d07fcb2a60cd05054670378",
+      "output_sha256": "740195f7fcb885b8602fc7b891f756a290a0cd73a09b922950217b213cf1e1dd",
+      "input_size": 89886,
+      "output_size": 89886,
+      "transformations": {
+        "llui48_to_riscv32": 59,
+        "branchi_same_section_encoded": 75,
+        "relax_markers_removed_from_branchi_sections": 237,
+        "llui_rep_markers_removed": 248
+      }
     }
   ],
   "native_supplicant": {
@@ -182,7 +221,11 @@
       "tag": "hostap_2_11",
       "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
       "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
-      "security_advisories": ["2026-1", "2026-2", "2026-3"],
+      "security_advisories": [
+        "2026-1",
+        "2026-2",
+        "2026-3"
+      ],
       "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
     },
     "target": "riscv32imfc-unknown-none-elf",
@@ -215,7 +258,11 @@
       "tag": "hostap_2_11",
       "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
       "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
-      "security_advisories": ["2026-1", "2026-2", "2026-3"],
+      "security_advisories": [
+        "2026-1",
+        "2026-2",
+        "2026-3"
+      ],
       "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
     },
     "target": "riscv32imfc-unknown-none-elf",
@@ -243,5 +290,16 @@
         "source_profile": "ap-personal-wpa3.toml"
       }
     ]
+  },
+  "ble_profile": {
+    "revision": "ws63-ble-b0-archive-abi-v1",
+    "normalization_revision": "ws63-ble-b0-normalized-v1",
+    "archives": [
+      "libbt_host.a",
+      "libbt_app.a",
+      "libbth_sdk.a",
+      "libbg_common.a"
+    ],
+    "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json"
   }
 }

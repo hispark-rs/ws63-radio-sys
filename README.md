@@ -101,6 +101,13 @@ mutation. `hisi-rf-link` normalizes vendor archives ahead of release, while
 `R_RISCV_CALL_PLT` relocations. Stock `rust-lld` resolves the final replacement
 addresses in one link. Image headers and hashes remain owned by `hisi-fwpkg`.
 
+The BLE B0 contract applies the same release-time normalization to the pinned
+WS63 BLE host/app/SDK archives. `ws63-ble-b0.toml` binds source hashes and target
+ABI; the committed JSON report inventories relocations and assigns every external
+symbol to an explicit integration owner. The `ble` feature exports those packaged
+archive paths and the profile revision to downstream build support, but does not
+yet claim BLE controller/host initialization or a stable user API.
+
 `crates/hisi-rf-link/profiles/ws63-scheduling.toml` binds observed RF task entry
 symbols and vendor priorities to exact archive or ROM hashes. It records
 classification evidence, not runtime policy: unmatched entries remain `unknown`,

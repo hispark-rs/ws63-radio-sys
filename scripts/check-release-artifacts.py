@@ -16,6 +16,7 @@ import zstandard
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63.toml"
+BLE_PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63-ble-b0.toml"
 PAYLOAD = ROOT / "crates" / "ws63-radio-blob" / "artifacts"
 ORACLE = ROOT / "ws63-RF" / "lib"
 
@@ -47,11 +48,15 @@ def unpack(name: str) -> bytes:
 
 def main() -> None:
     profile = tomllib.loads(PROFILE.read_text())
+    ble_profile = tomllib.loads(BLE_PROFILE.read_text())
     committed = json.loads((PAYLOAD / "manifest.json").read_text())
     committed_by_name = {
         artifact["archive"]: artifact for artifact in committed["artifacts"]
     }
     archive_names = [f"lib{entry['name']}.a" for entry in profile["wifi_archives"]]
+    for entry in ble_profile["archives"]:
+        if entry["archive"] not in archive_names:
+            archive_names.append(entry["archive"])
     inputs = [ORACLE / name for name in archive_names]
     missing = [str(path) for path in inputs if not path.is_file()]
     if missing:
@@ -122,6 +127,38 @@ def main() -> None:
     if sha256(callback_bytes) != callback_expected["output_sha256"]:
         raise RuntimeError("ROM callback archive SHA-256 drift")
     print(f"{callback_name}: reproducible ({len(callback_bytes)} bytes)")
+
+    subprocess.run(
+        [
+            "cargo",
+            "run",
+            "--quiet",
+            "-p",
+            "hisi-rf-link",
+            "--target",
+            host_target(),
+            "--locked",
+            "--",
+            "ble-profile",
+            "--profile",
+            str(BLE_PROFILE),
+            "--archive-root",
+            str(ORACLE),
+            "--rom-symbols",
+            str(ROOT / "ws63-RF" / "rom" / "ws63_acore_rom.lds"),
+            "--output",
+            str(
+                ROOT
+                / "crates"
+                / "hisi-rf-link"
+                / "profiles"
+                / "ws63-ble-b0-report.json"
+            ),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
 
 
 if __name__ == "__main__":

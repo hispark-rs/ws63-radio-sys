@@ -30,6 +30,15 @@ jobs:
       - run: uv run scripts/check-hostap-security-radar.py --self-test
       - run: uv run scripts/check-runtime-compat-profile.py
       - run: uv run scripts/check-supplicant-boundary-profile.py
+      - name: Check BLE archive and ABI profile
+        run: >-
+          cargo run -p hisi-rf-link --locked --target x86_64-unknown-linux-gnu --
+          ble-profile
+          --profile crates/hisi-rf-link/profiles/ws63-ble-b0.toml
+          --archive-root ws63-RF/lib
+          --rom-symbols ws63-RF/rom/ws63_acore_rom.lds
+          --output crates/hisi-rf-link/profiles/ws63-ble-b0-report.json
+          --check
       - name: Rebuild normalized release artifacts
         run: uv run scripts/check-release-artifacts.py
       - name: Check supplicant C ABI
@@ -58,6 +67,9 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --features upstream-authenticator-wpa3 --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --no-default-features --features ble --locked
       - run: uv run crates/hisi-rf-link/python/test_relocations.py
       - name: Package release unit
         run: |
@@ -163,3 +175,10 @@ jobs:
           cargo check "-Zbuild-std=core,alloc"
           --target riscv32imfc-unknown-none-elf
           -p ws63-radio-sys --features upstream-authenticator-wpa3 --locked
+      - name: Build BLE B0 Cargo consumer contract
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
+        run: >-
+          cargo check "-Zbuild-std=core,alloc"
+          --target riscv32imfc-unknown-none-elf
+          -p ws63-radio-sys --no-default-features --features ble --locked

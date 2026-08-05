@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add a hash-bound WS63 BLE B0 archive/ABI inventory, normalized redistributable
+  BLE artifacts, and a cross-platform Cargo consumer contract for the `ble`
+  feature. SLE/GLE remains outside this profile.
+
 ## [0.1.0-alpha.11] - 2026-08-03
 
 ### Added
