@@ -50,6 +50,25 @@ cargo package -p ws63-radio-blob --locked --target <host-target>
 cargo package -p ws63-radio-sys --locked --no-verify --list
 ```
 
+After an audited source or ABI change, maintainers update one payload group
+explicitly:
+
+```console
+cargo run -p hisi-rf-link --target <host-target> --locked -- \
+  rebuild-native-supplicant \
+  --repository-root . \
+  --output-dir target/native-authenticator-update \
+  --compiler <pinned-riscv64-unknown-elf-gcc> \
+  --archiver <pinned-riscv64-unknown-elf-ar> \
+  --group authenticator \
+  --update-artifacts
+```
+
+This rewrites both profiles in that release-unit group and updates only their
+manifest hashes and sizes. Normal CI and release jobs omit
+`--update-artifacts`; they fail on any byte, size, hash, toolchain, or profile
+revision drift.
+
 The final `ws63-radio-sys` tarball is fully compiled only after its exact-version
 dependency layer is visible in crates.io:
 

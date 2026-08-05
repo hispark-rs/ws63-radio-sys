@@ -111,6 +111,35 @@ fn option(arguments: &mut Vec<std::ffi::OsString>, name: &str) -> Result<PathBuf
     Ok(PathBuf::from(arguments.remove(position)))
 }
 
+fn optional_string(
+    arguments: &mut Vec<std::ffi::OsString>,
+    name: &str,
+) -> Result<Option<String>, Error> {
+    let Some(position) = arguments.iter().position(|argument| argument == name) else {
+        return Ok(None);
+    };
+    if position + 1 >= arguments.len() {
+        return Err(Error::new(format!("missing value for {name}")));
+    }
+    arguments.remove(position);
+    arguments
+        .remove(position)
+        .into_string()
+        .map(Some)
+        .map_err(|_| Error::new(format!("{name} must be valid UTF-8")))
+}
+
+fn flag(arguments: &mut Vec<std::ffi::OsString>, name: &str) -> bool {
+    arguments
+        .iter()
+        .position(|argument| argument == name)
+        .map(|position| {
+            arguments.remove(position);
+            true
+        })
+        .unwrap_or(false)
+}
+
 fn command_first_line(path: &Path) -> Result<String, Error> {
     let output = Command::new(path)
         .arg("--version")
@@ -354,6 +383,7 @@ fn rebuild_group(
     artifacts: &[Artifact],
     group_name: &str,
     group: &NativeSupplicant,
+    update_artifacts: bool,
 ) -> Result<(), Error> {
     validate_native_group(group_name, group, compiler, archiver)?;
     for profile in &group.profiles {
@@ -369,6 +399,9 @@ fn rebuild_group(
         let built_path = build_profile(repository, output, compiler, archiver, profile)?;
         let built = fs::read(&built_path)
             .map_err(|error| Error::new(format!("read {}: {error}", built_path.display())))?;
+        if update_artifacts {
+            continue;
+        }
         let packaged_path = repository
             .join("crates/ws63-radio-blob/artifacts")
             .join(format!("{}.zst", profile.archive));
@@ -400,9 +433,13 @@ fn rebuild(
     output: &Path,
     compiler: &Path,
     archiver: &Path,
+    update_artifacts: bool,
+    selected_group: Option<&str>,
 ) -> Result<(), Error> {
     let manifest_path = repository.join("crates/ws63-radio-blob/artifacts/manifest.json");
-    let manifest: ArtifactManifest = load_json(&manifest_path)?;
+    let mut manifest_value: serde_json::Value = load_json(&manifest_path)?;
+    let manifest: ArtifactManifest = serde_json::from_value(manifest_value.clone())
+        .map_err(|error| Error::new(format!("parse {}: {error}", manifest_path.display())))?;
     if manifest.schema_version != 1 {
         return Err(Error::new(format!(
             "unsupported artifact manifest schema {}",
@@ -411,24 +448,79 @@ fn rebuild(
     }
     fs::create_dir_all(output)
         .map_err(|error| Error::new(format!("create {}: {error}", output.display())))?;
-    rebuild_group(
-        repository,
-        output,
-        compiler,
-        archiver,
-        &manifest.artifacts,
-        "native supplicant",
-        &manifest.native_supplicant,
-    )?;
-    rebuild_group(
-        repository,
-        output,
-        compiler,
-        archiver,
-        &manifest.artifacts,
-        "native authenticator",
-        &manifest.native_authenticator,
-    )?;
+    if selected_group.is_none_or(|group| group == "supplicant") {
+        rebuild_group(
+            repository,
+            output,
+            compiler,
+            archiver,
+            &manifest.artifacts,
+            "native supplicant",
+            &manifest.native_supplicant,
+            update_artifacts,
+        )?;
+    }
+    if selected_group.is_none_or(|group| group == "authenticator") {
+        rebuild_group(
+            repository,
+            output,
+            compiler,
+            archiver,
+            &manifest.artifacts,
+            "native authenticator",
+            &manifest.native_authenticator,
+            update_artifacts,
+        )?;
+    }
+    if update_artifacts {
+        let artifacts = manifest_value["artifacts"]
+            .as_array_mut()
+            .ok_or_else(|| Error::new("artifact manifest artifacts is not an array"))?;
+        let groups = [
+            ("supplicant", &manifest.native_supplicant),
+            ("authenticator", &manifest.native_authenticator),
+        ];
+        for (_, group) in groups
+            .into_iter()
+            .filter(|(name, _)| selected_group.is_none_or(|selected| selected == *name))
+        {
+            for profile in &group.profiles {
+                let built_path = output.join(&profile.archive);
+                let built = fs::read(&built_path).map_err(|error| {
+                    Error::new(format!("read {}: {error}", built_path.display()))
+                })?;
+                let packaged_path = repository
+                    .join("crates/ws63-radio-blob/artifacts")
+                    .join(format!("{}.zst", profile.archive));
+                let compressed = ruzstd::encoding::compress_to_vec(
+                    built.as_slice(),
+                    ruzstd::encoding::CompressionLevel::Fastest,
+                );
+                fs::write(&packaged_path, compressed).map_err(|error| {
+                    Error::new(format!("write {}: {error}", packaged_path.display()))
+                })?;
+                let artifact = artifacts
+                    .iter_mut()
+                    .find(|artifact| artifact["archive"] == profile.archive)
+                    .ok_or_else(|| {
+                        Error::new(format!("manifest is missing {}", profile.archive))
+                    })?;
+                artifact["output_size"] = serde_json::Value::from(built.len());
+                artifact["output_sha256"] = serde_json::Value::from(sha256(&built));
+                println!(
+                    "updated {}: {} bytes, sha256={}",
+                    profile.archive,
+                    built.len(),
+                    sha256(&built)
+                );
+            }
+        }
+        let mut serialized = serde_json::to_string_pretty(&manifest_value)
+            .map_err(|error| Error::new(format!("serialize artifact manifest: {error}")))?;
+        serialized.push('\n');
+        fs::write(&manifest_path, serialized)
+            .map_err(|error| Error::new(format!("write {}: {error}", manifest_path.display())))?;
+    }
     Ok(())
 }
 
@@ -447,10 +539,27 @@ pub fn run(arguments: impl Iterator<Item = std::ffi::OsString>) -> Result<(), Er
     };
     let compiler = option(&mut arguments, "--compiler")?;
     let archiver = option(&mut arguments, "--archiver")?;
+    let update_artifacts = flag(&mut arguments, "--update-artifacts");
+    let selected_group = optional_string(&mut arguments, "--group")?;
+    if selected_group
+        .as_deref()
+        .is_some_and(|group| !matches!(group, "supplicant" | "authenticator"))
+    {
+        return Err(Error::new(
+            "--group must be either supplicant or authenticator",
+        ));
+    }
     if !arguments.is_empty() {
         return Err(Error::new(format!("unexpected arguments: {:?}", arguments)));
     }
-    rebuild(&repository, &output, &compiler, &archiver)
+    rebuild(
+        &repository,
+        &output,
+        &compiler,
+        &archiver,
+        update_artifacts,
+        selected_group.as_deref(),
+    )
 }
 
 #[cfg(test)]
@@ -472,5 +581,18 @@ mod tests {
             repository.join("crates/ws63-radio-blob/artifacts/libhisi_wpa_native_port_wpa2.a.zst");
         let bytes = expand_zstd(&path).unwrap();
         assert!(bytes.starts_with(b"!<arch>\n"));
+    }
+
+    #[test]
+    fn pure_rust_zstd_encoder_round_trips() {
+        let source = b"!<arch>\nreproducible target archive";
+        let compressed = ruzstd::encoding::compress_to_vec(
+            source.as_slice(),
+            ruzstd::encoding::CompressionLevel::Fastest,
+        );
+        let mut decoder = StreamingDecoder::new(compressed.as_slice()).unwrap();
+        let mut decoded = Vec::new();
+        decoder.read_to_end(&mut decoded).unwrap();
+        assert_eq!(decoded, source);
     }
 }
