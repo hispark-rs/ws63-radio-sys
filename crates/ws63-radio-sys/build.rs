@@ -85,6 +85,20 @@ struct SupplicantBoundaryProfile {
 struct BleInitProfile {
     revision: String,
     roots: Vec<String>,
+    controller_archives: Vec<BleControllerArchive>,
+}
+
+#[derive(Deserialize)]
+struct BleControllerArchive {
+    archive: String,
+}
+
+fn cargo_metadata_key(prefix: &str, archive: &str) -> String {
+    let name = archive
+        .strip_prefix("lib")
+        .and_then(|name| name.strip_suffix(".a"))
+        .unwrap_or_else(|| panic!("BLE controller artifact must be named lib*.a: {archive}"));
+    format!("{prefix}{}", name.to_ascii_uppercase().replace('-', "_"))
 }
 
 fn sha256(path: &std::path::Path) -> String {
@@ -535,26 +549,28 @@ fn main() {
             init_revision, BLE_INIT_PROFILE_REVISION,
             "BLE init artifact/profile revision mismatch"
         );
-        let controller_archives = [
-            "DEP_WS63_RADIO_BLOB_BLE_CONTROLLER_BGTP_ARCHIVE",
-            "DEP_WS63_RADIO_BLOB_BLE_CONTROLLER_BGTP_ROM_DATA_ARCHIVE",
-        ]
-        .map(|variable| {
-            let path = PathBuf::from(
-                env::var_os(variable)
-                    .unwrap_or_else(|| panic!("ws63-radio-blob did not export {variable}")),
-            );
-            assert!(
-                path.is_file(),
-                "BLE controller archive is missing: {}",
-                path.display()
-            );
-            println!("cargo:rerun-if-env-changed={variable}");
-            path
-        });
-        println!("cargo:ble_init_profile_revision={init_revision}");
         let init_profile: BleInitProfile =
             toml::from_str(hisi_rf_link::WS63_BLE_B1_PROFILE).expect("parse WS63 BLE init profile");
+        let controller_archives = init_profile
+            .controller_archives
+            .iter()
+            .map(|archive| {
+                let variable =
+                    cargo_metadata_key("DEP_WS63_RADIO_BLOB_BLE_CONTROLLER_", &archive.archive);
+                let path = PathBuf::from(
+                    env::var_os(&variable)
+                        .unwrap_or_else(|| panic!("ws63-radio-blob did not export {variable}")),
+                );
+                assert!(
+                    path.is_file(),
+                    "BLE controller archive is missing: {}",
+                    path.display()
+                );
+                println!("cargo:rerun-if-env-changed={variable}");
+                path
+            })
+            .collect::<Vec<_>>();
+        println!("cargo:ble_init_profile_revision={init_revision}");
         assert_eq!(
             init_profile.revision, BLE_INIT_PROFILE_REVISION,
             "embedded BLE init profile revision mismatch"
