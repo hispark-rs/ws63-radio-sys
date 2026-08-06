@@ -98,7 +98,10 @@ fn cargo_metadata_key(prefix: &str, archive: &str) -> String {
         .strip_prefix("lib")
         .and_then(|name| name.strip_suffix(".a"))
         .unwrap_or_else(|| panic!("BLE controller artifact must be named lib*.a: {archive}"));
-    format!("{prefix}{}", name.to_ascii_uppercase().replace('-', "_"))
+    format!(
+        "{prefix}{}_ARCHIVE",
+        name.to_ascii_uppercase().replace('-', "_")
+    )
 }
 
 fn sha256(path: &std::path::Path) -> String {
