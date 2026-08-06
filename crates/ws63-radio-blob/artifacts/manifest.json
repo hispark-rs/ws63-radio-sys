@@ -213,6 +213,32 @@
         "relax_markers_removed_from_branchi_sections": 237,
         "llui_rep_markers_removed": 248
       }
+    },
+    {
+      "archive": "libbgtp.a",
+      "input_sha256": "017a773c3cb4aad449f2da059de2b1ff3a806c8019e249977760dd3b6e6ddc7f",
+      "output_sha256": "2f556e4c3df4ae5b1b72a6a78e6df70f6b3a201afe0695427eef19e0f2a2df3f",
+      "input_size": 1480206,
+      "output_size": 1480206,
+      "transformations": {
+        "llui48_to_riscv32": 816,
+        "branchi_same_section_encoded": 823,
+        "relax_markers_removed_from_branchi_sections": 2321,
+        "llui_rep_markers_removed": 1123
+      }
+    },
+    {
+      "archive": "libbgtp_rom_data.a",
+      "input_sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
+      "output_sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
+      "input_size": 17902,
+      "output_size": 17902,
+      "transformations": {
+        "llui48_to_riscv32": 0,
+        "branchi_same_section_encoded": 0,
+        "relax_markers_removed_from_branchi_sections": 0,
+        "llui_rep_markers_removed": 0
+      }
     }
   ],
   "native_supplicant": {
@@ -300,6 +326,13 @@
       "libbth_sdk.a",
       "libbg_common.a"
     ],
-    "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json"
+    "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json",
+    "init_revision": "ws63-ble-b1-init-closure-v1",
+    "init_normalization_revision": "ws63-ble-b1-normalized-v1",
+    "controller_archives": [
+      "libbgtp.a",
+      "libbgtp_rom_data.a"
+    ],
+    "init_required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b1-report.json"
   }
 }

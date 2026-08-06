@@ -9,8 +9,11 @@ the separately selected WPA2-Personal and WPA3-SAE AP authenticators, and the of
 The BLE B0 payload contains normalized `libbt_host.a`, `libbt_app.a`, and
 `libbth_sdk.a` artifacts plus the shared `libbg_common.a`. Its hash-bound profile
 and generated external-symbol ownership report are versioned with the payload.
-The SLE/GLE archive is deliberately excluded, and this package does not claim
-that the BLE controller or host initialization path is complete.
+The B1 initialization contract additionally carries normalized `libbgtp.a` and
+`libbgtp_rom_data.a`, a rooted object closure, and the four-task/stack resource
+inventory. The SLE/GLE archive is deliberately excluded. Packaging the
+controller is a prerequisite, not evidence that controller/host initialization
+has run on silicon.
 
 The package stores each deterministic archive as a Zstandard payload to stay
 within registry limits. Its pure Rust build script expands the archives only

@@ -492,6 +492,7 @@ fn main() {
 
     if env::var_os("CARGO_FEATURE_BLE").is_some() {
         const BLE_PROFILE_REVISION: &str = "ws63-ble-b0-archive-abi-v1";
+        const BLE_INIT_PROFILE_REVISION: &str = "ws63-ble-b1-init-closure-v1";
         let revision = env::var("DEP_WS63_RADIO_BLOB_BLE_PROFILE_REVISION")
             .expect("ws63-radio-blob did not export its BLE profile revision");
         assert_eq!(
@@ -517,6 +518,38 @@ fn main() {
         println!(
             "cargo:ble_archives={}",
             archives
+                .iter()
+                .map(|path| path.display().to_string())
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        let init_revision = env::var("DEP_WS63_RADIO_BLOB_BLE_INIT_PROFILE_REVISION")
+            .expect("ws63-radio-blob did not export its BLE init profile revision");
+        assert_eq!(
+            init_revision, BLE_INIT_PROFILE_REVISION,
+            "BLE init artifact/profile revision mismatch"
+        );
+        let controller_archives = [
+            "DEP_WS63_RADIO_BLOB_BLE_CONTROLLER_BGTP_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_BLE_CONTROLLER_BGTP_ROM_DATA_ARCHIVE",
+        ]
+        .map(|variable| {
+            let path = PathBuf::from(
+                env::var_os(variable)
+                    .unwrap_or_else(|| panic!("ws63-radio-blob did not export {variable}")),
+            );
+            assert!(
+                path.is_file(),
+                "BLE controller archive is missing: {}",
+                path.display()
+            );
+            println!("cargo:rerun-if-env-changed={variable}");
+            path
+        });
+        println!("cargo:ble_init_profile_revision={init_revision}");
+        println!(
+            "cargo:ble_controller_archives={}",
+            controller_archives
                 .iter()
                 .map(|path| path.display().to_string())
                 .collect::<Vec<_>>()

@@ -22,6 +22,8 @@ struct Manifest {
 struct BleProfile {
     revision: String,
     archives: Vec<String>,
+    init_revision: String,
+    controller_archives: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -168,5 +170,24 @@ fn main() {
     println!(
         "cargo:ble_profile_revision={}",
         manifest.ble_profile.revision
+    );
+    for archive in &manifest.ble_profile.controller_archives {
+        assert!(
+            manifest
+                .artifacts
+                .iter()
+                .any(|artifact| artifact.archive == *archive),
+            "BLE controller profile references an unknown archive: {archive}"
+        );
+        let path = output.join(archive);
+        let key = archive
+            .strip_prefix("lib")
+            .and_then(|name| name.strip_suffix(".a"))
+            .expect("BLE controller artifact must be named lib*.a");
+        println!("cargo:ble_controller_{key}_archive={}", path.display());
+    }
+    println!(
+        "cargo:ble_init_profile_revision={}",
+        manifest.ble_profile.init_revision
     );
 }

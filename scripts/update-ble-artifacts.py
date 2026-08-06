@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["zstandard==0.23.0"]
 # ///
-"""Normalize and package the hash-bound WS63 BLE B0 target archives."""
+"""Normalize and package the hash-bound WS63 BLE host/controller archives."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ import zstandard
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63-ble-b0.toml"
+INIT_PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63-ble-b1.toml"
 PAYLOAD = ROOT / "crates" / "ws63-radio-blob" / "artifacts"
 ORACLE = ROOT / "ws63-RF" / "lib"
 MANIFEST = PAYLOAD / "manifest.json"
@@ -35,8 +36,12 @@ def host_target() -> str:
 
 def main() -> None:
     profile = tomllib.loads(PROFILE.read_text())
+    init_profile = tomllib.loads(INIT_PROFILE.read_text())
     names = [entry["archive"] for entry in profile["archives"]]
-    normalized = [name for name in names if name != "libbg_common.a"]
+    controller_names = [
+        entry["archive"] for entry in init_profile["controller_archives"]
+    ]
+    normalized = [name for name in names if name != "libbg_common.a"] + controller_names
 
     with tempfile.TemporaryDirectory(prefix="ws63-ble-b0-") as directory:
         output = pathlib.Path(directory)
@@ -54,7 +59,7 @@ def main() -> None:
                 "--",
                 "normalize",
                 "--profile-revision",
-                "ws63-ble-b0-normalized-v1",
+                "ws63-ble-b1-normalized-v1",
                 "--out-dir",
                 str(output),
                 "--manifest",
@@ -86,6 +91,10 @@ def main() -> None:
         "normalization_revision": "ws63-ble-b0-normalized-v1",
         "archives": names,
         "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json",
+        "init_revision": init_profile["revision"],
+        "init_normalization_revision": "ws63-ble-b1-normalized-v1",
+        "controller_archives": controller_names,
+        "init_required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b1-report.json",
     }
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 
