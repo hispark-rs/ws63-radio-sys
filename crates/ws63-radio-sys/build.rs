@@ -81,6 +81,12 @@ struct SupplicantBoundaryProfile {
     native_root_symbols: Vec<String>,
 }
 
+#[derive(Deserialize)]
+struct BleInitProfile {
+    revision: String,
+    roots: Vec<String>,
+}
+
 fn sha256(path: &std::path::Path) -> String {
     let digest = Sha256::digest(fs::read(path).unwrap_or_else(|error| {
         panic!(
@@ -547,6 +553,16 @@ fn main() {
             path
         });
         println!("cargo:ble_init_profile_revision={init_revision}");
+        let init_profile: BleInitProfile =
+            toml::from_str(hisi_rf_link::WS63_BLE_B1_PROFILE).expect("parse WS63 BLE init profile");
+        assert_eq!(
+            init_profile.revision, BLE_INIT_PROFILE_REVISION,
+            "embedded BLE init profile revision mismatch"
+        );
+        println!(
+            "cargo:ble_init_root_symbols={}",
+            init_profile.roots.join(",")
+        );
         println!(
             "cargo:ble_controller_archives={}",
             controller_archives
