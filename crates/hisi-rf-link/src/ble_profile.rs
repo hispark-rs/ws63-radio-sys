@@ -152,6 +152,24 @@ pub(crate) fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'stat
     if name.starts_with("uapi_drv_cipher_") {
         return Some("hisi-crypto-ws63");
     }
+    if name.starts_with("uapi_drv_keyslot_")
+        || name.starts_with("uapi_drv_klad_")
+        || matches!(name, "uapi_drv_km_init" | "uapi_drv_km_deinit")
+    {
+        return Some("hisi-crypto-ws63");
+    }
+    if name.starts_with("osal_irq_") || name == "m_auc_int_pri" {
+        return Some("hisi-hal-interrupt-port");
+    }
+    if name.starts_with("uapi_efuse_") || name == "uapi_tsensor_get_current_temp" {
+        return Some("hisi-hal-platform-service");
+    }
+    if name == "get_tcxo_freq" {
+        return Some("hisi-hal-clock-service");
+    }
+    if name == "dyn_get_em_mem_cfg" {
+        return Some("ws63-radio-memory-profile");
+    }
     if matches!(
         name,
         "api_h2c_write" | "g_dts_thread_chnl" | "hci_if_bth_init"
@@ -159,6 +177,8 @@ pub(crate) fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'stat
         return Some("ws63-radio-controller-transport");
     }
     if name.starts_with("log_event_")
+        || name.starts_with("log_oam_")
+        || name.starts_with("diag_")
         || name.starts_with("massdata_")
         || name.starts_with("global_")
         || matches!(
@@ -171,6 +191,9 @@ pub(crate) fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'stat
     if matches!(
         name,
         "__udivdi3"
+            | "__divdi3"
+            | "__lshrdi3"
+            | "__moddi3"
             | "atoi"
             | "memcmp"
             | "memcpy"

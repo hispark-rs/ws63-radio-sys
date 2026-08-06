@@ -3,20 +3,34 @@
   "revision": "ws63-ble-b1-init-closure-v1",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
+    "bt_thread_handle",
     "bt_acore_task_main",
     "sdk_msg_thread",
     "btsrv_task_body",
     "btsdk_init",
     "enable_ble"
   ],
-  "external_roots": [
+  "controller_archives": [
     {
-      "name": "bt_thread_handle",
-      "owner": "ws63-radio-controller-port",
-      "reason": "Controller task entry is supplied by the WS63 controller integration, not the B0 host archives"
+      "archive": "libbgtp.a",
+      "sha256": "017a773c3cb4aad449f2da059de2b1ff3a806c8019e249977760dd3b6e6ddc7f",
+      "role": "WS63 BLE controller task, event scheduler, HCI transport and radio control"
+    },
+    {
+      "archive": "libbgtp_rom_data.a",
+      "sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
+      "role": "WS63 BLE controller mask-ROM data definitions"
     }
   ],
+  "external_roots": [],
   "selected_members": [
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_thread.c.obj",
+      "selected_by": "bt_thread_handle",
+      "defined_symbols": 9,
+      "undefined_symbols": 18
+    },
     {
       "archive": "libbg_common.a",
       "member": "mpc_trans.c.obj",
@@ -51,6 +65,48 @@
       "selected_by": "enable_ble",
       "defined_symbols": 32,
       "undefined_symbols": 61
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bgtp_sleep_sw_ram.c.obj",
+      "selected_by": "bgtp_bsub_extern_wakeup",
+      "defined_symbols": 14,
+      "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_main.c.obj",
+      "selected_by": "bt_init",
+      "defined_symbols": 6,
+      "undefined_symbols": 90
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_rf_config.c.obj",
+      "selected_by": "bt_rf_config_update_act",
+      "defined_symbols": 36,
+      "undefined_symbols": 31
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_hci.c.obj",
+      "selected_by": "dts_hci_get_thread_msg_queue_count",
+      "defined_symbols": 15,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp_rom_data.a",
+      "member": "btc_rom_data.c.obj",
+      "selected_by": "g_macro_cfg_flags",
+      "defined_symbols": 93,
+      "undefined_symbols": 35
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "hci_if.c.obj",
+      "selected_by": "hci_msg_recv_h2c",
+      "defined_symbols": 20,
+      "undefined_symbols": 41
     },
     {
       "archive": "libbg_common.a",
@@ -338,6 +394,307 @@
       "selected_by": "sapi_ble_disable",
       "defined_symbols": 2,
       "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bgtp_sleep_hw.c.obj",
+      "selected_by": "bgtp_lowpower_clock_config",
+      "defined_symbols": 7,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "btc_timer_ram.c.obj",
+      "selected_by": "btc_timer_next_due_in_slot",
+      "defined_symbols": 1,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_interrupt_itcm.c.obj",
+      "selected_by": "dts_bg_osc_en_int_clear_pending_irq",
+      "defined_symbols": 17,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_interrupt.c.obj",
+      "selected_by": "dts_bg_osc_en_intc_delete",
+      "defined_symbols": 4,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_lowpower.c.obj",
+      "selected_by": "dts_bg_veto_sys_wakeup",
+      "defined_symbols": 5,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_coex.c.obj",
+      "selected_by": "dts_coex_enter_bgle_lowpower_process",
+      "defined_symbols": 16,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_sched_util_ram.c.obj",
+      "selected_by": "es_sleep_time_calc",
+      "defined_symbols": 14,
+      "undefined_symbols": 19
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "L2_comm.c.obj",
+      "selected_by": "L2_deinit",
+      "defined_symbols": 3,
+      "undefined_symbols": 25
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "ble_isr_ram.c.obj",
+      "selected_by": "ble_isr",
+      "defined_symbols": 3,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_hal_interface.c.obj",
+      "selected_by": "bt_cali_feature_cfg",
+      "defined_symbols": 14,
+      "undefined_symbols": 24
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_customize.c.obj",
+      "selected_by": "bt_customize_load",
+      "defined_symbols": 9,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_cbb_config.c.obj",
+      "selected_by": "bt_init_mac",
+      "defined_symbols": 10,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_srd.c.obj",
+      "selected_by": "bt_srd_config",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_rf_table.c.obj",
+      "selected_by": "bt_sw_config_em",
+      "defined_symbols": 83,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_if.c.obj",
+      "selected_by": "coex_if_deinit",
+      "defined_symbols": 13,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "btdfx.c.obj",
+      "selected_by": "dfx_init",
+      "defined_symbols": 5,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_ble_ram.c.obj",
+      "selected_by": "dm_ble_reset_all_ram",
+      "defined_symbols": 6,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_gle_afl.c.obj",
+      "selected_by": "dm_gle_afl_reset",
+      "defined_symbols": 5,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_gle_fsm.c.obj",
+      "selected_by": "dm_gle_deinit_all",
+      "defined_symbols": 7,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "em_mgr_ram.c.obj",
+      "selected_by": "em_init",
+      "defined_symbols": 2,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "enc_ke_ecc_ram.c.obj",
+      "selected_by": "encrypt_init_ext",
+      "defined_symbols": 4,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb.c.obj",
+      "selected_by": "evt_task_gle_acb_handle_return_tx_data",
+      "defined_symbols": 87,
+      "undefined_symbols": 75
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_imb.c.obj",
+      "selected_by": "evt_task_gle_imb_handle_return_tx_data",
+      "defined_symbols": 81,
+      "undefined_symbols": 63
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "hci_gle.c.obj",
+      "selected_by": "g_em_gle_tx_data_num",
+      "defined_symbols": 19,
+      "undefined_symbols": 27
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "gle_isr_ram.c.obj",
+      "selected_by": "gle_isr_init_ram",
+      "defined_symbols": 3,
+      "undefined_symbols": 15
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble.c.obj",
+      "selected_by": "lm_ble_deinit",
+      "defined_symbols": 2,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_chnl_scan.c.obj",
+      "selected_by": "lm_chnl_scan_deinit",
+      "defined_symbols": 6,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb.c.obj",
+      "selected_by": "lm_gle_acb_close",
+      "defined_symbols": 22,
+      "undefined_symbols": 41
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_adv.c.obj",
+      "selected_by": "lm_gle_adv_close",
+      "defined_symbols": 7,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_imb.c.obj",
+      "selected_by": "lm_gle_imb_close",
+      "defined_symbols": 61,
+      "undefined_symbols": 34
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_initiate.c.obj",
+      "selected_by": "lm_gle_initiate_close",
+      "defined_symbols": 8,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_iob.c.obj",
+      "selected_by": "lm_gle_iob_close",
+      "defined_symbols": 14,
+      "undefined_symbols": 25
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_scan.c.obj",
+      "selected_by": "lm_gle_scan_close",
+      "defined_symbols": 8,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_test_mode.c.obj",
+      "selected_by": "lm_gle_test_mode_close",
+      "defined_symbols": 7,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "pwr_ctrl_cfg_ram.c.obj",
+      "selected_by": "pwr_ctrl_init",
+      "defined_symbols": 10,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_path.c.obj",
+      "selected_by": "bt_get_ct_table_temp_idx",
+      "defined_symbols": 29,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_hal_control.c.obj",
+      "selected_by": "bt_read_rf_reg",
+      "defined_symbols": 64,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_bt_data.c.obj",
+      "selected_by": "cali_get_data_buff",
+      "defined_symbols": 3,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "enc_kd_sm3_ram.c.obj",
+      "selected_by": "encrypt_done_sm3",
+      "defined_symbols": 9,
+      "undefined_symbols": 24
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bgtp_pmu_hw.c.obj",
+      "selected_by": "pmu_bg_deepslp_poweroff_cbk",
+      "defined_symbols": 5,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_co_ram.c.obj",
+      "selected_by": "dm_co_check_adv_data",
+      "defined_symbols": 11,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "pub_if.c.obj",
+      "selected_by": "g_api_bth_recv_data_cbk",
+      "defined_symbols": 16,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "hci_bt.c.obj",
+      "selected_by": "g_hci_bt_acl_tx_buff_receiving",
+      "defined_symbols": 15,
+      "undefined_symbols": 21
     },
     {
       "archive": "libbth_sdk.a",
@@ -732,6 +1089,384 @@
       "undefined_symbols": 5
     },
     {
+      "archive": "libbgtp.a",
+      "member": "evt_prog_ram.c.obj",
+      "selected_by": "evt_prog_init",
+      "defined_symbols": 7,
+      "undefined_symbols": 40
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_sched.c.obj",
+      "selected_by": "evt_sched_deinit",
+      "defined_symbols": 21,
+      "undefined_symbols": 37
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_test_mode.c.obj",
+      "selected_by": "evt_task_ble_test_mode_rx_deinit",
+      "defined_symbols": 48,
+      "undefined_symbols": 36
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_chnl_scan.c.obj",
+      "selected_by": "evt_task_chnl_scan_deinit",
+      "defined_symbols": 27,
+      "undefined_symbols": 27
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_comm.c.obj",
+      "selected_by": "evt_task_comm_env_init",
+      "defined_symbols": 9,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_adv.c.obj",
+      "selected_by": "evt_task_gle_adv_env_deinit",
+      "defined_symbols": 24,
+      "undefined_symbols": 46
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_initiate.c.obj",
+      "selected_by": "evt_task_gle_initiate_env_deinit",
+      "defined_symbols": 23,
+      "undefined_symbols": 38
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_iob.c.obj",
+      "selected_by": "evt_task_gle_iob_env_deinit",
+      "defined_symbols": 70,
+      "undefined_symbols": 62
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_scan.c.obj",
+      "selected_by": "evt_task_gle_scan_env_deinit",
+      "defined_symbols": 21,
+      "undefined_symbols": 33
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_test_mode.c.obj",
+      "selected_by": "evt_task_gle_test_mode_rx_deinit",
+      "defined_symbols": 53,
+      "undefined_symbols": 33
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_chr_handle.c.obj",
+      "selected_by": "bt_cali_match_n_report",
+      "defined_symbols": 1,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_state.c.obj",
+      "selected_by": "cali_is_complete",
+      "defined_symbols": 9,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_list.c.obj",
+      "selected_by": "cali_is_necessary",
+      "defined_symbols": 4,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_entrance.c.obj",
+      "selected_by": "cali_process",
+      "defined_symbols": 5,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_tx.c.obj",
+      "selected_by": "g_bt_pwr_ppa_gain_step_val",
+      "defined_symbols": 89,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_adapter.c.obj",
+      "selected_by": "coex_adapter_deinit",
+      "defined_symbols": 31,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_wl.c.obj",
+      "selected_by": "coex_wl_chnl_map_update",
+      "defined_symbols": 2,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "data_collection.c.obj",
+      "selected_by": "data_collection_sample_en",
+      "defined_symbols": 8,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "btdfx_fn.c.obj",
+      "selected_by": "dfx_bt_cmd_handler",
+      "defined_symbols": 29,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_data_collection.c.obj",
+      "selected_by": "dts_diag_sample_register",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_gle.c.obj",
+      "selected_by": "dm_gle_hci_gle_basic_cmp_send",
+      "defined_symbols": 37,
+      "undefined_symbols": 20
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_afl.c.obj",
+      "selected_by": "evt_task_gle_add_dev_to_afl_act",
+      "defined_symbols": 7,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_gle_fsm_tbl.c.obj",
+      "selected_by": "dm_gle_get_pre_act_tbl",
+      "defined_symbols": 2,
+      "undefined_symbols": 19
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "em_map_ram.c.obj",
+      "selected_by": "em_offset_calc",
+      "defined_symbols": 4,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_crypto_ram.c.obj",
+      "selected_by": "dts_ecdh_p256_dhkey",
+      "defined_symbols": 18,
+      "undefined_symbols": 26
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_gle_acb_process.c.obj",
+      "selected_by": "coex_gle_acb_create_coex_process",
+      "defined_symbols": 7,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_sched_ram.c.obj",
+      "selected_by": "evt_sched_update_acl_param_with_instant",
+      "defined_symbols": 20,
+      "undefined_symbols": 48
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_fsm.c.obj",
+      "selected_by": "evt_task_comm_fsm_except_handler",
+      "defined_symbols": 5,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_acb_get_llcp_ack_tbl",
+      "defined_symbols": 13,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_instant.c.obj",
+      "selected_by": "evt_task_gle_acb_instant_prog",
+      "defined_symbols": 14,
+      "undefined_symbols": 14
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_isr.c.obj",
+      "selected_by": "evt_task_gle_acb_isr_cbk",
+      "defined_symbols": 23,
+      "undefined_symbols": 46
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_comm.c.obj",
+      "selected_by": "evt_task_gle_event_send_tx_complete_event",
+      "defined_symbols": 22,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_conn_record.c.obj",
+      "selected_by": "g_gle_acb_duration",
+      "defined_symbols": 9,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "gle_sca.c.obj",
+      "selected_by": "gle_acb_calc_drift",
+      "defined_symbols": 4,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_imb_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_imb_get_pre_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_conn_update.c.obj",
+      "selected_by": "lm_gle_acb_conn_upd_get_fsm_id",
+      "defined_symbols": 41,
+      "undefined_symbols": 45
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_enc.c.obj",
+      "selected_by": "lm_gle_acb_srv_enc_get_fsm_id",
+      "defined_symbols": 12,
+      "undefined_symbols": 24
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_adv_fsm.c.obj",
+      "selected_by": "lm_gle_adv_get_fsm_id",
+      "defined_symbols": 4,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_img_fsm.c.obj",
+      "selected_by": "lm_gle_img_fsm_create",
+      "defined_symbols": 3,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_initiate_fsm.c.obj",
+      "selected_by": "lm_gle_initiate_get_fsm_id",
+      "defined_symbols": 4,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_scan_fsm.c.obj",
+      "selected_by": "lm_gle_scan_get_fsm_id",
+      "defined_symbols": 4,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_test_mode_fsm.c.obj",
+      "selected_by": "lm_gle_test_mode_get_fsm_id",
+      "defined_symbols": 5,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_test_mode.c.obj",
+      "selected_by": "lm_ble_test_mode_close",
+      "defined_symbols": 8,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_fsm.c.obj",
+      "selected_by": "lm_gle_acb_del_all_srv_fsm",
+      "defined_symbols": 12,
+      "undefined_symbols": 21
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_get_reject_tbl",
+      "defined_symbols": 13,
+      "undefined_symbols": 51
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_map.c.obj",
+      "selected_by": "lm_gle_acb_llcp_map_to_sed_map",
+      "defined_symbols": 22,
+      "undefined_symbols": 40
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_comm.c.obj",
+      "selected_by": "lm_gle_comm_send_con_cmp_evt",
+      "defined_symbols": 2,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_data_length.c.obj",
+      "selected_by": "lm_gle_data_length_update_effective_value",
+      "defined_symbols": 12,
+      "undefined_symbols": 24
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_iob_fsm.c.obj",
+      "selected_by": "lm_gle_iob_del_all_srv_fsm",
+      "defined_symbols": 12,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "rf_accumulation.c.obj",
+      "selected_by": "bt_cfg_mac_channel",
+      "defined_symbols": 10,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_pll.c.obj",
+      "selected_by": "bt_pll_start_tx",
+      "defined_symbols": 14,
+      "undefined_symbols": 23
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bgsub_pmu.c.obj",
+      "selected_by": "bg_sleep_restore",
+      "defined_symbols": 8,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dm_co_fsm_tbl.c.obj",
+      "selected_by": "dm_co_get_ble_dev_bsle_feat",
+      "defined_symbols": 8,
+      "undefined_symbols": 23
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_test_mode_fsm.c.obj",
+      "selected_by": "lm_ble_test_mode_get_fsm_id",
+      "defined_symbols": 5,
+      "undefined_symbols": 12
+    },
+    {
       "archive": "libbg_common.a",
       "member": "bt_queue.c.obj",
       "selected_by": "bam_item_data_free",
@@ -907,6 +1642,321 @@
       "undefined_symbols": 4
     },
     {
+      "archive": "libbgtp.a",
+      "member": "evt_sched_mgr_ram.c.obj",
+      "selected_by": "es_task_insert",
+      "defined_symbols": 19,
+      "undefined_symbols": 32
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_adv_ram.c.obj",
+      "selected_by": "evt_task_ble_adv_check_hdc_type",
+      "defined_symbols": 12,
+      "undefined_symbols": 41
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_test_mode_fsm_tbl.c.obj",
+      "selected_by": "evt_task_ble_test_mode_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_test_mode_isr.c.obj",
+      "selected_by": "evt_task_ble_test_mode_isr_cbk",
+      "defined_symbols": 11,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "sed_adapter.c.obj",
+      "selected_by": "sed_ble_set_rx_phy",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "chnl_calc_util.c.obj",
+      "selected_by": "chnl_calc_get_valid_map_num",
+      "defined_symbols": 1,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_chnl_scan_fsm_tbl.c.obj",
+      "selected_by": "evt_task_chnl_scan_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_gle_adv_process.c.obj",
+      "selected_by": "coex_gle_adv_create_coex_process",
+      "defined_symbols": 5,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_adv_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_adv_get_pre_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_adv_isr.c.obj",
+      "selected_by": "evt_task_gle_adv_isr_cbk",
+      "defined_symbols": 39,
+      "undefined_symbols": 45
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_adv_scan_comm.c.obj",
+      "selected_by": "evt_task_gle_adv_set_crcinit",
+      "defined_symbols": 14,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_gle_scan_process.c.obj",
+      "selected_by": "coex_gle_scan_state_set",
+      "defined_symbols": 12,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_initiate_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_initiate_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_initiate_isr.c.obj",
+      "selected_by": "evt_task_gle_initiate_isr_cbk",
+      "defined_symbols": 37,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_iob_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_iob_get_pre_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_scan_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_scan_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_scan_isr.c.obj",
+      "selected_by": "evt_task_gle_scan_isr_cbk",
+      "defined_symbols": 30,
+      "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_test_mode_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_test_mode_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_test_mode_isr.c.obj",
+      "selected_by": "evt_task_gle_test_mode_isr_cbk",
+      "defined_symbols": 11,
+      "undefined_symbols": 14
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_rx.c.obj",
+      "selected_by": "cali_lo_cap_func",
+      "defined_symbols": 64,
+      "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "hal_bt_cali.c.obj",
+      "selected_by": "cali_tx_power_func",
+      "defined_symbols": 8,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "rf_calibration_alg.c.obj",
+      "selected_by": "bt_cali_complex_divide",
+      "defined_symbols": 46,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_productline.c.obj",
+      "selected_by": "bt_productline_efuse_read",
+      "defined_symbols": 10,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_reg.c.obj",
+      "selected_by": "cali_backup_regs",
+      "defined_symbols": 3,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_wl_action.c.obj",
+      "selected_by": "coex_wl_action_deinit",
+      "defined_symbols": 9,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_conn_update_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_conn_update_get_sta_tbl",
+      "defined_symbols": 7,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_disc.c.obj",
+      "selected_by": "lm_gle_acb_disc_without_terminate",
+      "defined_symbols": 12,
+      "undefined_symbols": 25
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_feat.c.obj",
+      "selected_by": "lm_gle_feats_get_acb_feat_bit",
+      "defined_symbols": 10,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_enc_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_enc_get_sta_tbl",
+      "defined_symbols": 17,
+      "undefined_symbols": 20
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_adv_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_adv_get_sta_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_img_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_img_get_exception_hci_tbl",
+      "defined_symbols": 12,
+      "undefined_symbols": 15
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_initiate_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_initiate_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_initiate_act.c.obj",
+      "selected_by": "lm_gle_initiate_send_status_evt",
+      "defined_symbols": 13,
+      "undefined_symbols": 33
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_scan_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_scan_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_test_mode_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_test_mode_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_imb.c.obj",
+      "selected_by": "lm_gle_acb_create_imb_srv_act",
+      "defined_symbols": 27,
+      "undefined_symbols": 35
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_phy_update.c.obj",
+      "selected_by": "lm_gle_acb_phy_update_auto_req_act",
+      "defined_symbols": 32,
+      "undefined_symbols": 35
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_pwr_ctrl.c.obj",
+      "selected_by": "lm_gle_acb_pwr_ctrl_ind_act",
+      "defined_symbols": 31,
+      "undefined_symbols": 35
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_ver.c.obj",
+      "selected_by": "lm_gle_hci_rd_rem_ver_create_srv_act",
+      "defined_symbols": 10,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "chnl_calc_gle.c.obj",
+      "selected_by": "chnl_calc_gle_2m_phy_chnl_map_from_1m",
+      "defined_symbols": 3,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_chnl_scan_gle.c.obj",
+      "selected_by": "lm_chnl_scan_get_gle_chnl_map",
+      "defined_symbols": 6,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_map_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_map_get_sta_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_data_length_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_data_length_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_iob_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_iob_get_exception_hci_tbl",
+      "defined_symbols": 9,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_test_mode_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_test_mode_fsm_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 9
+    },
+    {
       "archive": "libbg_common.a",
       "member": "random.c.obj",
       "selected_by": "bth_random",
@@ -954,6 +2004,118 @@
       "selected_by": "l2cap_signal_le_connection_param_check",
       "defined_symbols": 6,
       "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_ble_adv_process.c.obj",
+      "selected_by": "coex_ble_adv_create_coex_process",
+      "defined_symbols": 5,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_adv_fsm_tbl.c.obj",
+      "selected_by": "evt_task_ble_adv_get_pre_tbl",
+      "defined_symbols": 14,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "txpd_adapter.c.obj",
+      "selected_by": "txpd_ble_adv_set_txphy",
+      "defined_symbols": 2,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_gle_initiate_process.c.obj",
+      "selected_by": "coex_gle_initiate_start_coex_process",
+      "defined_symbols": 1,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_feat_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_feats_get_sta_tbl",
+      "defined_symbols": 3,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_enc_grand.c.obj",
+      "selected_by": "lm_gle_acb_g_calculate_sk",
+      "defined_symbols": 15,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_enc_terminal.c.obj",
+      "selected_by": "lm_gle_acb_t_calculate_sk",
+      "defined_symbols": 12,
+      "undefined_symbols": 22
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_adv_act.c.obj",
+      "selected_by": "lm_gle_adv_advertising_hci_enable_act",
+      "defined_symbols": 20,
+      "undefined_symbols": 27
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_scan_act.c.obj",
+      "selected_by": "lm_gle_scan_event_sched_stop_act",
+      "defined_symbols": 21,
+      "undefined_symbols": 27
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_test_mode_act.c.obj",
+      "selected_by": "gle_hci_gle_rx_test_enable_act",
+      "defined_symbols": 7,
+      "undefined_symbols": 37
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_imb_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_imb_gnode_get_sta_tbl",
+      "defined_symbols": 9,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_phy_update_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_phy_update_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 10
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_pwr_ctrl_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_srv_pwr_ctrl_get_pre_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_acb_srv_ver_fsm_tbl.c.obj",
+      "selected_by": "lm_gle_acb_ver_get_sta_tbl",
+      "defined_symbols": 3,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_gle_iob_disc.c.obj",
+      "selected_by": "lm_gle_iob_disc_with_terminate_act",
+      "defined_symbols": 11,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_test_mode_act.c.obj",
+      "selected_by": "ble_hci_le_rx_test_v1_enable_act",
+      "defined_symbols": 15,
+      "undefined_symbols": 27
     }
   ],
   "required_symbols": [
@@ -1022,19 +2184,319 @@
       "owner": "hisi-rf-rtos-driver"
     },
     {
-      "name": "__udivdi3",
+      "name": "__divdi3",
       "owner": "compiler-builtins-or-core"
     },
     {
-      "name": "api_h2c_write",
-      "owner": "ws63-radio-controller-transport"
+      "name": "__lshrdi3",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "__moddi3",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "__udivdi3",
+      "owner": "compiler-builtins-or-core"
     },
     {
       "name": "atoi",
       "owner": "compiler-builtins-or-core"
     },
     {
+      "name": "bg_pmu_change_state",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bg_pmu_get_state",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_lowpower_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_prevent_sleep_clear",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_sleep",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_sleep_hardware_status_clear",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_sleep_irq_handler",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_sleep_time_lpcycles_2_us",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_sleep_time_slot_2_us",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_sleep_time_us_2_lpcycles",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "bgtp_soc_wakeup_irq_handler",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "ble_isr_cb_register",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "ble_isr_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "ble_isr_get_cur_isr_queue_head",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "ble_isr_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_get_max_mem_heap_usage",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_get_mem_heap_size",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_get_mem_heap_usage",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_mem_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_cancel",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_check",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_clear",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_debug_hw_timer_past",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_reset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_scheduler",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "btc_timer_set",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "diag_cmd_report_sample_data",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "diag_sample_data_register",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "dm_ble_deinit_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_hci_le_get_max_tx_octets",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_init_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_reset_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_bd_addr_is_null",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_check_evt_mask",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_coex_air_map_update_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_deinit_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_get_air_used_chnl_map",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_basic_cmp_send",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_ctrller_to_host_flow_ctrl_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_host_buffer_size_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_rd_afh_chnl_assess_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_rd_bd_addr_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_rd_le_host_supp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_rd_local_support_cmds_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_rd_local_support_feats_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_rd_local_ver_info_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_reset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_reset_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_set_evt_mask_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_set_evt_mask_page2_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_vendor_set_bd_addr_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_wr_afh_chnl_assess_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_hci_wr_le_host_supp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_init_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_init_dft_val",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_co_reset_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dpc_call_func",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dpc_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dpc_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_ble_read_cur_clock",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_ble_read_finecntclock",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_ble_read_halfslot_rounded_clock",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_btc_crypto_task_chk_del",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_btc_crypto_task_create",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_btc_crypto_task_need_delete",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_btc_mem_info_dump",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "dts_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_gle_read_cur_clock",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_gle_read_finecntclock",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_hci_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_hci_malloc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_init",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -1042,7 +2504,539 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "dts_random",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_read_config",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "dts_thread_set_sem",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_trigger_crypto_engine",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dyn_get_em_mem_cfg",
+      "owner": "ws63-radio-memory-profile"
+    },
+    {
+      "name": "em_alloc_ble_pri_tx_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_alloc_comm_tx_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_alloc_gle_pri_tx_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_alloc_head_sed_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_alloc_tail_sed_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_alloc_txpd",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_buff_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_desc_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_ble_pri_tx_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_comm_tx_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_gle_pri_tx_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_gle_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_sed_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_free_txpd",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_get_gle_next_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_get_gle_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_get_next_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_get_rx_buff_offset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_get_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_get_sed_type",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_offset_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_rd",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_rf_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_rx_buff_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_sed_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_set_gle_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_set_rx_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "em_wr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_cancel_key_deriv_algo_tasks",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_check_algorithm_support",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_clear_aes_ccm_counter",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_clear_sm4_ccm_counter",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_done_ecc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_enable_aes_ccm_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_enable_ccmctr_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_enable_sm4_ccm_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_execute_ecc_rom_used",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_execute_task",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_generate_random",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_get_supported_algorithm",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_is_aes_ccm_rx_mic_en",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_is_aes_ccm_tx_mic_en",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_is_rx_mic_en",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_is_sm4_ccm_rx_mic_en",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_is_sm4_ccm_tx_mic_en",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_is_tx_mic_en",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_reset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_aes_ccm_iv",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_aes_ccm_sk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_aes_task",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_ccmctr_initial_vector",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_ccmctr_session_key",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_ecc_task",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_key_deriv_algo_task",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_sm4_ccm_iv",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_set_sm4_ccm_sk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_start_aes",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "encrypt_start_ecc_rom_used",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_calc_intv",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_calc_offset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_check_cancel_list",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_check_offset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_check_param",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_check_ready_list",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_cpy_elt_without_hdr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_dec_elt_count",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_dump_intv_list",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_dur_compute",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_elt_cmp_priority",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_elt_cmp_sn",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_elt_cmp_task_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_elt_cmp_task_id_and_instant",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_elt_insert_check_end_during_scan",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_finetimer_refresh",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_init_elt_by_param",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_move_to_cancel_list",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_process_cancel_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_set_cbk_param",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_set_processed_sn",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_update_elt_by_param",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "es_view_intv_list_print",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_finish_eeq_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_get_eeq_allow_prog_cnt",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_match_elt_by_ee_gclkn",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_match_elt_by_linklable",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_normal_eeq_fullint_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_push_eeq",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_reset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_rx_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_slot_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_start",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_start_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_start_urgent",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_sw_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_prog_urgent_eeq_fullint_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_acl_env_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_acl_env_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_acl_get_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_acl_handle_return_tx_data",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_abort_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_clear_mac_flag",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_common_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_config_es",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_config_mac",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_create_get_buff",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_disable_handler",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_env_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_evt_int_handler",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_free_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_free_txnode",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_get_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_get_txpd_txtype",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_idle_event_int",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_init_ee_static",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_init_txnode",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_rx_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_set_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_adv_stop_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_env_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_env_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_common_msg_process",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_find_tbl_by_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_list_free",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -1054,8 +3048,152 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
-      "name": "g_dts_thread_chnl",
-      "owner": "ws63-radio-controller-transport"
+      "name": "fsm_msg_comm_except_process_callback_register",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_forward",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_process",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_restore_to_head_ext",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_restore_to_tail_ext",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_save_to_head_ext",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_save_to_tail_ext",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_update_saved_msg",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_register",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_reset",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_send_basic_msg",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_send_basic_msg_without_log",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_send_group_msg_match_fsm_type",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_send_msg",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_send_msg_without_log",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_trans_state_ext",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_unregister",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_aes_queue",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_aes_state",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_bg_sleep_boundary",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_bg_sleep_clk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_bg_sleep_dur",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_bg_sleep_finecnt",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_bg_sleep_log_num",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_bgtp_extern_wakeup_flag",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_ble_isr_queue_head",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_ble_isr_queue_idx",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_ble_isr_queue_max_deep",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_btc_timer_queue",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_dm_co_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_ecc_queue",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_ecc_state",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_es_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_es_finetarget_msk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_gle_isr_queue_head",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_gle_isr_queue_idx",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_gle_isr_queue_max_deep",
+      "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "g_intheap_begin",
@@ -1066,8 +3204,60 @@
       "owner": "hisi-rf-rtos-driver"
     },
     {
+      "name": "g_prevent_sleep_reasons",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_prevent_sleep_time",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_sleep_type",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_sm3_queue",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_sm3_state",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_sm3_triggered",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "gap_create_connectiona",
       "owner": "ble-application-hook"
+    },
+    {
+      "name": "get_tcxo_freq",
+      "owner": "hisi-hal-clock-service"
+    },
+    {
+      "name": "gle_errorint_isr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "gle_isr_cb_register",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "gle_isr_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "gle_isr_get_cur_isr_queue_head",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "gle_isr_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "gle_sp_samp_int_isr",
+      "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "global_isr_time_statistics_get",
@@ -1078,8 +3268,136 @@
       "owner": "platform-diagnostics"
     },
     {
-      "name": "hci_if_bth_init",
-      "owner": "ws63-radio-controller-transport"
+      "name": "hci_bt_cmd_get_adv_dest_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_concat",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_contain",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_extract",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_fetch",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_head",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_insert_after",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_insert_back",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_insert_front",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_insert_inorder",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_locate",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_match",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_move_matched",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_pop",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_size",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "list_tail",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_close",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_conn_upd_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_get_max_tx_octets",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_srv_enc_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_adv_close",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_adv_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_close",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_close",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_comm_get_desc_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_comm_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_comm_set_desc_env",
+      "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "log_event_print0",
@@ -1104,6 +3422,18 @@
     {
       "name": "log_event_print_alterable_para_press",
       "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_oam_register_handler_callback",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_oam_status_store",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "m_auc_int_pri",
+      "owner": "hisi-hal-interrupt-port"
     },
     {
       "name": "massdata_record_system_error",
@@ -1214,6 +3544,30 @@
       "owner": "hisi-rf-rtos-driver"
     },
     {
+      "name": "osal_irq_clear",
+      "owner": "hisi-hal-interrupt-port"
+    },
+    {
+      "name": "osal_irq_disable",
+      "owner": "hisi-hal-interrupt-port"
+    },
+    {
+      "name": "osal_irq_enable",
+      "owner": "hisi-hal-interrupt-port"
+    },
+    {
+      "name": "osal_irq_free",
+      "owner": "hisi-hal-interrupt-port"
+    },
+    {
+      "name": "osal_irq_request",
+      "owner": "hisi-hal-interrupt-port"
+    },
+    {
+      "name": "osal_irq_set_priority",
+      "owner": "hisi-hal-interrupt-port"
+    },
+    {
       "name": "osal_kthread_create",
       "owner": "hisi-rf-rtos-driver"
     },
@@ -1231,6 +3585,22 @@
     },
     {
       "name": "osal_msecs_to_jiffies",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msg_queue_create",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msg_queue_delete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msg_queue_get_msg_num",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msg_queue_read_copy",
       "owner": "hisi-rf-rtos-driver"
     },
     {
@@ -1256,6 +3626,34 @@
     {
       "name": "print_str",
       "owner": "platform-diagnostics"
+    },
+    {
+      "name": "pwr_ctrl_get_dft_tx_power_level",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "pwr_ctrl_get_gle_acb_rssi_avg_cnt",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "pwr_ctrl_get_gle_acb_rssi_avg_time",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "pwr_ctrl_get_rf_tx_path_compensation_val",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "pwr_ctrl_set_dft_tx_power_level",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "pwr_ctrl_set_rf_rx_path_compensation_val",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "pwr_ctrl_set_rf_tx_path_compensation_val",
+      "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "s_pubkey_mpint_par",
@@ -1370,8 +3768,116 @@
       "owner": "platform-diagnostics"
     },
     {
+      "name": "uapi_drv_cipher_hash_deinit",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_hash_finish",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_hash_init",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_hash_start",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_hash_update",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_mac_finish",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_mac_start",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_mac_update",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_pke_ecc_gen_ecdh_key",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_pke_ecc_gen_key",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_symc_deinit",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_symc_destroy",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_cipher_symc_init",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
       "name": "uapi_drv_cipher_trng_get_random_bytes",
       "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_keyslot_create",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_keyslot_destroy",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_klad_attach",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_klad_create",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_klad_destroy",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_klad_detach",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_klad_set_attr",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_klad_set_clear_key",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_km_deinit",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_drv_km_init",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_efuse_read_bit",
+      "owner": "hisi-hal-platform-service"
+    },
+    {
+      "name": "uapi_efuse_read_buffer",
+      "owner": "hisi-hal-platform-service"
+    },
+    {
+      "name": "uapi_efuse_write_bit",
+      "owner": "hisi-hal-platform-service"
+    },
+    {
+      "name": "uapi_efuse_write_buffer",
+      "owner": "hisi-hal-platform-service"
     },
     {
       "name": "uapi_nv_read",
@@ -1386,8 +3892,16 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "uapi_tcxo_delay_us",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "uapi_tcxo_get_us",
       "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "uapi_tsensor_get_current_temp",
+      "owner": "hisi-hal-platform-service"
     },
     {
       "name": "vsprintf_s",
@@ -1403,7 +3917,7 @@
         "entry": "bt_thread_handle",
         "stack_bytes": 3584,
         "vendor_priority": 1,
-        "owner": "ws63-radio-controller-port"
+        "owner": "libbgtp.a"
       },
       {
         "name": "bt_sdk",

@@ -1,6 +1,7 @@
 //! Rooted WS63 BLE controller/host initialization closure.
 
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     fs,
@@ -15,6 +16,8 @@ struct InitProfile {
     revision: String,
     b0_profile_revision: String,
     roots: Vec<String>,
+    controller_archives: Vec<ControllerArchive>,
+    #[serde(default)]
     external_roots: Vec<ExternalRoot>,
     tasks: Vec<Task>,
 }
@@ -28,6 +31,13 @@ struct B0Profile {
 #[derive(Debug, Deserialize)]
 struct B0Archive {
     archive: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+struct ControllerArchive {
+    archive: String,
+    sha256: String,
+    role: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -74,6 +84,7 @@ struct Report {
     revision: String,
     b0_profile_revision: String,
     roots: Vec<String>,
+    controller_archives: Vec<ControllerArchive>,
     external_roots: Vec<ExternalRoot>,
     selected_members: Vec<SelectedMember>,
     required_symbols: Vec<RequiredSymbol>,
@@ -89,6 +100,13 @@ fn parse_rom_symbols(path: &Path) -> Result<BTreeSet<String>, String> {
         .filter(|name| !name.is_empty() && !name.starts_with("/*"))
         .map(str::to_owned)
         .collect())
+}
+
+fn sha256(bytes: &[u8]) -> String {
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 fn generate(
@@ -125,6 +143,21 @@ fn generate(
         members.extend(
             normalize::inspect_archive_member_symbols(&archive_root.join(&archive.archive))
                 .map_err(|error| error.to_string())?,
+        );
+    }
+    for archive in &init.controller_archives {
+        let path = archive_root.join(&archive.archive);
+        let bytes = fs::read(&path).map_err(|error| format!("read {}: {error}", path.display()))?;
+        let actual = sha256(&bytes);
+        if actual != archive.sha256 {
+            return Err(format!(
+                "{} SHA-256 {actual}, expected {}",
+                path.display(),
+                archive.sha256
+            ));
+        }
+        members.extend(
+            normalize::inspect_archive_member_symbols(&path).map_err(|error| error.to_string())?,
         );
     }
     let mut providers: BTreeMap<String, Vec<usize>> = BTreeMap::new();
@@ -221,6 +254,7 @@ fn generate(
         revision: init.revision,
         b0_profile_revision: b0.revision,
         roots: init.roots,
+        controller_archives: init.controller_archives,
         external_roots: init.external_roots,
         selected_members,
         required_symbols,
