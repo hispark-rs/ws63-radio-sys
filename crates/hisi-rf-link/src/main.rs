@@ -38,7 +38,7 @@ const COMMANDS: &[(&str, &str)] = &[
 
 fn usage() -> ! {
     eprintln!(
-        "usage: hisi-rf-link <inspect|normalize|verify-normalized|verify-guarded-sites|ble-profile|rebuild-native-supplicant|archive-paths|task-profile|{}> [arguments...]",
+        "usage: hisi-rf-link <inspect|normalize|verify-normalized|verify-guarded-sites|ble-profile|ble-init-profile|rebuild-native-supplicant|archive-paths|task-profile|{}> [arguments...]",
         COMMANDS
             .iter()
             .map(|(name, _)| *name)
@@ -227,6 +227,37 @@ fn ble_profile(args: impl Iterator<Item = std::ffi::OsString>) {
     });
 }
 
+fn ble_init_profile(args: impl Iterator<Item = std::ffi::OsString>) {
+    let mut arguments = args.collect::<Vec<_>>();
+    let profile = PathBuf::from(required_option(&mut arguments, "--profile"));
+    let b0_profile = PathBuf::from(required_option(&mut arguments, "--b0-profile"));
+    let archive_root = PathBuf::from(required_option(&mut arguments, "--archive-root"));
+    let rom_symbols = PathBuf::from(required_option(&mut arguments, "--rom-symbols"));
+    let output = PathBuf::from(required_option(&mut arguments, "--output"));
+    let check = if let Some(position) = arguments.iter().position(|argument| argument == "--check")
+    {
+        arguments.remove(position);
+        true
+    } else {
+        false
+    };
+    if !arguments.is_empty() {
+        usage();
+    }
+    hisi_rf_link::ble_init_profile::write_or_check(
+        &profile,
+        &b0_profile,
+        &archive_root,
+        &rom_symbols,
+        &output,
+        check,
+    )
+    .unwrap_or_else(|error| {
+        eprintln!("BLE B1 init profile: {error}");
+        std::process::exit(1);
+    });
+}
+
 fn print_path(path: PathBuf) {
     if !path.is_file() {
         eprintln!("radio archive is missing: {}", path.display());
@@ -313,6 +344,10 @@ fn main() {
     }
     if command == "ble-profile" {
         ble_profile(args);
+        return;
+    }
+    if command == "ble-init-profile" {
+        ble_init_profile(args);
         return;
     }
     if command == "verify-guarded-sites" {

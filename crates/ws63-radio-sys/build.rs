@@ -323,6 +323,8 @@ fn main() {
     let scheduling_profile_path = out_dir.join("ws63-scheduling.toml");
     let ble_profile_path = out_dir.join("ws63-ble-b0.toml");
     let ble_report_path = out_dir.join("ws63-ble-b0-report.json");
+    let ble_init_profile_path = out_dir.join("ws63-ble-b1.toml");
+    let ble_init_report_path = out_dir.join("ws63-ble-b1-report.json");
     for (path, contents) in [
         (&profile_path, hisi_rf_link::WS63_ARCHIVE_PROFILE),
         (
@@ -339,6 +341,8 @@ fn main() {
         ),
         (&ble_profile_path, hisi_rf_link::WS63_BLE_B0_PROFILE),
         (&ble_report_path, hisi_rf_link::WS63_BLE_B0_REPORT),
+        (&ble_init_profile_path, hisi_rf_link::WS63_BLE_B1_PROFILE),
+        (&ble_init_report_path, hisi_rf_link::WS63_BLE_B1_REPORT),
     ] {
         fs::write(path, contents)
             .unwrap_or_else(|error| panic!("write {}: {error}", path.display()));
@@ -417,6 +421,8 @@ fn main() {
         ("task_profile", scheduling_profile_path),
         ("ble_profile", ble_profile_path),
         ("ble_report", ble_report_path),
+        ("ble_init_profile", ble_init_profile_path),
+        ("ble_init_report", ble_init_report_path),
         ("nvs_linker", nvs_linker),
     ] {
         if !path.exists() {

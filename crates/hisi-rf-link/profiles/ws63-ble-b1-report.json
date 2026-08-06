@@ -1,0 +1,1431 @@
+{
+  "schema_version": 1,
+  "revision": "ws63-ble-b1-init-closure-v1",
+  "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
+  "roots": [
+    "bt_acore_task_main",
+    "sdk_msg_thread",
+    "btsrv_task_body",
+    "btsdk_init",
+    "enable_ble"
+  ],
+  "external_roots": [
+    {
+      "name": "bt_thread_handle",
+      "owner": "ws63-radio-controller-port",
+      "reason": "Controller task entry is supplied by the WS63 controller integration, not the B0 host archives"
+    }
+  ],
+  "selected_members": [
+    {
+      "archive": "libbg_common.a",
+      "member": "mpc_trans.c.obj",
+      "selected_by": "bt_acore_task_main",
+      "defined_symbols": 3,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_hlp.c.obj",
+      "selected_by": "sdk_msg_thread",
+      "defined_symbols": 36,
+      "undefined_symbols": 41
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "btsrv_task.c.obj",
+      "selected_by": "btsrv_task_body",
+      "defined_symbols": 6,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_init.c.obj",
+      "selected_by": "btsdk_init",
+      "defined_symbols": 17,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "local_device_manager_ble.c.obj",
+      "selected_by": "enable_ble",
+      "defined_symbols": 32,
+      "undefined_symbols": 61
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bth_at_ble_common.c.obj",
+      "selected_by": "at_log_enable",
+      "defined_symbols": 8,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "mpc_dispatch.c.obj",
+      "selected_by": "bt_acore_tran_task_rx_process_pkt",
+      "defined_symbols": 1,
+      "undefined_symbols": 10
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "sdk_mem.c.obj",
+      "selected_by": "bt_os_free",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bt_tran_task.c.obj",
+      "selected_by": "bt_tran_task_rx_process_pkt",
+      "defined_symbols": 3,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "bt_vendor.c.obj",
+      "selected_by": "bt_vendor_init",
+      "defined_symbols": 1,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "gdk_msg.c.obj",
+      "selected_by": "gdk_msg_loop",
+      "defined_symbols": 11,
+      "undefined_symbols": 19
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "btlist_ram.c.obj",
+      "selected_by": "_list_node_new",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "osdep.c.obj",
+      "selected_by": "btos_free",
+      "defined_symbols": 41,
+      "undefined_symbols": 35
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_gap_io_security.c.obj",
+      "selected_by": "btsdk_author_req_ind",
+      "defined_symbols": 20,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_gap_conn_management.c.obj",
+      "selected_by": "btsdk_delete_remote_device_by_handle",
+      "defined_symbols": 35,
+      "undefined_symbols": 25
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "sysdep.c.obj",
+      "selected_by": "decode_new",
+      "defined_symbols": 18,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "g_sdk.c.obj",
+      "selected_by": "g_btclose_event",
+      "defined_symbols": 8,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "att_ui.c.obj",
+      "selected_by": "gatt_free_service",
+      "defined_symbols": 54,
+      "undefined_symbols": 74
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_le.c.obj",
+      "selected_by": "le_addr_type_get",
+      "defined_symbols": 67,
+      "undefined_symbols": 41
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "btlist.c.obj",
+      "selected_by": "list_add_head",
+      "defined_symbols": 18,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_ui.c.obj",
+      "selected_by": "smp_compare_addr",
+      "defined_symbols": 45,
+      "undefined_symbols": 46
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "sdk_list.c.obj",
+      "selected_by": "bt_sdk_list_add_tail",
+      "defined_symbols": 7,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "btsrv_gatt_client.c.obj",
+      "selected_by": "btsrv_handle_gatt_client_msg",
+      "defined_symbols": 17,
+      "undefined_symbols": 24
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "btsrv_gatt_server.c.obj",
+      "selected_by": "btsrv_handle_gatt_server_msg",
+      "defined_symbols": 24,
+      "undefined_symbols": 40
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "btsrv_hci_factory.c.obj",
+      "selected_by": "btsrv_handle_hci_factory_msg",
+      "defined_symbols": 11,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "local_device_manager.c.obj",
+      "selected_by": "btsrv_handle_local_manager_msg",
+      "defined_symbols": 1,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "btinit.c.obj",
+      "selected_by": "bt_done",
+      "defined_symbols": 3,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_gatt.c.obj",
+      "selected_by": "btsdk_gatt_init",
+      "defined_symbols": 48,
+      "undefined_symbols": 74
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_gap_local_settings.c.obj",
+      "selected_by": "btsdk_get_local_bd_addr",
+      "defined_symbols": 42,
+      "undefined_symbols": 28
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "tladapter.c.obj",
+      "selected_by": "btsdk_init_transport_layer",
+      "defined_symbols": 13,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "fsm.c.obj",
+      "selected_by": "fsm_inst_free",
+      "defined_symbols": 50,
+      "undefined_symbols": 32
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "gap_ui.c.obj",
+      "selected_by": "gap_register_ind_cbk",
+      "defined_symbols": 60,
+      "undefined_symbols": 53
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_core_ram.c.obj",
+      "selected_by": "hci_tl_recv_data_buff",
+      "defined_symbols": 40,
+      "undefined_symbols": 58
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at.c.obj",
+      "selected_by": "ble_at_register",
+      "defined_symbols": 1,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "uapi_ble_gap.c.obj",
+      "selected_by": "ble_gap_internal_callback_regist",
+      "defined_symbols": 31,
+      "undefined_symbols": 29
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "uapi_ble_gatt.c.obj",
+      "selected_by": "ble_gatt_internal_reg_cbk",
+      "defined_symbols": 24,
+      "undefined_symbols": 26
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "bt_database.c.obj",
+      "selected_by": "ble_get_smp_keys",
+      "defined_symbols": 28,
+      "undefined_symbols": 14
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "uapi_ble_l2cap.c.obj",
+      "selected_by": "ble_l2cap_main_internal_reg_cbk",
+      "defined_symbols": 20,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "bt_data_config.c.obj",
+      "selected_by": "bt_acore_config_bypass_mode",
+      "defined_symbols": 6,
+      "undefined_symbols": 14
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "device_manager.c.obj",
+      "selected_by": "bt_manager_deinit_configure",
+      "defined_symbols": 3,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bg_conf.c.obj",
+      "selected_by": "bth_conf_set_feature",
+      "defined_symbols": 5,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "connection_manager_ble.c.obj",
+      "selected_by": "btsrv_ble_smp_pair_complete_cbk",
+      "defined_symbols": 14,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "btsrv_gatt_server_default_service.c.obj",
+      "selected_by": "btsrv_gatts_set_device_appearance_value",
+      "defined_symbols": 9,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sapi_ble_gap.c.obj",
+      "selected_by": "sapi_ble_clean_adv_data_filter",
+      "defined_symbols": 37,
+      "undefined_symbols": 63
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_general.c.obj",
+      "selected_by": "sapi_ble_clean_product_type",
+      "defined_symbols": 25,
+      "undefined_symbols": 56
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sapi_ble_dev_manager.c.obj",
+      "selected_by": "sapi_ble_disable",
+      "defined_symbols": 2,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "ble_connect.c.obj",
+      "selected_by": "ble_connect_svr_proc",
+      "defined_symbols": 1,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "uapi_ble_hci.c.obj",
+      "selected_by": "ble_general_hci_proc",
+      "defined_symbols": 6,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "bt_desktop.c.obj",
+      "selected_by": "bt_desktop_svr_proc",
+      "defined_symbols": 2,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbth_sdk.a",
+      "member": "bt_manager.c.obj",
+      "selected_by": "bt_manager_svr_proc",
+      "defined_symbols": 4,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "sdk_common.c.obj",
+      "selected_by": "check_crc16",
+      "defined_symbols": 4,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "ahib_mpc.c.obj",
+      "selected_by": "ahib_mpc_rx_data",
+      "defined_symbols": 10,
+      "undefined_symbols": 29
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "btstack.c.obj",
+      "selected_by": "bt_init_env",
+      "defined_symbols": 4,
+      "undefined_symbols": 23
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "bt_dev_init.c.obj",
+      "selected_by": "bt_mpc_check_notify_dev_info_state",
+      "defined_symbols": 7,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "gdk_cmsis.c.obj",
+      "selected_by": "gdk_cb",
+      "defined_symbols": 12,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "gdk_list.c.obj",
+      "selected_by": "gdk_list_add_tail",
+      "defined_symbols": 16,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "common_conf.c.obj",
+      "selected_by": "bth_add_global_heap_memused",
+      "defined_symbols": 22,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_hlp_conn.c.obj",
+      "selected_by": "sec_set_trusted_device",
+      "defined_symbols": 3,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "smp_ui.c.obj",
+      "selected_by": "smp_passkey_entry_input",
+      "defined_symbols": 24,
+      "undefined_symbols": 34
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "global_ram.c.obj",
+      "selected_by": "mem_frees",
+      "defined_symbols": 25,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "att_pdu.c.obj",
+      "selected_by": "att_fsminst",
+      "defined_symbols": 72,
+      "undefined_symbols": 51
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "att_gatt.c.obj",
+      "selected_by": "att_uuid_get",
+      "defined_symbols": 71,
+      "undefined_symbols": 77
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_conf.c.obj",
+      "selected_by": "bth_get_gatt_device_name",
+      "defined_symbols": 103,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "att_common.c.obj",
+      "selected_by": "gatt_done_reserve",
+      "defined_symbols": 36,
+      "undefined_symbols": 21
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_ui.c.obj",
+      "selected_by": "l2cap_reg_cbk",
+      "defined_symbols": 15,
+      "undefined_symbols": 21
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_hlp_ram.c.obj",
+      "selected_by": "hci_cbk",
+      "defined_symbols": 22,
+      "undefined_symbols": 33
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_core.c.obj",
+      "selected_by": "hci_fsminst",
+      "defined_symbols": 7,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_core_reserv.c.obj",
+      "selected_by": "hci_le_get_remote_features_by_bd_type",
+      "defined_symbols": 55,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_link_le.c.obj",
+      "selected_by": "le_connect",
+      "defined_symbols": 6,
+      "undefined_symbols": 32
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_hlp.c.obj",
+      "selected_by": "pack_hci_par",
+      "defined_symbols": 15,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_link.c.obj",
+      "selected_by": "hci_acl_link_cbk",
+      "defined_symbols": 19,
+      "undefined_symbols": 36
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_link_util.c.obj",
+      "selected_by": "hci_acl_link_find_by_bd_type",
+      "defined_symbols": 13,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_data_proc.c.obj",
+      "selected_by": "hcic_acl_data_send",
+      "defined_symbols": 28,
+      "undefined_symbols": 38
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_secu.c.obj",
+      "selected_by": "hcic_security_set_bondable",
+      "defined_symbols": 3,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sapi_ble_gatt.c.obj",
+      "selected_by": "sapi_ble_gatt_discovery_characteristics",
+      "defined_symbols": 41,
+      "undefined_symbols": 56
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "btsrv_uuid.c.obj",
+      "selected_by": "bts_init_128bit_uuid",
+      "defined_symbols": 5,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sapi_ble_hci.c.obj",
+      "selected_by": "sapi_ble_hci_general",
+      "defined_symbols": 1,
+      "undefined_symbols": 9
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "btprofile.c.obj",
+      "selected_by": "bt_done_profile",
+      "defined_symbols": 3,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "bluelet_reserv.c.obj",
+      "selected_by": "bt_init_reserv",
+      "defined_symbols": 1,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "hdlmgnt.c.obj",
+      "selected_by": "bth_wait_handle",
+      "defined_symbols": 17,
+      "undefined_symbols": 19
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_gatt_hlp.c.obj",
+      "selected_by": "btsdk_gatth_add_service",
+      "defined_symbols": 78,
+      "undefined_symbols": 57
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "hci_comm_data.c.obj",
+      "selected_by": "hci_get_ble_data_recv_cbk",
+      "defined_symbols": 6,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bt_dfx.c.obj",
+      "selected_by": "bth_task_in_reserve",
+      "defined_symbols": 16,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "gap_hlp_comm.c.obj",
+      "selected_by": "gap_fsminst",
+      "defined_symbols": 42,
+      "undefined_symbols": 68
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "gap_period_adv.c.obj",
+      "selected_by": "gap_le_disable_periodic_advertising",
+      "defined_symbols": 9,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "gap_hlp_le.c.obj",
+      "selected_by": "gaph_get_le_device_appearance",
+      "defined_symbols": 107,
+      "undefined_symbols": 74
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_ev_ram.c.obj",
+      "selected_by": "hci_internal_cbk_reg",
+      "defined_symbols": 17,
+      "undefined_symbols": 37
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "stream2stru.c.obj",
+      "selected_by": "hci_stream_to_struct",
+      "defined_symbols": 12,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at_gap.c.obj",
+      "selected_by": "ble_at_gap_register",
+      "defined_symbols": 51,
+      "undefined_symbols": 46
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at_gattc.c.obj",
+      "selected_by": "ble_at_gattc_register",
+      "defined_symbols": 22,
+      "undefined_symbols": 20
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at_gatts.c.obj",
+      "selected_by": "ble_at_gatts_register",
+      "defined_symbols": 31,
+      "undefined_symbols": 27
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "mpc_send.c.obj",
+      "selected_by": "bt_acore_mpc_send_2_bt_bypass",
+      "defined_symbols": 2,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_core.c.obj",
+      "selected_by": "sapi_ble_disconnect_link",
+      "defined_symbols": 37,
+      "undefined_symbols": 23
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_ahia_gap.c.obj",
+      "selected_by": "sapi_ble_set_conn_param",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "nv_common.c.obj",
+      "selected_by": "ble_acore_set_reserved_sync_flash",
+      "defined_symbols": 15,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sapi_ble_l2cap.c.obj",
+      "selected_by": "sapi_ble_l2cap_channel_tx",
+      "defined_symbols": 9,
+      "undefined_symbols": 21
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sapi_ble_adv.c.obj",
+      "selected_by": "ble_general_set_extended_adv_data",
+      "defined_symbols": 4,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "bt_mpc.c.obj",
+      "selected_by": "bt_mpc_tx_packet",
+      "defined_symbols": 4,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_gap_device_discovery.c.obj",
+      "selected_by": "btsdk_passkey_req_reply",
+      "defined_symbols": 21,
+      "undefined_symbols": 21
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "gap_reserv.c.obj",
+      "selected_by": "gap_create_connection_cancel",
+      "defined_symbols": 32,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_ui_le.c.obj",
+      "selected_by": "hci_security_le_keys_remove",
+      "defined_symbols": 3,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "sdk_bta_if.c.obj",
+      "selected_by": "sdk_bta_interface_init",
+      "defined_symbols": 4,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bt_queue.c.obj",
+      "selected_by": "bam_item_data_free",
+      "defined_symbols": 12,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bt_saia_utils.c.obj",
+      "selected_by": "saia_utils_check_crc",
+      "defined_symbols": 22,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "bth_power_on.c.obj",
+      "selected_by": "get_bth_power_on_comp_callback_interface",
+      "defined_symbols": 2,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "smp_aes_comm.c.obj",
+      "selected_by": "smp_cmac_reverse",
+      "defined_symbols": 13,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "smp_fsm.c.obj",
+      "selected_by": "smp_link_find_by_remote_addr",
+      "defined_symbols": 94,
+      "undefined_symbols": 77
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "buff.c.obj",
+      "selected_by": "_buff_new",
+      "defined_symbols": 4,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_core_ram.c.obj",
+      "selected_by": "l2cap_cid_find_by_local_cid",
+      "defined_symbols": 13,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_core.c.obj",
+      "selected_by": "l2cap_fsminst",
+      "defined_symbols": 31,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_conn.c.obj",
+      "selected_by": "l2capc_connect_req",
+      "defined_symbols": 14,
+      "undefined_symbols": 24
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_core_ble.c.obj",
+      "selected_by": "l2capc_connection_parameter_update_req",
+      "defined_symbols": 14,
+      "undefined_symbols": 38
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_data_proc.c.obj",
+      "selected_by": "l2capc_data_recv",
+      "defined_symbols": 5,
+      "undefined_symbols": 19
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_ev_le.c.obj",
+      "selected_by": "hci_ev_le_advertising_report",
+      "defined_symbols": 24,
+      "undefined_symbols": 38
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_gle.c.obj",
+      "selected_by": "l2cap_acl_dataind_gle",
+      "defined_symbols": 6,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_ev.c.obj",
+      "selected_by": "hci_cmd_find_by_cmd_status_evt_rom",
+      "defined_symbols": 6,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "sdk_util.c.obj",
+      "selected_by": "bt_sdk_at_str_to_data",
+      "defined_symbols": 11,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at_cmd_gap_test.c.obj",
+      "selected_by": "bt_sdk_gap_register_callbacks",
+      "defined_symbols": 1,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "remote_device_manager_ble.c.obj",
+      "selected_by": "gap_ble_get_bonded_devices",
+      "defined_symbols": 7,
+      "undefined_symbols": 14
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at_common.c.obj",
+      "selected_by": "ble_at_str_to_uuid",
+      "defined_symbols": 1,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbt_app.a",
+      "member": "ble_at_cmd_gatt_test.c.obj",
+      "selected_by": "bt_sdk_gattc_register_callbacks",
+      "defined_symbols": 2,
+      "undefined_symbols": 5
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "nv_operator.c.obj",
+      "selected_by": "data_read",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_ahib_gap.c.obj",
+      "selected_by": "bt_mpc_adapter_gap_cbk",
+      "defined_symbols": 3,
+      "undefined_symbols": 34
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_ahib_gatt.c.obj",
+      "selected_by": "bt_mpc_adapter_gatt_cbk",
+      "defined_symbols": 2,
+      "undefined_symbols": 42
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_ahib_hci.c.obj",
+      "selected_by": "bt_mpc_adapter_hci_cbk",
+      "defined_symbols": 2,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "ble_ahib_l2cap.c.obj",
+      "selected_by": "bt_mpc_adapter_l2cap_cbk",
+      "defined_symbols": 2,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "hci_secu_ram.c.obj",
+      "selected_by": "hcic_security_le_keys_recover",
+      "defined_symbols": 2,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "random.c.obj",
+      "selected_by": "bth_random",
+      "defined_symbols": 1,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "smp_reserv.c.obj",
+      "selected_by": "get_smp_hci_ev_cbk",
+      "defined_symbols": 17,
+      "undefined_symbols": 16
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "patch_bth_bg_common.c.obj",
+      "selected_by": "smp_calc_ltk_patch",
+      "defined_symbols": 4,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_reserv.c.obj",
+      "selected_by": "get_l2cap_hci_ev_cbk",
+      "defined_symbols": 26,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_sec.c.obj",
+      "selected_by": "l2cap_security_req",
+      "defined_symbols": 8,
+      "undefined_symbols": 25
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_signal.c.obj",
+      "selected_by": "l2cap_signal_trans_done",
+      "defined_symbols": 14,
+      "undefined_symbols": 18
+    },
+    {
+      "archive": "libbt_host.a",
+      "member": "l2cap_core_ble_ram.c.obj",
+      "selected_by": "l2cap_signal_le_connection_param_check",
+      "defined_symbols": 6,
+      "undefined_symbols": 6
+    }
+  ],
+  "required_symbols": [
+    {
+      "name": "LOS_MS2Tick",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MemInfoGet",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxCreate",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxPend",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_MuxPost",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemCreate",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemPend",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SemPost",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SwtmrCreate",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SwtmrStart",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_SwtmrStop",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_TaskDelay",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_Tick2MS",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "LOS_TickCountGet",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "__udivdi3",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "api_h2c_write",
+      "owner": "ws63-radio-controller-transport"
+    },
+    {
+      "name": "atoi",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "dts_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_malloc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dts_thread_set_sem",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_alloc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "fsm_msg_buf_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "g_dts_thread_chnl",
+      "owner": "ws63-radio-controller-transport"
+    },
+    {
+      "name": "g_intheap_begin",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "g_osSwtmrCBArray",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "gap_create_connectiona",
+      "owner": "ble-application-hook"
+    },
+    {
+      "name": "global_isr_time_statistics_get",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "global_thread_status_update",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "hci_if_bth_init",
+      "owner": "ws63-radio-controller-transport"
+    },
+    {
+      "name": "log_event_print0",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print1",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print2",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print3",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print4",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "log_event_print_alterable_para_press",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "massdata_record_system_error",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "massdata_record_system_event",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "memcmp",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "memcpy",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "memcpy_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "memmove_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "memset",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "memset_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_dhkey",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_pubkey",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_seckey",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_set2",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_var_free",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "mp_var_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "oal_mem_alloc",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "oal_mem_free",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "osDelay",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMessageQueueGet",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMessageQueueNew",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMessageQueuePut",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexAcquire",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexNew",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osMutexRelease",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osTimerDelete",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osTimerNew",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osTimerStart",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_create",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_lock",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_set_priority",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_unlock",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msecs_to_jiffies",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msg_queue_write_copy",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_msleep",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_vfree",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "osal_vmalloc",
+      "owner": "hisi-alloc"
+    },
+    {
+      "name": "panic",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "print_str",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "s_pubkey_mpint_par",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_aes128reverse",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_csrk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_d1",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_f4",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_f5k",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_f6",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_g2",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_h6",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_irk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_resolvable_private_addr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_stk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_calc_x_confirm",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_ecdh_public_key",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_ecdh_public_key_check_on_curve",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_fsminst",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_setbit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "smp_truncat",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "sprintf_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strcat_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strcmp",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "strcpy_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strlen",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "strncpy_s",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "strnlen",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "tolower",
+      "owner": "compiler-builtins-or-core"
+    },
+    {
+      "name": "uapi_at_bt_register_cmd",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "uapi_at_print",
+      "owner": "platform-diagnostics"
+    },
+    {
+      "name": "uapi_drv_cipher_trng_get_random_bytes",
+      "owner": "hisi-crypto-ws63"
+    },
+    {
+      "name": "uapi_nv_read",
+      "owner": "hisi-nvs"
+    },
+    {
+      "name": "uapi_nv_write",
+      "owner": "hisi-nvs"
+    },
+    {
+      "name": "uapi_systick_get_ms",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "uapi_tcxo_get_us",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "vsprintf_s",
+      "owner": "hisi-rom-sys-ws63"
+    }
+  ],
+  "resources": {
+    "task_count": 4,
+    "stack_bytes": 10240,
+    "tasks": [
+      {
+        "name": "bt",
+        "entry": "bt_thread_handle",
+        "stack_bytes": 3584,
+        "vendor_priority": 1,
+        "owner": "ws63-radio-controller-port"
+      },
+      {
+        "name": "bt_sdk",
+        "entry": "bt_acore_task_main",
+        "stack_bytes": 2048,
+        "vendor_priority": 12,
+        "owner": "libbg_common.a"
+      },
+      {
+        "name": "bth_sdk",
+        "entry": "sdk_msg_thread",
+        "stack_bytes": 512,
+        "vendor_priority": 13,
+        "owner": "libbt_host.a"
+      },
+      {
+        "name": "bt_service",
+        "entry": "btsrv_task_body",
+        "stack_bytes": 4096,
+        "vendor_priority": 12,
+        "owner": "libbg_common.a"
+      }
+    ]
+  }
+}

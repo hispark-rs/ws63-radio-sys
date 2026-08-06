@@ -122,7 +122,7 @@ fn parse_rom_symbols(path: &Path) -> Result<BTreeSet<String>, String> {
         .collect())
 }
 
-fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'static str> {
+pub(crate) fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'static str> {
     if rom_symbols.contains(name) {
         return Some("hisi-rom-sys-ws63");
     }

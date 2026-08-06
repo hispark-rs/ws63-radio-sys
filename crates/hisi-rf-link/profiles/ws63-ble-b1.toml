@@ -1,0 +1,43 @@
+schema_version = 1
+revision = "ws63-ble-b1-init-closure-v1"
+b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
+roots = [
+  "bt_acore_task_main",
+  "sdk_msg_thread",
+  "btsrv_task_body",
+  "btsdk_init",
+  "enable_ble",
+]
+
+[[external_roots]]
+name = "bt_thread_handle"
+owner = "ws63-radio-controller-port"
+reason = "Controller task entry is supplied by the WS63 controller integration, not the B0 host archives"
+
+[[tasks]]
+name = "bt"
+entry = "bt_thread_handle"
+stack_bytes = 3584
+vendor_priority = 1
+owner = "ws63-radio-controller-port"
+
+[[tasks]]
+name = "bt_sdk"
+entry = "bt_acore_task_main"
+stack_bytes = 2048
+vendor_priority = 12
+owner = "libbg_common.a"
+
+[[tasks]]
+name = "bth_sdk"
+entry = "sdk_msg_thread"
+stack_bytes = 512
+vendor_priority = 13
+owner = "libbt_host.a"
+
+[[tasks]]
+name = "bt_service"
+entry = "btsrv_task_body"
+stack_bytes = 4096
+vendor_priority = 12
+owner = "libbg_common.a"

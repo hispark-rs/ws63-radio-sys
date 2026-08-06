@@ -68,6 +68,14 @@ pub struct ArchiveSymbols {
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+pub struct ArchiveMemberSymbols {
+    pub archive: String,
+    pub member: String,
+    pub defined_global: BTreeSet<String>,
+    pub undefined_global: BTreeSet<String>,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub struct RelocationRecord {
     pub archive: String,
     pub member: String,
@@ -669,6 +677,22 @@ pub fn inspect_archive(path: &Path) -> Result<ArchiveInventory, Error> {
 }
 
 pub fn inspect_archive_symbols(path: &Path) -> Result<ArchiveSymbols, Error> {
+    let member_symbols = inspect_archive_member_symbols(path)?;
+    let members = member_symbols.len();
+    let mut defined_global = BTreeSet::new();
+    let mut undefined_global = BTreeSet::new();
+    for member in member_symbols {
+        defined_global.extend(member.defined_global);
+        undefined_global.extend(member.undefined_global);
+    }
+    Ok(ArchiveSymbols {
+        members,
+        defined_global,
+        undefined_global,
+    })
+}
+
+pub fn inspect_archive_member_symbols(path: &Path) -> Result<Vec<ArchiveMemberSymbols>, Error> {
     let data =
         fs::read(path).map_err(|error| Error::new(format!("read {}: {error}", path.display())))?;
     let archive = path
@@ -676,15 +700,14 @@ pub fn inspect_archive_symbols(path: &Path) -> Result<ArchiveSymbols, Error> {
         .and_then(|name| name.to_str())
         .unwrap_or("<archive>")
         .to_owned();
-    let mut members = 0;
-    let mut defined_global = BTreeSet::new();
-    let mut undefined_global = BTreeSet::new();
+    let mut symbols_by_member = Vec::new();
     for (member, start, end) in archive_members(&data, &archive)? {
         let member_data = &data[start..end];
         if member_data.get(..4) != Some(ELF_MAGIC) {
             continue;
         }
-        members += 1;
+        let mut defined_global = BTreeSet::new();
+        let mut undefined_global = BTreeSet::new();
         let context = format!("{archive}({member})");
         let sections = parse_sections(member_data, &context)?;
         for (index, section) in sections.iter().enumerate() {
@@ -703,12 +726,14 @@ pub fn inspect_archive_symbols(path: &Path) -> Result<ArchiveSymbols, Error> {
                 }
             }
         }
+        symbols_by_member.push(ArchiveMemberSymbols {
+            archive: archive.clone(),
+            member,
+            defined_global,
+            undefined_global,
+        });
     }
-    Ok(ArchiveSymbols {
-        members,
-        defined_global,
-        undefined_global,
-    })
+    Ok(symbols_by_member)
 }
 
 pub fn normalize_archive(input: &Path, output: &Path) -> Result<NormalizedArtifact, Error> {
