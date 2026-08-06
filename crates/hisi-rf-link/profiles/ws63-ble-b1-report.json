@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b1-init-closure-v1",
+  "revision": "ws63-ble-b1-init-closure-v2",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -8,7 +8,8 @@
     "sdk_msg_thread",
     "btsrv_task_body",
     "btsdk_init",
-    "enable_ble"
+    "enable_ble",
+    "g_systick_clock"
   ],
   "controller_archives": [
     {
@@ -20,6 +21,11 @@
       "archive": "libbgtp_rom_data.a",
       "sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
       "role": "WS63 BLE controller mask-ROM data definitions"
+    },
+    {
+      "archive": "librom_callback.a",
+      "sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
+      "role": "Shared platform ROM-data objects required by the BLE timebase ABI"
     }
   ],
   "external_roots": [],
@@ -65,6 +71,13 @@
       "selected_by": "enable_ble",
       "defined_symbols": 32,
       "undefined_symbols": 61
+    },
+    {
+      "archive": "librom_callback.a",
+      "member": "plat_rom_data.c.obj",
+      "selected_by": "g_systick_clock",
+      "defined_symbols": 14,
+      "undefined_symbols": 36
     },
     {
       "archive": "libbgtp.a",
@@ -3266,6 +3279,150 @@
     {
       "name": "global_thread_status_update",
       "owner": "platform-diagnostics"
+    },
+    {
+      "name": "hal_pin_ws63_get_ds",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_pin_ws63_get_mode",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_pin_ws63_get_pull",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_pin_ws63_set_ds",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_pin_ws63_set_mode",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_pin_ws63_set_pull",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_register_watchdog_v151_callback",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_dma_read",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_dma_write",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_get_flash_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_reg_erase",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_reg_flash_opreations",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_reg_read",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_sfc_v150_reg_write",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_systick_ws63_ctrl",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_systick_ws63_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_systick_ws63_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_tcxo_v150_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_tcxo_v150_get",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_tcxo_v150_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_timer_v150_config_load",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_timer_v150_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_timer_v150_get_current_value",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_timer_v150_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_timer_v150_start",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_timer_v150_stop",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_disable",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_enable",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_get_attr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_get_left_time",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_kick",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "hal_watchdog_v151_set_attr",
+      "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "hci_bt_cmd_get_adv_dest_id",

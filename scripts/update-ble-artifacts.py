@@ -59,7 +59,7 @@ def main() -> None:
                 "--",
                 "normalize",
                 "--profile-revision",
-                "ws63-ble-b1-normalized-v1",
+                "ws63-ble-b1-normalized-v2",
                 "--out-dir",
                 str(output),
                 "--manifest",
@@ -92,7 +92,7 @@ def main() -> None:
         "archives": names,
         "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json",
         "init_revision": init_profile["revision"],
-        "init_normalization_revision": "ws63-ble-b1-normalized-v1",
+        "init_normalization_revision": "ws63-ble-b1-normalized-v2",
         "controller_archives": controller_names,
         "init_required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b1-report.json",
     }
