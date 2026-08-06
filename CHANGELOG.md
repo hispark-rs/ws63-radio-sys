@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.15] - 2026-08-06
+
+### Fixed
+
+- Derive the BLE B1 controller archive metadata from the versioned profile
+  instead of a hard-coded two-archive list, so closure additions reach the
+  final Cargo link contract.
+- Resolve generated Cargo metadata names with their `_ARCHIVE` suffix and
+  verify the resulting archive exists before exporting it to consumers.
+
 ## [0.1.0-alpha.14] - 2026-08-06
 
 ### Fixed
