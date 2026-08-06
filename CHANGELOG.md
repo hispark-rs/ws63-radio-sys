@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.14] - 2026-08-06
+
+### Fixed
+
+- Extended the BLE B1 init closure to include the normalized shared platform
+  ROM-data object that owns `g_systick_clock`, keeping timebase initialization
+  linked from its original archive rather than synthesizing state in Rust.
+- Bumped the BLE B1 profile and normalization revisions to v2 and regenerated
+  the rooted closure report.
+
 ## [0.1.0-alpha.13] - 2026-08-06
 
 ### Added
