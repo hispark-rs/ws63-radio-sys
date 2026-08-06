@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.13] - 2026-08-06
+
+### Added
+
+- Add the hash-bound WS63 BLE B1 rooted controller closure, including the exact
+  required-symbol and four-task runtime profile derived from the selected
+  archive set.
+- Package the normalized, redistributable BLE controller archive and export its
+  Cargo link metadata and rooted entry symbols for stock rust-lld consumers.
+
 ## [0.1.0-alpha.12] - 2026-08-06
 
 ### Added
