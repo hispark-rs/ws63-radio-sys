@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v34",
+  "revision": "ws63-ble-b2-discovery-closure-v35",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -22,6 +22,15 @@
     "bgtp_prevent_sleep_set",
     "bgtp_sleep_time_calc",
     "bgtp_start_sleep",
+    "coex_ble_adv_end_coex_process",
+    "coex_ble_adv_evt_coex_process",
+    "coex_ble_adv_start_coex_process",
+    "coex_ble_adv_state_set",
+    "coex_ble_scan_end_coex_process",
+    "coex_ble_scan_evt_coex_process",
+    "coex_ble_scan_start_coex_process",
+    "coex_ble_scan_state_set",
+    "coex_if_btstate_set",
     "dts_ble_int_clear_pending_irq",
     "dts_ble_intc_delete",
     "dts_ble_intc_init",
@@ -183,6 +192,27 @@
       "selected_by": "bgtp_prevent_sleep_set",
       "defined_symbols": 14,
       "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_ble_adv_process.c.obj",
+      "selected_by": "coex_ble_adv_end_coex_process",
+      "defined_symbols": 5,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_ble_scan_process.c.obj",
+      "selected_by": "coex_ble_scan_end_coex_process",
+      "defined_symbols": 13,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_if.c.obj",
+      "selected_by": "coex_if_btstate_set",
+      "defined_symbols": 13,
+      "undefined_symbols": 12
     },
     {
       "archive": "libbgtp.a",
@@ -711,6 +741,20 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "bt_customize.c.obj",
+      "selected_by": "g_bt_customize",
+      "defined_symbols": 9,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_wl.c.obj",
+      "selected_by": "coex_wl_chnl_map_update",
+      "defined_symbols": 2,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "dm_ble_ram.c.obj",
       "selected_by": "dm_ble_hci_vendor_iot_le_adv_filter_act",
       "defined_symbols": 6,
@@ -753,31 +797,10 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "bt_customize.c.obj",
-      "selected_by": "g_bt_customize",
-      "defined_symbols": 9,
-      "undefined_symbols": 4
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "coex_ble_adv_process.c.obj",
-      "selected_by": "coex_ble_adv_create_coex_process",
-      "defined_symbols": 5,
-      "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
       "member": "txpd_adapter.c.obj",
       "selected_by": "txpd_ble_adv_set_txphy",
       "defined_symbols": 2,
       "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "coex_ble_scan_process.c.obj",
-      "selected_by": "coex_ble_scan_create_coex_process",
-      "defined_symbols": 13,
-      "undefined_symbols": 8
     },
     {
       "archive": "libbgtp.a",
@@ -841,13 +864,6 @@
       "selected_by": "bt_sw_config_em",
       "defined_symbols": 83,
       "undefined_symbols": 13
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "coex_if.c.obj",
-      "selected_by": "coex_if_deinit",
-      "defined_symbols": 13,
-      "undefined_symbols": 12
     },
     {
       "archive": "libbgtp.a",
@@ -1541,13 +1557,6 @@
       "selected_by": "cali_process",
       "defined_symbols": 5,
       "undefined_symbols": 9
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "coex_wl.c.obj",
-      "selected_by": "coex_wl_chnl_map_update",
-      "defined_symbols": 2,
-      "undefined_symbols": 0
     },
     {
       "archive": "libbgtp.a",

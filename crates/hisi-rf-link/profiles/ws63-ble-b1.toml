@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b2-discovery-closure-v34"
+revision = "ws63-ble-b2-discovery-closure-v35"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -21,6 +21,15 @@ callback_roots = [
   "bgtp_prevent_sleep_set",
   "bgtp_sleep_time_calc",
   "bgtp_start_sleep",
+  "coex_ble_adv_end_coex_process",
+  "coex_ble_adv_evt_coex_process",
+  "coex_ble_adv_start_coex_process",
+  "coex_ble_adv_state_set",
+  "coex_ble_scan_end_coex_process",
+  "coex_ble_scan_evt_coex_process",
+  "coex_ble_scan_start_coex_process",
+  "coex_ble_scan_state_set",
+  "coex_if_btstate_set",
   "dts_ble_int_clear_pending_irq",
   "dts_ble_intc_delete",
   "dts_ble_intc_init",
