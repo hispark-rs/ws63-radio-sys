@@ -9,8 +9,10 @@ use crate::sle::ErrorCode;
 pub const UUID_BYTES: usize = 16;
 pub const FIND_TYPE_PRIMARY_SERVICE: u8 = 1;
 pub const PROPERTY_TYPE_VALUE: u8 = 0;
+pub const DESCRIPTOR_USER_DESCRIPTION: u8 = 1;
 pub const PERMISSION_READ_WRITE: u16 = 0x03;
 pub const OPERATE_READ_NOTIFY: u32 = 0x09;
+pub const OPERATE_READ_WRITE: u32 = 0x05;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -32,6 +34,17 @@ pub struct ServerPropertyInfo {
     pub uuid: Uuid,
     pub permissions: u16,
     pub operate_indication: u32,
+    pub value_len: u16,
+    pub value: *mut u8,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct ServerDescriptorInfo {
+    pub uuid: Uuid,
+    pub permissions: u16,
+    pub operate_indication: u32,
+    pub descriptor_type: u8,
     pub value_len: u16,
     pub value: *mut u8,
 }
@@ -193,6 +206,12 @@ unsafe extern "C" {
         property: *mut ServerPropertyInfo,
         handle: *mut u16,
     ) -> ErrorCode;
+    pub fn ssaps_add_descriptor_sync(
+        server_id: u8,
+        service_handle: u16,
+        property_handle: u16,
+        descriptor: *mut ServerDescriptorInfo,
+    ) -> ErrorCode;
     pub fn ssaps_start_service(server_id: u8, service_handle: u16) -> ErrorCode;
     pub fn ssaps_set_info(server_id: u8, info: *mut ExchangeInfo) -> ErrorCode;
     pub fn ssaps_notify_indicate(
@@ -230,6 +249,8 @@ const _: () = {
     assert!(core::mem::size_of::<ExchangeInfo>() == 8);
     assert!(core::mem::size_of::<ServerPropertyInfo>() == 32);
     assert!(core::mem::offset_of!(ServerPropertyInfo, value) == 28);
+    assert!(core::mem::size_of::<ServerDescriptorInfo>() == 32);
+    assert!(core::mem::offset_of!(ServerDescriptorInfo, value) == 28);
     assert!(core::mem::size_of::<NotifyIndicate>() == 12);
     assert!(core::mem::size_of::<ClientHandleValue>() == 12);
     assert!(core::mem::size_of::<FindServiceResult>() == 22);

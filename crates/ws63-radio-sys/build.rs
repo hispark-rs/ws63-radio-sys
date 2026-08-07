@@ -696,6 +696,7 @@ fn main() {
                 "ssaps_register_server",
                 "ssaps_add_service_sync",
                 "ssaps_add_property_sync",
+                "ssaps_add_descriptor_sync",
                 "ssaps_start_service",
                 "ssaps_set_info",
                 "ssaps_notify_indicate",
