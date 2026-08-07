@@ -92,6 +92,18 @@ pub struct ServerReadRequest {
     pub need_authorize: bool,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct ServerWriteRequest {
+    pub request_id: u16,
+    pub handle: u16,
+    pub property_type: u8,
+    pub need_response: bool,
+    pub need_authorize: bool,
+    pub value_len: u16,
+    pub value: *mut u8,
+}
+
 pub type StartServiceCallback = unsafe extern "C" fn(server_id: u8, handle: u16, status: ErrorCode);
 pub type ClientNotificationCallback = unsafe extern "C" fn(
     client_id: u8,
@@ -129,6 +141,12 @@ pub type ClientWriteConfirmedCallback = unsafe extern "C" fn(
     result: *mut ClientWriteResult,
     status: ErrorCode,
 );
+pub type ServerWriteRequestCallback = unsafe extern "C" fn(
+    server_id: u8,
+    connection_id: u16,
+    request: *mut ServerWriteRequest,
+    status: ErrorCode,
+);
 pub type OpaqueCallback = unsafe extern "C" fn();
 
 #[repr(C)]
@@ -141,7 +159,7 @@ pub struct ServerCallbacks {
     pub delete_all_services: Option<OpaqueCallback>,
     pub read_request: Option<ServerReadRequestCallback>,
     pub read_by_uuid_request: Option<OpaqueCallback>,
-    pub write_request: Option<OpaqueCallback>,
+    pub write_request: Option<ServerWriteRequestCallback>,
     pub mtu_changed: Option<OpaqueCallback>,
     pub indicate_confirmed: Option<OpaqueCallback>,
 }
@@ -218,6 +236,7 @@ const _: () = {
     assert!(core::mem::size_of::<FindStructureParameters>() == 24);
     assert!(core::mem::size_of::<FindStructureResult>() == 18);
     assert!(core::mem::size_of::<ServerReadRequest>() == 8);
+    assert!(core::mem::size_of::<ServerWriteRequest>() == 16);
     assert!(core::mem::size_of::<ServerCallbacks>() == 40);
     assert!(core::mem::size_of::<ClientCallbacks>() == 36);
 };
