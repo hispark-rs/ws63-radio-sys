@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v47"
+revision = "ws63-ble-b3-gatt-closure-v48"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -22,6 +22,7 @@ callback_roots = [
   "bgtp_prevent_sleep_set",
   "bgtp_sleep_time_calc",
   "bgtp_start_sleep",
+  "ble_acl_calc_drift",
   "ble_sca_get_cfg",
   "coex_ble_adv_end_coex_process",
   "coex_ble_adv_evt_coex_process",
@@ -85,6 +86,7 @@ callback_roots = [
   "evt_task_ble_ext_adv_config_extheader_syncinfo",
   "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
   "evt_task_ble_ext_adv_set_adv_en",
+  "evt_task_ble_acl_get_sta_tbl",
   "evt_task_ble_initiate_get_sta_tbl",
   "evt_task_ble_initiate_start",
   "evt_task_ble_scan_get_sta_tbl",
