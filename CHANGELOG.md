@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.16] - 2026-08-07
+
+### Fixed
+
+- Export and verify the BLE ROM callback symbol metadata consumed by
+  `hisi-rf-ws63`, so standalone BLE controller links use the same guarded
+  callback contract as workspace builds.
+
 ## [0.1.0-alpha.15] - 2026-08-06
 
 ### Fixed
