@@ -701,6 +701,8 @@ fn main() {
                 "ssaps_notify_indicate",
                 "ssapc_register_callbacks",
                 "ssapc_exchange_info_req",
+                "ssapc_find_structure",
+                "ssapc_read_req",
                 "g_systick_clock",
             ]
             .join(",")
