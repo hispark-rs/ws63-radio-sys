@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v43",
+  "revision": "ws63-ble-b3-gatt-closure-v44",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -23,6 +23,7 @@
     "bgtp_prevent_sleep_set",
     "bgtp_sleep_time_calc",
     "bgtp_start_sleep",
+    "ble_sca_get_cfg",
     "coex_ble_adv_end_coex_process",
     "coex_ble_adv_evt_coex_process",
     "coex_ble_adv_start_coex_process",
@@ -214,6 +215,13 @@
       "selected_by": "bgtp_prevent_sleep_set",
       "defined_symbols": 14,
       "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "ble_sca.c.obj",
+      "selected_by": "ble_sca_get_cfg",
+      "defined_symbols": 4,
+      "undefined_symbols": 1
     },
     {
       "archive": "libbgtp.a",
