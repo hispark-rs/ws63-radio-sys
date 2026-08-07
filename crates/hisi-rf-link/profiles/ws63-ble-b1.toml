@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v48"
+revision = "ws63-ble-b3-gatt-closure-v49"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -79,6 +79,11 @@ callback_roots = [
   "evt_sched_trigger",
   "evt_sched_trigger_cancel",
   "evt_sched_update_acl_param_with_instant",
+  "evt_task_ble_acl_get_llcp_ack_tbl",
+  "evt_task_ble_acl_get_llcp_desc_tbl",
+  "evt_task_ble_acl_get_pre_tbl",
+  "evt_task_ble_acl_get_sta_tbl",
+  "evt_task_ble_acl_get_unknown_llcp_tbl",
   "evt_task_ble_adv_create",
   "evt_task_ble_adv_get_dur_tbl_val",
   "evt_task_ble_adv_get_intv_tbl_val",
@@ -86,7 +91,6 @@ callback_roots = [
   "evt_task_ble_ext_adv_config_extheader_syncinfo",
   "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
   "evt_task_ble_ext_adv_set_adv_en",
-  "evt_task_ble_acl_get_sta_tbl",
   "evt_task_ble_initiate_get_sta_tbl",
   "evt_task_ble_initiate_start",
   "evt_task_ble_scan_get_sta_tbl",

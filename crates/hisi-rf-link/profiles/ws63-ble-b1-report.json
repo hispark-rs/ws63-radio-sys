@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v48",
+  "revision": "ws63-ble-b3-gatt-closure-v49",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -80,6 +80,11 @@
     "evt_sched_trigger",
     "evt_sched_trigger_cancel",
     "evt_sched_update_acl_param_with_instant",
+    "evt_task_ble_acl_get_llcp_ack_tbl",
+    "evt_task_ble_acl_get_llcp_desc_tbl",
+    "evt_task_ble_acl_get_pre_tbl",
+    "evt_task_ble_acl_get_sta_tbl",
+    "evt_task_ble_acl_get_unknown_llcp_tbl",
     "evt_task_ble_adv_create",
     "evt_task_ble_adv_get_dur_tbl_val",
     "evt_task_ble_adv_get_intv_tbl_val",
@@ -87,7 +92,6 @@
     "evt_task_ble_ext_adv_config_extheader_syncinfo",
     "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
     "evt_task_ble_ext_adv_set_adv_en",
-    "evt_task_ble_acl_get_sta_tbl",
     "evt_task_ble_initiate_get_sta_tbl",
     "evt_task_ble_initiate_start",
     "evt_task_ble_scan_get_sta_tbl",
@@ -344,6 +348,13 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "evt_task_ble_acl_fsm_tbl.c.obj",
+      "selected_by": "evt_task_ble_acl_get_llcp_ack_tbl",
+      "defined_symbols": 13,
+      "undefined_symbols": 10
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "evt_task_ble_adv_ram.c.obj",
       "selected_by": "evt_task_ble_adv_create",
       "defined_symbols": 12,
@@ -362,13 +373,6 @@
       "selected_by": "evt_task_ble_ext_adv_config_extheader_syncinfo",
       "defined_symbols": 11,
       "undefined_symbols": 25
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_ble_acl_fsm_tbl.c.obj",
-      "selected_by": "evt_task_ble_acl_get_sta_tbl",
-      "defined_symbols": 13,
-      "undefined_symbols": 10
     },
     {
       "archive": "libbgtp.a",
@@ -897,17 +901,17 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "txpd_adapter.c.obj",
-      "selected_by": "txpd_ble_adv_set_txphy",
-      "defined_symbols": 2,
-      "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
       "member": "evt_task_ble_acl_ram.c.obj",
       "selected_by": "evt_task_ble_acl_send_acl_data_ram",
       "defined_symbols": 4,
       "undefined_symbols": 9
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "txpd_adapter.c.obj",
+      "selected_by": "txpd_ble_adv_set_txphy",
+      "defined_symbols": 2,
+      "undefined_symbols": 1
     },
     {
       "archive": "libbgtp.a",
