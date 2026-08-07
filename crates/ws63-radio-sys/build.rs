@@ -606,7 +606,7 @@ fn main() {
 
     if env::var_os("CARGO_FEATURE_SLE").is_some() {
         const SLE_PROFILE_REVISION: &str = "ws63-sle-s0-archive-abi-v1";
-        const SLE_INIT_PROFILE_REVISION: &str = "ws63-sle-s2-connect-v1";
+        const SLE_INIT_PROFILE_REVISION: &str = "ws63-sle-s3-ssap-v1";
         let revision = env::var("DEP_WS63_RADIO_BLOB_SLE_PROFILE_REVISION")
             .expect("ws63-radio-blob did not export its SLE profile revision");
         assert_eq!(
@@ -692,6 +692,13 @@ fn main() {
                 "sle_connection_register_callbacks",
                 "sle_connect_remote_device",
                 "sle_disconnect_remote_device",
+                "ssaps_register_callbacks",
+                "ssaps_register_server",
+                "ssaps_add_service_sync",
+                "ssaps_add_property_sync",
+                "ssaps_start_service",
+                "ssaps_notify_indicate",
+                "ssapc_register_callbacks",
                 "g_systick_clock",
             ]
             .join(",")

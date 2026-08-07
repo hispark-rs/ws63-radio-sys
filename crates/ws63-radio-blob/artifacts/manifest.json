@@ -358,7 +358,7 @@
       "libbth_sdk.a",
       "libbg_common.a"
     ],
-    "init_revision": "ws63-sle-s2-connect-v1",
+    "init_revision": "ws63-sle-s3-ssap-v1",
     "controller_archives": [
       "libbgtp.a",
       "libbgtp_rom_data.a",

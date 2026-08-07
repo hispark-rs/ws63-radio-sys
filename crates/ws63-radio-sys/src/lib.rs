@@ -37,6 +37,8 @@ compile_error!("select exactly one AP authenticator security profile");
 pub mod authenticator;
 #[cfg(feature = "sle")]
 pub mod sle;
+#[cfg(feature = "sle")]
+pub mod ssap;
 pub mod supplicant;
 
 /// Marker type for the Cargo links contract.
