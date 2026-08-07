@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b2-discovery-closure-v37"
+revision = "ws63-ble-b2-discovery-closure-v38"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -87,7 +87,9 @@ callback_roots = [
   "evt_task_comm_rx_error_record",
   "evt_task_comm_task_end",
   "evt_task_comm_task_start",
+  "hci_ble_rx_acl_data",
   "hci_bt_send_evt_msg",
+  "hci_bt_send_evt_msg_without_log",
   "hw_em_get_ble_tx_buff_free_list",
   "hw_em_get_ble_tx_buff_node",
   "hw_em_get_gle_tx_buff_free_list",
