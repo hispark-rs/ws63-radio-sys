@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v52",
+  "revision": "ws63-ble-b3-gatt-closure-v53",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -127,12 +127,17 @@
     "lm_ble_acl_get_sta_tbl",
     "lm_ble_acl_init_desc_for_pwr_ctrl",
     "lm_ble_acl_start",
+    "lm_ble_acl_ver_get_sta_tbl",
     "lm_ble_adv_clear_assigned_adv_act",
     "lm_ble_adv_comm_fsm_get_sta_tbl",
     "lm_ble_adv_fsm_get_sta_tbl",
     "lm_ble_adv_notify_per_adv_fsm",
     "lm_ble_initiate_fsm_get_sta_tbl",
     "lm_ble_scan_fsm_get_sta_tbl",
+    "lm_chnl_scan_add_map_assessment_module",
+    "lm_chnl_scan_get_ble_chnl_cls",
+    "lm_chnl_scan_get_ble_chnl_map",
+    "lm_chnl_scan_remove_map_assessment_module",
     "pwr_ctrl_convert_tx_pwr_val_to_less_level",
     "pwr_ctrl_get_ble_tx_estimate_power_value",
     "rxpd_get_rx_phy",
@@ -483,6 +488,13 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_ver_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_ver_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "lm_ble_adv_ext_act_ram.c.obj",
       "selected_by": "lm_ble_adv_clear_assigned_adv_act",
       "defined_symbols": 2,
@@ -515,6 +527,20 @@
       "selected_by": "lm_ble_scan_fsm_get_sta_tbl",
       "defined_symbols": 5,
       "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_chnl_scan.c.obj",
+      "selected_by": "lm_chnl_scan_add_map_assessment_module",
+      "defined_symbols": 6,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_chnl_scan_ble.c.obj",
+      "selected_by": "lm_chnl_scan_get_ble_chnl_cls",
+      "defined_symbols": 6,
+      "undefined_symbols": 8
     },
     {
       "archive": "libbgtp.a",
@@ -980,6 +1006,13 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "evt_task_chnl_scan.c.obj",
+      "selected_by": "evt_task_chnl_scan_create",
+      "defined_symbols": 27,
+      "undefined_symbols": 27
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "L2_comm.c.obj",
       "selected_by": "L2_deinit",
       "defined_symbols": 3,
@@ -1082,13 +1115,6 @@
       "selected_by": "lm_ble_deinit",
       "defined_symbols": 2,
       "undefined_symbols": 9
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "lm_chnl_scan.c.obj",
-      "selected_by": "lm_chnl_scan_deinit",
-      "defined_symbols": 6,
-      "undefined_symbols": 12
     },
     {
       "archive": "libbgtp.a",
@@ -1652,17 +1678,24 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "chnl_calc_util.c.obj",
+      "selected_by": "chnl_calc_get_valid_map_num",
+      "defined_symbols": 1,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_chnl_scan_fsm_tbl.c.obj",
+      "selected_by": "evt_task_chnl_scan_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "evt_task_ble_test_mode.c.obj",
       "selected_by": "evt_task_ble_test_mode_rx_deinit",
       "defined_symbols": 48,
       "undefined_symbols": 36
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_chnl_scan.c.obj",
-      "selected_by": "evt_task_chnl_scan_deinit",
-      "defined_symbols": 27,
-      "undefined_symbols": 27
     },
     {
       "archive": "libbgtp.a",
@@ -2090,20 +2123,6 @@
       "selected_by": "evt_task_ble_test_mode_isr_cbk",
       "defined_symbols": 11,
       "undefined_symbols": 13
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "chnl_calc_util.c.obj",
-      "selected_by": "chnl_calc_get_valid_map_num",
-      "defined_symbols": 1,
-      "undefined_symbols": 0
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_chnl_scan_fsm_tbl.c.obj",
-      "selected_by": "evt_task_chnl_scan_get_sta_tbl",
-      "defined_symbols": 4,
-      "undefined_symbols": 3
     },
     {
       "archive": "libbgtp.a",
@@ -4559,6 +4578,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_hci_rd_rem_ver_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_hci_rd_rem_ver_create_srv_act",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -4691,6 +4714,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_llcp_ver_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_req_map_upd_act",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -4752,6 +4779,10 @@
     },
     {
       "name": "lm_ble_ver_srv_exception_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_ver_wait_rsp_to_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
