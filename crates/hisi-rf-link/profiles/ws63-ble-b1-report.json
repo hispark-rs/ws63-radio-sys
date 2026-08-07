@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v50",
+  "revision": "ws63-ble-b3-gatt-closure-v51",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -135,6 +135,8 @@
     "pwr_ctrl_get_ble_tx_estimate_power_value",
     "rxpd_get_rx_phy",
     "rxpd_get_rx_phy_info",
+    "sed_ble_set_rx_phy",
+    "sed_ble_set_tx_phy",
     "uapi_drv_cipher_trng_get_random"
   ],
   "controller_archives": [
@@ -511,6 +513,13 @@
       "selected_by": "rxpd_get_rx_phy",
       "defined_symbols": 2,
       "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "sed_adapter.c.obj",
+      "selected_by": "sed_ble_set_rx_phy",
+      "defined_symbols": 2,
+      "undefined_symbols": 2
     },
     {
       "archive": "libbgtp.a",
@@ -2072,13 +2081,6 @@
       "selected_by": "evt_task_ble_test_mode_isr_cbk",
       "defined_symbols": 11,
       "undefined_symbols": 13
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "sed_adapter.c.obj",
-      "selected_by": "sed_ble_set_rx_phy",
-      "defined_symbols": 2,
-      "undefined_symbols": 2
     },
     {
       "archive": "libbgtp.a",
