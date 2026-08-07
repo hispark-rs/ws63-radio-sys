@@ -703,6 +703,7 @@ fn main() {
                 "ssapc_exchange_info_req",
                 "ssapc_find_structure",
                 "ssapc_read_req",
+                "ssapc_write_req",
                 "g_systick_clock",
             ]
             .join(",")

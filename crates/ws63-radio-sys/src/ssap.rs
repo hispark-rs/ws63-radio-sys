@@ -54,6 +54,9 @@ pub struct ClientHandleValue {
     pub data: *mut u8,
 }
 
+pub type ClientWriteParameters = ClientHandleValue;
+pub type ClientWriteResult = ClientHandleValue;
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct FindServiceResult {
@@ -120,6 +123,12 @@ pub type ServerReadRequestCallback = unsafe extern "C" fn(
     request: *mut ServerReadRequest,
     status: ErrorCode,
 );
+pub type ClientWriteConfirmedCallback = unsafe extern "C" fn(
+    client_id: u8,
+    connection_id: u16,
+    result: *mut ClientWriteResult,
+    status: ErrorCode,
+);
 pub type OpaqueCallback = unsafe extern "C" fn();
 
 #[repr(C)]
@@ -145,7 +154,7 @@ pub struct ClientCallbacks {
     pub find_structure_complete: Option<FindStructureCompleteCallback>,
     pub read_confirmed: Option<OpaqueCallback>,
     pub read_by_uuid_complete: Option<OpaqueCallback>,
-    pub write_confirmed: Option<OpaqueCallback>,
+    pub write_confirmed: Option<ClientWriteConfirmedCallback>,
     pub exchange_info: Option<ExchangeInfoCallback>,
     pub notification: Option<ClientNotificationCallback>,
     pub indication: Option<OpaqueCallback>,
@@ -189,6 +198,11 @@ unsafe extern "C" {
         connection_id: u16,
         handle: u16,
         property_type: u8,
+    ) -> ErrorCode;
+    pub fn ssapc_write_req(
+        client_id: u8,
+        connection_id: u16,
+        parameters: *mut ClientWriteParameters,
     ) -> ErrorCode;
 }
 
