@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v38",
+  "revision": "ws63-ble-b2-discovery-closure-v39",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -19,6 +19,7 @@
   ],
   "callback_roots": [
     "bgsub_pmu_init",
+    "bgtp_get_lowpower_clock_freq",
     "bgtp_prevent_sleep_set",
     "bgtp_sleep_time_calc",
     "bgtp_start_sleep",
@@ -191,6 +192,13 @@
       "selected_by": "bgsub_pmu_init",
       "defined_symbols": 8,
       "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bgtp_sleep_hw.c.obj",
+      "selected_by": "bgtp_get_lowpower_clock_freq",
+      "defined_symbols": 7,
+      "undefined_symbols": 0
     },
     {
       "archive": "libbgtp.a",
@@ -737,13 +745,6 @@
       "selected_by": "coex_adapter_get_wlan",
       "defined_symbols": 31,
       "undefined_symbols": 12
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "bgtp_sleep_hw.c.obj",
-      "selected_by": "bgtp_lowpower_clock_config",
-      "defined_symbols": 7,
-      "undefined_symbols": 0
     },
     {
       "archive": "libbgtp.a",
