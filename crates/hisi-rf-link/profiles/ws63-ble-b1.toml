@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b2-discovery-closure-v33"
+revision = "ws63-ble-b2-discovery-closure-v34"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -43,7 +43,25 @@ callback_roots = [
   "dm_co_reset",
   "encrypt_clear_sm3_tasks",
   "encrypt_init_sm3",
+  "es_finetimer_get_first_target_time",
+  "es_finetimer_prog_time",
+  "es_get_ee_type",
+  "es_get_es_type",
+  "es_get_priority_by_prio_idx",
   "evt_prog_init",
+  "evt_prog_pop_elt_match_isr",
+  "evt_prog_program_eeq",
+  "evt_sched_check_offset",
+  "evt_sched_create_intv",
+  "evt_sched_get_intv",
+  "evt_sched_get_offset",
+  "evt_sched_insert_intv",
+  "evt_sched_remove_intv",
+  "evt_sched_resched_check",
+  "evt_sched_scan_update_param",
+  "evt_sched_trigger",
+  "evt_sched_trigger_cancel",
+  "evt_sched_update_acl_param_with_instant",
   "evt_task_ble_adv_create",
   "evt_task_ble_adv_get_dur_tbl_val",
   "evt_task_ble_adv_get_intv_tbl_val",

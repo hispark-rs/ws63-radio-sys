@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v33",
+  "revision": "ws63-ble-b2-discovery-closure-v34",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -44,7 +44,25 @@
     "dm_co_reset",
     "encrypt_clear_sm3_tasks",
     "encrypt_init_sm3",
+    "es_finetimer_get_first_target_time",
+    "es_finetimer_prog_time",
+    "es_get_ee_type",
+    "es_get_es_type",
+    "es_get_priority_by_prio_idx",
     "evt_prog_init",
+    "evt_prog_pop_elt_match_isr",
+    "evt_prog_program_eeq",
+    "evt_sched_check_offset",
+    "evt_sched_create_intv",
+    "evt_sched_get_intv",
+    "evt_sched_get_offset",
+    "evt_sched_insert_intv",
+    "evt_sched_remove_intv",
+    "evt_sched_resched_check",
+    "evt_sched_scan_update_param",
+    "evt_sched_trigger",
+    "evt_sched_trigger_cancel",
+    "evt_sched_update_acl_param_with_instant",
     "evt_task_ble_adv_create",
     "evt_task_ble_adv_get_dur_tbl_val",
     "evt_task_ble_adv_get_intv_tbl_val",
@@ -217,10 +235,31 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "evt_sched_util_ram.c.obj",
+      "selected_by": "es_finetimer_get_first_target_time",
+      "defined_symbols": 14,
+      "undefined_symbols": 19
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_sched.c.obj",
+      "selected_by": "es_get_ee_type",
+      "defined_symbols": 21,
+      "undefined_symbols": 37
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "evt_prog_ram.c.obj",
       "selected_by": "evt_prog_init",
       "defined_symbols": 7,
       "undefined_symbols": 40
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_sched_ram.c.obj",
+      "selected_by": "evt_sched_resched_check",
+      "defined_symbols": 20,
+      "undefined_symbols": 48
     },
     {
       "archive": "libbgtp.a",
@@ -672,13 +711,6 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "evt_sched_util_ram.c.obj",
-      "selected_by": "es_sleep_time_calc",
-      "defined_symbols": 14,
-      "undefined_symbols": 19
-    },
-    {
-      "archive": "libbgtp.a",
       "member": "dm_ble_ram.c.obj",
       "selected_by": "dm_ble_hci_vendor_iot_le_adv_filter_act",
       "defined_symbols": 6,
@@ -707,10 +739,24 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "evt_sched.c.obj",
-      "selected_by": "evt_sched_delete_link_task_check",
-      "defined_symbols": 21,
-      "undefined_symbols": 37
+      "member": "evt_sched_mgr_ram.c.obj",
+      "selected_by": "es_task_insert",
+      "defined_symbols": 19,
+      "undefined_symbols": 32
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb.c.obj",
+      "selected_by": "evt_task_gle_acb_get_env",
+      "defined_symbols": 87,
+      "undefined_symbols": 75
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "bt_customize.c.obj",
+      "selected_by": "g_bt_customize",
+      "defined_symbols": 9,
+      "undefined_symbols": 4
     },
     {
       "archive": "libbgtp.a",
@@ -718,13 +764,6 @@
       "selected_by": "coex_ble_adv_create_coex_process",
       "defined_symbols": 5,
       "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_sched_ram.c.obj",
-      "selected_by": "evt_sched_reschedule_flexible_task",
-      "defined_symbols": 20,
-      "undefined_symbols": 48
     },
     {
       "archive": "libbgtp.a",
@@ -760,13 +799,6 @@
       "selected_by": "lm_ble_adv_stop_act",
       "defined_symbols": 1,
       "undefined_symbols": 3
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "bt_customize.c.obj",
-      "selected_by": "g_bt_customize",
-      "defined_symbols": 9,
-      "undefined_symbols": 4
     },
     {
       "archive": "libbgtp.a",
@@ -851,13 +883,6 @@
       "selected_by": "encrypt_init_ext",
       "defined_symbols": 4,
       "undefined_symbols": 16
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_gle_acb.c.obj",
-      "selected_by": "evt_task_gle_acb_handle_return_tx_data",
-      "defined_symbols": 87,
-      "undefined_symbols": 75
     },
     {
       "archive": "libbgtp.a",
@@ -1393,10 +1418,52 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "evt_sched_mgr_ram.c.obj",
-      "selected_by": "es_task_insert",
-      "defined_symbols": 19,
-      "undefined_symbols": 32
+      "member": "coex_gle_acb_process.c.obj",
+      "selected_by": "coex_gle_acb_create_coex_process",
+      "defined_symbols": 7,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_fsm_tbl.c.obj",
+      "selected_by": "evt_task_gle_acb_get_llcp_ack_tbl",
+      "defined_symbols": 13,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_instant.c.obj",
+      "selected_by": "evt_task_gle_acb_instant_prog",
+      "defined_symbols": 14,
+      "undefined_symbols": 14
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_isr.c.obj",
+      "selected_by": "evt_task_gle_acb_isr_cbk",
+      "defined_symbols": 23,
+      "undefined_symbols": 46
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_comm.c.obj",
+      "selected_by": "evt_task_gle_event_send_tx_complete_event",
+      "defined_symbols": 22,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_gle_acb_conn_record.c.obj",
+      "selected_by": "g_gle_acb_duration",
+      "defined_symbols": 9,
+      "undefined_symbols": 12
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "gle_sca.c.obj",
+      "selected_by": "gle_acb_calc_drift",
+      "defined_symbols": 4,
+      "undefined_symbols": 1
     },
     {
       "archive": "libbgtp.a",
@@ -1516,55 +1583,6 @@
       "selected_by": "em_offset_calc",
       "defined_symbols": 4,
       "undefined_symbols": 49
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "coex_gle_acb_process.c.obj",
-      "selected_by": "coex_gle_acb_create_coex_process",
-      "defined_symbols": 7,
-      "undefined_symbols": 4
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_gle_acb_fsm_tbl.c.obj",
-      "selected_by": "evt_task_gle_acb_get_llcp_ack_tbl",
-      "defined_symbols": 13,
-      "undefined_symbols": 8
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_gle_acb_instant.c.obj",
-      "selected_by": "evt_task_gle_acb_instant_prog",
-      "defined_symbols": 14,
-      "undefined_symbols": 14
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_gle_acb_isr.c.obj",
-      "selected_by": "evt_task_gle_acb_isr_cbk",
-      "defined_symbols": 23,
-      "undefined_symbols": 46
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_gle_comm.c.obj",
-      "selected_by": "evt_task_gle_event_send_tx_complete_event",
-      "defined_symbols": 22,
-      "undefined_symbols": 7
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_gle_acb_conn_record.c.obj",
-      "selected_by": "g_gle_acb_duration",
-      "defined_symbols": 9,
-      "undefined_symbols": 12
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "gle_sca.c.obj",
-      "selected_by": "gle_acb_calc_drift",
-      "defined_symbols": 4,
-      "undefined_symbols": 1
     },
     {
       "archive": "libbgtp.a",
