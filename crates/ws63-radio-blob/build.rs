@@ -31,6 +31,8 @@ struct BleProfile {
 struct SleProfile {
     revision: String,
     archives: Vec<String>,
+    init_revision: String,
+    controller_archives: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -215,5 +217,24 @@ fn main() {
     println!(
         "cargo:sle_profile_revision={}",
         manifest.sle_profile.revision
+    );
+    for archive in &manifest.sle_profile.controller_archives {
+        assert!(
+            manifest
+                .artifacts
+                .iter()
+                .any(|artifact| artifact.archive == *archive),
+            "SLE controller profile references an unknown archive: {archive}"
+        );
+        let path = output.join(archive);
+        let key = archive
+            .strip_prefix("lib")
+            .and_then(|name| name.strip_suffix(".a"))
+            .expect("SLE controller artifact must be named lib*.a");
+        println!("cargo:sle_controller_{key}_archive={}", path.display());
+    }
+    println!(
+        "cargo:sle_init_profile_revision={}",
+        manifest.sle_profile.init_revision
     );
 }

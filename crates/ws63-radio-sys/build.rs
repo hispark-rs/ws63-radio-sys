@@ -606,6 +606,7 @@ fn main() {
 
     if env::var_os("CARGO_FEATURE_SLE").is_some() {
         const SLE_PROFILE_REVISION: &str = "ws63-sle-s0-archive-abi-v1";
+        const SLE_INIT_PROFILE_REVISION: &str = "ws63-sle-s1-announce-seek-v1";
         let revision = env::var("DEP_WS63_RADIO_BLOB_SLE_PROFILE_REVISION")
             .expect("ws63-radio-blob did not export its SLE profile revision");
         assert_eq!(
@@ -636,6 +637,64 @@ fn main() {
                 .map(|path| path.display().to_string())
                 .collect::<Vec<_>>()
                 .join(",")
+        );
+        let init_revision = env::var("DEP_WS63_RADIO_BLOB_SLE_INIT_PROFILE_REVISION")
+            .expect("ws63-radio-blob did not export its SLE init profile revision");
+        assert_eq!(
+            init_revision, SLE_INIT_PROFILE_REVISION,
+            "SLE init artifact/profile revision mismatch"
+        );
+        let controller_archives = [
+            "DEP_WS63_RADIO_BLOB_SLE_CONTROLLER_BGTP_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_SLE_CONTROLLER_BGTP_ROM_DATA_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_SLE_CONTROLLER_ROM_CALLBACK_ARCHIVE",
+        ]
+        .map(|variable| {
+            let path = PathBuf::from(
+                env::var_os(variable)
+                    .unwrap_or_else(|| panic!("ws63-radio-blob did not export {variable}")),
+            );
+            assert!(
+                path.is_file(),
+                "SLE controller archive is missing: {}",
+                path.display()
+            );
+            println!("cargo:rerun-if-env-changed={variable}");
+            path
+        });
+        println!("cargo:sle_init_profile_revision={init_revision}");
+        println!(
+            "cargo:sle_controller_archives={}",
+            controller_archives
+                .iter()
+                .map(|path| path.display().to_string())
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        println!(
+            "cargo:sle_init_root_symbols={}",
+            [
+                "bt_thread_handle",
+                "bt_acore_task_main",
+                "sdk_msg_thread",
+                "btsrv_task_body",
+                "btsdk_init",
+                "enable_sle",
+                "sle_announce_seek_register_callbacks",
+                "sle_set_announce_param",
+                "sle_set_announce_data",
+                "sle_start_announce",
+                "sle_set_seek_param",
+                "sle_start_seek",
+                "g_systick_clock",
+            ]
+            .join(",")
+        );
+        let init_profile: BleInitProfile = toml::from_str(hisi_rf_link::WS63_BLE_B1_PROFILE)
+            .expect("parse shared WS63 BGLE controller profile");
+        println!(
+            "cargo:sle_callback_symbols={}",
+            init_profile.callback_roots.join(",")
         );
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_SLE");

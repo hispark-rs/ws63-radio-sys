@@ -358,6 +358,12 @@
       "libbth_sdk.a",
       "libbg_common.a"
     ],
+    "init_revision": "ws63-sle-s1-announce-seek-v1",
+    "controller_archives": [
+      "libbgtp.a",
+      "libbgtp_rom_data.a",
+      "librom_callback.a"
+    ],
     "required_symbol_report": "hisi-rf-link/profiles/ws63-sle-s0-report.json"
   }
 }
