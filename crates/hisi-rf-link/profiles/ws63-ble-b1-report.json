@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v51",
+  "revision": "ws63-ble-b3-gatt-closure-v52",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -90,6 +90,8 @@
     "evt_task_ble_acl_get_pre_tbl",
     "evt_task_ble_acl_get_sta_tbl",
     "evt_task_ble_acl_get_unknown_llcp_tbl",
+    "evt_task_ble_acl_refresh_llcp_instant_ram",
+    "evt_task_ble_acl_update_active_tx_octets",
     "evt_task_ble_adv_create",
     "evt_task_ble_adv_get_dur_tbl_val",
     "evt_task_ble_adv_get_intv_tbl_val",
@@ -366,6 +368,20 @@
       "selected_by": "evt_task_ble_acl_get_llcp_ack_tbl",
       "defined_symbols": 13,
       "undefined_symbols": 10
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "ble_acl_instant_ram.c.obj",
+      "selected_by": "evt_task_ble_acl_refresh_llcp_instant_ram",
+      "defined_symbols": 1,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_acl_ram.c.obj",
+      "selected_by": "evt_task_ble_acl_update_active_tx_octets",
+      "defined_symbols": 4,
+      "undefined_symbols": 9
     },
     {
       "archive": "libbgtp.a",
@@ -919,13 +935,6 @@
       "selected_by": "evt_task_gle_acb_get_env",
       "defined_symbols": 87,
       "undefined_symbols": 75
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_ble_acl_ram.c.obj",
-      "selected_by": "evt_task_ble_acl_send_acl_data_ram",
-      "defined_symbols": 4,
-      "undefined_symbols": 9
     },
     {
       "archive": "libbgtp.a",

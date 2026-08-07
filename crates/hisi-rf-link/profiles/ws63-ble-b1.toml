@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v51"
+revision = "ws63-ble-b3-gatt-closure-v52"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -89,6 +89,8 @@ callback_roots = [
   "evt_task_ble_acl_get_pre_tbl",
   "evt_task_ble_acl_get_sta_tbl",
   "evt_task_ble_acl_get_unknown_llcp_tbl",
+  "evt_task_ble_acl_refresh_llcp_instant_ram",
+  "evt_task_ble_acl_update_active_tx_octets",
   "evt_task_ble_adv_create",
   "evt_task_ble_adv_get_dur_tbl_val",
   "evt_task_ble_adv_get_intv_tbl_val",
