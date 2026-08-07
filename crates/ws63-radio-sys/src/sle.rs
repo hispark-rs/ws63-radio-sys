@@ -17,6 +17,8 @@ pub const CONNECTION_STATE_NONE: u32 = 0;
 pub const CONNECTION_STATE_CONNECTED: u32 = 1;
 pub const CONNECTION_STATE_DISCONNECTED: u32 = 2;
 pub const PAIR_STATE_NONE: u32 = 1;
+pub const PAIR_STATE_PAIRING: u32 = 2;
+pub const PAIR_STATE_PAIRED: u32 = 3;
 pub const DISCONNECT_BY_REMOTE: u32 = 0x10;
 pub const DISCONNECT_BY_LOCAL: u32 = 0x11;
 
