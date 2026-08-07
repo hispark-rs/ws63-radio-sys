@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v31",
+  "revision": "ws63-ble-b2-discovery-closure-v32",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -71,6 +71,8 @@
     "lm_ble_adv_comm_fsm_get_sta_tbl",
     "lm_ble_adv_fsm_get_sta_tbl",
     "lm_ble_scan_fsm_get_sta_tbl",
+    "pwr_ctrl_convert_tx_pwr_val_to_less_level",
+    "pwr_ctrl_get_ble_tx_estimate_power_value",
     "uapi_drv_cipher_trng_get_random"
   ],
   "controller_archives": [
@@ -293,6 +295,13 @@
       "selected_by": "lm_ble_scan_fsm_get_sta_tbl",
       "defined_symbols": 5,
       "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "pwr_ctrl_cfg_ram.c.obj",
+      "selected_by": "pwr_ctrl_convert_tx_pwr_val_to_less_level",
+      "defined_symbols": 10,
+      "undefined_symbols": 7
     },
     {
       "archive": "libbgtp.a",
@@ -744,6 +753,13 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "bt_customize.c.obj",
+      "selected_by": "g_bt_customize",
+      "defined_symbols": 9,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "L2_comm.c.obj",
       "selected_by": "L2_deinit",
       "defined_symbols": 3,
@@ -762,13 +778,6 @@
       "selected_by": "bt_cali_feature_cfg",
       "defined_symbols": 14,
       "undefined_symbols": 24
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "bt_customize.c.obj",
-      "selected_by": "bt_customize_load",
-      "defined_symbols": 9,
-      "undefined_symbols": 4
     },
     {
       "archive": "libbgtp.a",
@@ -923,13 +932,6 @@
       "selected_by": "lm_gle_test_mode_close",
       "defined_symbols": 7,
       "undefined_symbols": 8
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "pwr_ctrl_cfg_ram.c.obj",
-      "selected_by": "pwr_ctrl_init",
-      "defined_symbols": 10,
-      "undefined_symbols": 7
     },
     {
       "archive": "libbgtp.a",
