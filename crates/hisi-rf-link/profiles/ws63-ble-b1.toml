@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b2-discovery-closure-v40"
+revision = "ws63-ble-b3-gatt-closure-v41"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -109,6 +109,7 @@ callback_roots = [
   "lm_ble_adv_comm_fsm_get_sta_tbl",
   "lm_ble_adv_fsm_get_sta_tbl",
   "lm_ble_adv_notify_per_adv_fsm",
+  "lm_ble_initiate_fsm_get_sta_tbl",
   "lm_ble_scan_fsm_get_sta_tbl",
   "pwr_ctrl_convert_tx_pwr_val_to_less_level",
   "pwr_ctrl_get_ble_tx_estimate_power_value",

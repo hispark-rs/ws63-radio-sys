@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v40",
+  "revision": "ws63-ble-b3-gatt-closure-v41",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -110,6 +110,7 @@
     "lm_ble_adv_comm_fsm_get_sta_tbl",
     "lm_ble_adv_fsm_get_sta_tbl",
     "lm_ble_adv_notify_per_adv_fsm",
+    "lm_ble_initiate_fsm_get_sta_tbl",
     "lm_ble_scan_fsm_get_sta_tbl",
     "pwr_ctrl_convert_tx_pwr_val_to_less_level",
     "pwr_ctrl_get_ble_tx_estimate_power_value",
@@ -414,6 +415,13 @@
       "selected_by": "lm_ble_adv_notify_per_adv_fsm",
       "defined_symbols": 2,
       "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_initiate_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_initiate_fsm_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 9
     },
     {
       "archive": "libbgtp.a",
@@ -848,6 +856,13 @@
       "selected_by": "lm_ble_adv_stop_act",
       "defined_symbols": 1,
       "undefined_symbols": 3
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_ext_initiate_act.c.obj",
+      "selected_by": "lm_ble_initiate_off_hci_ext_create_con_act",
+      "defined_symbols": 7,
+      "undefined_symbols": 24
     },
     {
       "archive": "libbgtp.a",
@@ -1506,6 +1521,13 @@
       "selected_by": "gle_acb_calc_drift",
       "defined_symbols": 4,
       "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_initiate_ram.c.obj",
+      "selected_by": "evt_task_ble_initiate_start",
+      "defined_symbols": 1,
+      "undefined_symbols": 13
     },
     {
       "archive": "libbgtp.a",
@@ -2471,6 +2493,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "ble_acl_is_addr_connected",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "ble_ext_adv_get_aux_extheader_flag",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -2564,6 +2590,14 @@
     },
     {
       "name": "dm_ble_encrypt_done_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_generate_access_address",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_get_host_chnl_cls_map",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -2704,6 +2738,14 @@
     },
     {
       "name": "dm_ble_reset_all",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_update_fal_usage",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "dm_ble_update_noncon_state",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -3415,7 +3457,43 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "evt_task_ble_initiate_create_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "evt_task_ble_initiate_env_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_env_destroy",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_get_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_set_con_req",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_set_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_set_es",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_set_reg",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_set_sed",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_set_txpd",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4091,6 +4169,14 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_check_adv_cmd_conflict",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_check_rand_addr_invalid",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_comm_send_con_cmp_evt",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -4107,11 +4193,55 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_initiate_evt_task_fsm_start",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_get_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_initiate_get_fsm_id",
       "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "lm_ble_initiate_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_off_hci_create_con_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_off_stopping_recv_data",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_send_status_evt",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_set_addr",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_stopping_event_sched_stop_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_stopping_hci_create_con_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiate_stopping_hci_create_con_cancel_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiating_hci_create_con_cancel_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_initiating_recv_data",
       "owner": "hisi-rom-sys-ws63"
     },
     {
