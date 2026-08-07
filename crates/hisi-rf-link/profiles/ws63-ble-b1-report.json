@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v42",
+  "revision": "ws63-ble-b3-gatt-closure-v43",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -86,6 +86,7 @@
     "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
     "evt_task_ble_ext_adv_set_adv_en",
     "evt_task_ble_initiate_get_sta_tbl",
+    "evt_task_ble_initiate_start",
     "evt_task_ble_scan_get_sta_tbl",
     "evt_task_ble_scan_start",
     "evt_task_comm_create_intv",
@@ -353,6 +354,13 @@
       "selected_by": "evt_task_ble_initiate_get_sta_tbl",
       "defined_symbols": 4,
       "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_initiate_ram.c.obj",
+      "selected_by": "evt_task_ble_initiate_start",
+      "defined_symbols": 1,
+      "undefined_symbols": 13
     },
     {
       "archive": "libbgtp.a",
@@ -1529,13 +1537,6 @@
       "selected_by": "gle_acb_calc_drift",
       "defined_symbols": 4,
       "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_ble_initiate_ram.c.obj",
-      "selected_by": "evt_task_ble_initiate_start",
-      "defined_symbols": 1,
-      "undefined_symbols": 13
     },
     {
       "archive": "libbgtp.a",
