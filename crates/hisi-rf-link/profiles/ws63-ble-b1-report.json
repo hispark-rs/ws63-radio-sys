@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v35",
+  "revision": "ws63-ble-b2-discovery-closure-v36",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -98,8 +98,10 @@
     "hw_em_tx_desc_get_txpd_free_list",
     "hw_em_tx_desc_get_txpd_node",
     "is_sleep_prevent",
+    "lm_ble_adv_clear_assigned_adv_act",
     "lm_ble_adv_comm_fsm_get_sta_tbl",
     "lm_ble_adv_fsm_get_sta_tbl",
+    "lm_ble_adv_notify_per_adv_fsm",
     "lm_ble_scan_fsm_get_sta_tbl",
     "pwr_ctrl_convert_tx_pwr_val_to_less_level",
     "pwr_ctrl_get_ble_tx_estimate_power_value",
@@ -363,10 +365,24 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "lm_ble_adv_ext_act_ram.c.obj",
+      "selected_by": "lm_ble_adv_clear_assigned_adv_act",
+      "defined_symbols": 2,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "lm_ble_adv_fsm_tbl.c.obj",
       "selected_by": "lm_ble_adv_comm_fsm_get_sta_tbl",
       "defined_symbols": 13,
       "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_adv_ram.c.obj",
+      "selected_by": "lm_ble_adv_notify_per_adv_fsm",
+      "defined_symbols": 2,
+      "undefined_symbols": 1
     },
     {
       "archive": "libbgtp.a",
@@ -799,20 +815,6 @@
       "archive": "libbgtp.a",
       "member": "txpd_adapter.c.obj",
       "selected_by": "txpd_ble_adv_set_txphy",
-      "defined_symbols": 2,
-      "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "lm_ble_adv_ram.c.obj",
-      "selected_by": "lm_ble_adv_connect_p_start_abort_act",
-      "defined_symbols": 2,
-      "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "lm_ble_adv_ext_act_ram.c.obj",
-      "selected_by": "lm_ble_adv_scan_req_report_abort_act",
       "defined_symbols": 2,
       "undefined_symbols": 1
     },
