@@ -90,6 +90,9 @@ jobs:
           cargo check -Zbuild-std=core,alloc \
             --target riscv32imfc-unknown-none-elf \
             -p ws63-radio-sys --no-default-features --features ble --locked
+          cargo check -Zbuild-std=core,alloc \
+            --target riscv32imfc-unknown-none-elf \
+            -p ws63-radio-sys --no-default-features --features sle --locked
       - run: uv run crates/hisi-rf-link/python/test_relocations.py
       - name: Package release unit
         run: |
@@ -202,3 +205,10 @@ jobs:
           cargo check "-Zbuild-std=core,alloc"
           --target riscv32imfc-unknown-none-elf
           -p ws63-radio-sys --no-default-features --features ble --locked
+      - name: Build SLE S0 Cargo consumer contract
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
+        run: >-
+          cargo check "-Zbuild-std=core,alloc"
+          --target riscv32imfc-unknown-none-elf
+          -p ws63-radio-sys --no-default-features --features sle --locked
