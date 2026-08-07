@@ -16,6 +16,7 @@ struct InitProfile {
     revision: String,
     b0_profile_revision: String,
     roots: Vec<String>,
+    callback_roots: Vec<String>,
     controller_archives: Vec<ControllerArchive>,
     #[serde(default)]
     external_roots: Vec<ExternalRoot>,
@@ -84,6 +85,7 @@ struct Report {
     revision: String,
     b0_profile_revision: String,
     roots: Vec<String>,
+    callback_roots: Vec<String>,
     controller_archives: Vec<ControllerArchive>,
     external_roots: Vec<ExternalRoot>,
     selected_members: Vec<SelectedMember>,
@@ -114,6 +116,7 @@ fn generate(
     b0_profile_path: &Path,
     archive_root: &Path,
     rom_symbols_path: &Path,
+    rom_callbacks_path: &Path,
 ) -> Result<Report, String> {
     let init: InitProfile = toml::from_str(
         &fs::read_to_string(init_profile_path)
@@ -172,7 +175,32 @@ fn generate(
         .iter()
         .map(|root| root.name.clone())
         .collect::<BTreeSet<_>>();
-    let mut pending = init.roots.iter().cloned().collect::<VecDeque<_>>();
+    let callback_inventory = fs::read_to_string(rom_callbacks_path)
+        .map_err(|error| format!("read {}: {error}", rom_callbacks_path.display()))?;
+    let callback_inventory = callback_inventory
+        .lines()
+        .map(str::trim)
+        .filter(|name| !name.is_empty() && !name.starts_with('#'))
+        .map(str::to_owned)
+        .collect::<BTreeSet<_>>();
+    for callback in &init.callback_roots {
+        if !callback_inventory.contains(callback) {
+            return Err(format!(
+                "BLE init callback root is absent from the ROM callback inventory: {callback}"
+            ));
+        }
+        if !providers.contains_key(callback) && !external_root_names.contains(callback) {
+            return Err(format!(
+                "BLE init callback root has no selected archive or external provider: {callback}"
+            ));
+        }
+    }
+    let mut pending = init
+        .roots
+        .iter()
+        .chain(&init.callback_roots)
+        .cloned()
+        .collect::<VecDeque<_>>();
     let mut resolved = BTreeSet::new();
     let mut selected = BTreeSet::new();
     let mut selected_members = Vec::new();
@@ -254,6 +282,7 @@ fn generate(
         revision: init.revision,
         b0_profile_revision: b0.revision,
         roots: init.roots,
+        callback_roots: init.callback_roots,
         controller_archives: init.controller_archives,
         external_roots: init.external_roots,
         selected_members,
@@ -271,10 +300,17 @@ pub fn write_or_check(
     b0_profile: &Path,
     archive_root: &Path,
     rom_symbols: &Path,
+    rom_callbacks: &Path,
     output: &Path,
     check: bool,
 ) -> Result<(), String> {
-    let report = generate(profile, b0_profile, archive_root, rom_symbols)?;
+    let report = generate(
+        profile,
+        b0_profile,
+        archive_root,
+        rom_symbols,
+        rom_callbacks,
+    )?;
     let encoded = serde_json::to_vec_pretty(&report)
         .map_err(|error| format!("serialize BLE init profile: {error}"))?;
     if check {

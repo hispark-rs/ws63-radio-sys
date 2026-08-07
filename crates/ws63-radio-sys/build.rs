@@ -85,6 +85,7 @@ struct SupplicantBoundaryProfile {
 struct BleInitProfile {
     revision: String,
     roots: Vec<String>,
+    callback_roots: Vec<String>,
     controller_archives: Vec<BleControllerArchive>,
 }
 
@@ -432,7 +433,7 @@ fn main() {
     for (key, path) in [
         ("lib_dir", lib.clone()),
         ("rom_symbols", rom_symbols.clone()),
-        ("rom_callbacks", rom_callbacks),
+        ("rom_callbacks", rom_callbacks.clone()),
         ("rom_patches", rom_patches.clone()),
         ("rom_callback_archive", rom_callback_archive),
         ("archive_profile", profile_path),
@@ -515,7 +516,7 @@ fn main() {
 
     if env::var_os("CARGO_FEATURE_BLE").is_some() {
         const BLE_PROFILE_REVISION: &str = "ws63-ble-b0-archive-abi-v1";
-        const BLE_INIT_PROFILE_REVISION: &str = "ws63-ble-b1-init-closure-v2";
+        const BLE_INIT_PROFILE_REVISION: &str = "ws63-ble-b1-init-closure-v28";
         let revision = env::var("DEP_WS63_RADIO_BLOB_BLE_PROFILE_REVISION")
             .expect("ws63-radio-blob did not export its BLE profile revision");
         assert_eq!(
@@ -589,6 +590,10 @@ fn main() {
                 .map(|path| path.display().to_string())
                 .collect::<Vec<_>>()
                 .join(",")
+        );
+        println!(
+            "cargo:ble_callback_symbols={}",
+            init_profile.callback_roots.join(",")
         );
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_BLE");

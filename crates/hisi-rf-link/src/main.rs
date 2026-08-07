@@ -233,6 +233,7 @@ fn ble_init_profile(args: impl Iterator<Item = std::ffi::OsString>) {
     let b0_profile = PathBuf::from(required_option(&mut arguments, "--b0-profile"));
     let archive_root = PathBuf::from(required_option(&mut arguments, "--archive-root"));
     let rom_symbols = PathBuf::from(required_option(&mut arguments, "--rom-symbols"));
+    let rom_callbacks = PathBuf::from(required_option(&mut arguments, "--rom-callbacks"));
     let output = PathBuf::from(required_option(&mut arguments, "--output"));
     let check = if let Some(position) = arguments.iter().position(|argument| argument == "--check")
     {
@@ -249,6 +250,7 @@ fn ble_init_profile(args: impl Iterator<Item = std::ffi::OsString>) {
         &b0_profile,
         &archive_root,
         &rom_symbols,
+        &rom_callbacks,
         &output,
         check,
     )

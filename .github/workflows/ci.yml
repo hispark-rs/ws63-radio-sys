@@ -47,6 +47,7 @@ jobs:
           --b0-profile crates/hisi-rf-link/profiles/ws63-ble-b0.toml
           --archive-root ws63-RF/lib
           --rom-symbols ws63-RF/rom/ws63_acore_rom.lds
+          --rom-callbacks ws63-RF/rom/ws63_acore_rom_callbacks.txt
           --output crates/hisi-rf-link/profiles/ws63-ble-b1-report.json
           --check
       - name: Rebuild normalized release artifacts

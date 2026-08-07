@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b1-init-closure-v2"
+revision = "ws63-ble-b1-init-closure-v28"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -9,6 +9,47 @@ roots = [
   "btsdk_init",
   "enable_ble",
   "g_systick_clock",
+]
+callback_roots = [
+  "bgsub_pmu_init",
+  "bgtp_prevent_sleep_set",
+  "bgtp_sleep_time_calc",
+  "bgtp_start_sleep",
+  "dts_ble_int_clear_pending_irq",
+  "dts_ble_intc_delete",
+  "dts_ble_intc_init",
+  "dts_disable_int",
+  "dts_enable_int",
+  "dts_gle_int_clear_pending_irq",
+  "dts_gle_intc_delete",
+  "dts_gle_intc_init",
+  "dts_hci_write_to_self",
+  "dts_interrupt_init",
+  "dts_lowpower_feature_get",
+  "dm_ble_get_dft_data_ext_global_val",
+  "dm_ble_get_local_feats",
+  "dm_ble_get_local_states",
+  "dm_ble_get_pre_tbl",
+  "dm_co_get_local_supp_cmds_tbl",
+  "dm_co_get_local_supp_feats_tbl",
+  "dm_co_get_pre_tbl",
+  "dm_co_init",
+  "dm_co_reset",
+  "encrypt_clear_sm3_tasks",
+  "encrypt_init_sm3",
+  "evt_prog_init",
+  "hci_bt_send_evt_msg",
+  "hw_em_get_ble_tx_buff_free_list",
+  "hw_em_get_ble_tx_buff_node",
+  "hw_em_get_gle_tx_buff_free_list",
+  "hw_em_get_gle_tx_buff_node",
+  "hw_em_get_tx_s_buff_free_list",
+  "hw_em_get_tx_s_buff_node",
+  "hw_em_tx_desc_get_txpd_free_list",
+  "hw_em_tx_desc_get_txpd_node",
+  "is_sleep_prevent",
+  "lm_ble_adv_comm_fsm_get_sta_tbl",
+  "uapi_drv_cipher_trng_get_random",
 ]
 
 [[controller_archives]]
@@ -25,6 +66,11 @@ role = "WS63 BLE controller mask-ROM data definitions"
 archive = "librom_callback.a"
 sha256 = "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be"
 role = "Shared platform ROM-data objects required by the BLE timebase ABI"
+
+[[external_roots]]
+name = "uapi_drv_cipher_trng_get_random"
+owner = "hisi-rf-ws63"
+reason = "Routes the ROM callback through the explicitly injected WS63 TRNG capability"
 
 [[tasks]]
 name = "bt"
