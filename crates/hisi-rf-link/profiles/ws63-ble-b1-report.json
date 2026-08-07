@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v53",
+  "revision": "ws63-ble-b3-gatt-closure-v54",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -25,6 +25,7 @@
     "bgtp_start_sleep",
     "ble_acl_calc_drift",
     "ble_sca_get_cfg",
+    "bt_rf_cali_rx_content",
     "coex_ble_acl_create_coex_process",
     "coex_ble_acl_end_coex_process",
     "coex_ble_acl_evt_coex_process",
@@ -247,6 +248,13 @@
       "selected_by": "ble_acl_calc_drift",
       "defined_symbols": 4,
       "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "hal_bt_cali.c.obj",
+      "selected_by": "bt_rf_cali_rx_content",
+      "defined_symbols": 8,
+      "undefined_symbols": 13
     },
     {
       "archive": "libbgtp.a",
@@ -908,6 +916,34 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "bt_hal_control.c.obj",
+      "selected_by": "bt_read_rf_reg",
+      "defined_symbols": 64,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "rf_calibration_alg.c.obj",
+      "selected_by": "bt_rf_cali_cal_complex_div",
+      "defined_symbols": 46,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "cali_tx.c.obj",
+      "selected_by": "cali_tx_power_config",
+      "defined_symbols": 89,
+      "undefined_symbols": 49
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "rf_accumulation.c.obj",
+      "selected_by": "g_al_acc_val_i",
+      "defined_symbols": 10,
+      "undefined_symbols": 6
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "bt_customize.c.obj",
       "selected_by": "g_bt_customize",
       "defined_symbols": 9,
@@ -1171,13 +1207,6 @@
       "selected_by": "bt_get_ct_table_temp_idx",
       "defined_symbols": 29,
       "undefined_symbols": 17
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "bt_hal_control.c.obj",
-      "selected_by": "bt_read_rf_reg",
-      "defined_symbols": 64,
-      "undefined_symbols": 2
     },
     {
       "archive": "libbgtp.a",
@@ -1594,17 +1623,17 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "rf_calibration_alg.c.obj",
-      "selected_by": "bt_set2comp",
-      "defined_symbols": 46,
-      "undefined_symbols": 11
+      "member": "bt_productline.c.obj",
+      "selected_by": "bt_productline_efuse_read",
+      "defined_symbols": 10,
+      "undefined_symbols": 5
     },
     {
       "archive": "libbgtp.a",
-      "member": "cali_tx.c.obj",
-      "selected_by": "cali_tx_power_get_dbb_scale_by_lvl",
-      "defined_symbols": 89,
-      "undefined_symbols": 49
+      "member": "cali_reg.c.obj",
+      "selected_by": "cali_backup_regs",
+      "defined_symbols": 3,
+      "undefined_symbols": 2
     },
     {
       "archive": "libbgtp.a",
@@ -1902,13 +1931,6 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "rf_accumulation.c.obj",
-      "selected_by": "bt_cfg_mac_channel",
-      "defined_symbols": 10,
-      "undefined_symbols": 6
-    },
-    {
-      "archive": "libbgtp.a",
       "member": "lm_ble_test_mode_fsm.c.obj",
       "selected_by": "lm_ble_test_mode_get_fsm_id",
       "defined_symbols": 5,
@@ -2088,27 +2110,6 @@
       "selected_by": "hcic_security_le_keys_recover",
       "defined_symbols": 2,
       "undefined_symbols": 4
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "hal_bt_cali.c.obj",
-      "selected_by": "bt_rf_convert_accum_to_mv",
-      "defined_symbols": 8,
-      "undefined_symbols": 13
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "bt_productline.c.obj",
-      "selected_by": "bt_productline_efuse_read",
-      "defined_symbols": 10,
-      "undefined_symbols": 5
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "cali_reg.c.obj",
-      "selected_by": "cali_backup_regs",
-      "defined_symbols": 3,
-      "undefined_symbols": 2
     },
     {
       "archive": "libbgtp.a",
