@@ -697,8 +697,10 @@ fn main() {
                 "ssaps_add_service_sync",
                 "ssaps_add_property_sync",
                 "ssaps_start_service",
+                "ssaps_set_info",
                 "ssaps_notify_indicate",
                 "ssapc_register_callbacks",
+                "ssapc_exchange_info_req",
                 "g_systick_clock",
             ]
             .join(",")

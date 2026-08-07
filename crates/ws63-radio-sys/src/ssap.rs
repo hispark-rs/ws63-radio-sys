@@ -19,6 +19,13 @@ pub struct Uuid {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ExchangeInfo {
+    pub mtu_size: u32,
+    pub version: u16,
+}
+
+#[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct ServerPropertyInfo {
     pub uuid: Uuid,
@@ -53,6 +60,12 @@ pub type ClientNotificationCallback = unsafe extern "C" fn(
     data: *mut ClientHandleValue,
     status: ErrorCode,
 );
+pub type ExchangeInfoCallback = unsafe extern "C" fn(
+    client_id: u8,
+    connection_id: u16,
+    parameters: *mut ExchangeInfo,
+    status: ErrorCode,
+);
 pub type OpaqueCallback = unsafe extern "C" fn();
 
 #[repr(C)]
@@ -79,7 +92,7 @@ pub struct ClientCallbacks {
     pub read_confirmed: Option<OpaqueCallback>,
     pub read_by_uuid_complete: Option<OpaqueCallback>,
     pub write_confirmed: Option<OpaqueCallback>,
-    pub exchange_info: Option<OpaqueCallback>,
+    pub exchange_info: Option<ExchangeInfoCallback>,
     pub notification: Option<ClientNotificationCallback>,
     pub indication: Option<OpaqueCallback>,
 }
@@ -100,17 +113,24 @@ unsafe extern "C" {
         handle: *mut u16,
     ) -> ErrorCode;
     pub fn ssaps_start_service(server_id: u8, service_handle: u16) -> ErrorCode;
+    pub fn ssaps_set_info(server_id: u8, info: *mut ExchangeInfo) -> ErrorCode;
     pub fn ssaps_notify_indicate(
         server_id: u8,
         connection_id: u16,
         parameters: *mut NotifyIndicate,
     ) -> ErrorCode;
     pub fn ssapc_register_callbacks(callbacks: *mut ClientCallbacks) -> ErrorCode;
+    pub fn ssapc_exchange_info_req(
+        client_id: u8,
+        connection_id: u16,
+        parameters: *mut ExchangeInfo,
+    ) -> ErrorCode;
 }
 
 #[cfg(target_pointer_width = "32")]
 const _: () = {
     assert!(core::mem::size_of::<Uuid>() == 17);
+    assert!(core::mem::size_of::<ExchangeInfo>() == 8);
     assert!(core::mem::size_of::<ServerPropertyInfo>() == 32);
     assert!(core::mem::offset_of!(ServerPropertyInfo, value) == 28);
     assert!(core::mem::size_of::<NotifyIndicate>() == 12);
