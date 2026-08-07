@@ -189,6 +189,7 @@ unsafe extern "C" {
     pub fn sle_connection_register_callbacks(callbacks: *mut ConnectionCallbacks) -> ErrorCode;
     pub fn sle_connect_remote_device(address: *const Address) -> ErrorCode;
     pub fn sle_disconnect_remote_device(address: *const Address) -> ErrorCode;
+    pub fn sle_pair_remote_device(address: *const Address) -> ErrorCode;
 }
 
 #[cfg(target_pointer_width = "32")]
