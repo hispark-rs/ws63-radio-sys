@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v54",
+  "revision": "ws63-ble-b3-gatt-closure-v55",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -123,10 +123,20 @@
     "hw_em_tx_desc_get_txpd_free_list",
     "hw_em_tx_desc_get_txpd_node",
     "is_sleep_prevent",
+    "lm_ble_acl_conn_update_get_sta_tbl",
     "lm_ble_acl_create_desc",
+    "lm_ble_acl_enable_encryption_get_sta_tbl",
+    "lm_ble_acl_feats_get_sta_tbl",
+    "lm_ble_acl_get_exception_hci_tbl",
+    "lm_ble_acl_get_llcp_reject_ext_tbl",
+    "lm_ble_acl_get_llcp_unknown_tbl",
     "lm_ble_acl_get_pre_tbl",
     "lm_ble_acl_get_sta_tbl",
     "lm_ble_acl_init_desc_for_pwr_ctrl",
+    "lm_ble_acl_map_get_sta_tbl",
+    "lm_ble_acl_phy_upd_get_sta_tbl",
+    "lm_ble_acl_srv_data_length_get_pre_tbl",
+    "lm_ble_acl_srv_data_length_get_sta_tbl",
     "lm_ble_acl_start",
     "lm_ble_acl_ver_get_sta_tbl",
     "lm_ble_adv_clear_assigned_adv_act",
@@ -482,6 +492,13 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_conn_update_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_conn_update_get_sta_tbl",
+      "defined_symbols": 7,
+      "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "lm_ble_acl_ram.c.obj",
       "selected_by": "lm_ble_acl_create_desc",
       "defined_symbols": 4,
@@ -489,10 +506,45 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_enc_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_enable_encryption_get_sta_tbl",
+      "defined_symbols": 18,
+      "undefined_symbols": 23
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_feat_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_feats_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "lm_ble_acl_fsm_tbl.c.obj",
-      "selected_by": "lm_ble_acl_get_pre_tbl",
+      "selected_by": "lm_ble_acl_get_exception_hci_tbl",
       "defined_symbols": 13,
       "undefined_symbols": 54
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_map_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_map_get_sta_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_phy_upd_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_phy_upd_get_sta_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 11
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_data_length_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_acl_srv_data_length_get_pre_tbl",
+      "defined_symbols": 6,
+      "undefined_symbols": 4
     },
     {
       "archive": "libbgtp.a",
@@ -1007,6 +1059,13 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "lm_ble_acl_srv_enc_ram.c.obj",
+      "selected_by": "lm_ble_acl_central_finish_start_enc_ram",
+      "defined_symbols": 3,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "lm_ble_acl_srv_pwr_ctrl.c.obj",
       "selected_by": "lm_ble_acl_path_loss_thres_rep_to_act",
       "defined_symbols": 34,
@@ -1021,10 +1080,10 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "lm_ble_acl_srv_enc_ram.c.obj",
-      "selected_by": "lm_ble_hci_enable_enc_cmd_act",
-      "defined_symbols": 3,
-      "undefined_symbols": 7
+      "member": "lm_ble_acl_srv_data_length_ram.c.obj",
+      "selected_by": "lm_ble_llcp_length_unexpected_act",
+      "defined_symbols": 1,
+      "undefined_symbols": 4
     },
     {
       "archive": "libbgtp.a",
@@ -4243,7 +4302,51 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_acl_central_calculate_sk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_cancel_enc_due_to_ext_rejection",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_cancel_enc_due_to_rejection",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_cancel_enc_due_to_unknown_rsp",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_collect_sk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_enable_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_acl_central_finish_start_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_receive_start_enc_request",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_request_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_request_pause_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_respond_pause_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_central_respond_start_enc",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4259,7 +4362,19 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_acl_conn_update_cmp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_conn_update_llcp_to_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_acl_conn_update_req_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_conn_update_req_srv_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4323,7 +4438,43 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_acl_peripheral_calculate_sk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_enc_denied_by_host",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_acl_peripheral_finish_start_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_generate_skd_iv",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_pause_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_request_start_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_respond_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_respond_pause_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_start_enc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_peripheral_store_next_enc_procedure",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4352,6 +4503,10 @@
     },
     {
       "name": "lm_ble_acl_start_init_map",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_suspend_enc_due_to_timeout",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4551,7 +4706,27 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_feats_llcp_unknown_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_feats_wait_rsp_to_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_hci_conn_update_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_hci_conn_update_host_neg_reply_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_hci_conn_update_host_reply_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_hci_conn_update_srv_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4572,6 +4747,10 @@
     },
     {
       "name": "lm_ble_hci_rd_chnl_map_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_hci_rd_rem_feats_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4659,6 +4838,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_llcp_chnl_map_ind_srv_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_llcp_chnl_report_ind_act",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -4671,7 +4854,27 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_llcp_conn_param_req_srv_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_conn_param_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_llcp_conn_update_ind_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_conn_update_ind_srv_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_conn_update_ind_when_wait_update_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_conn_update_ind_when_wait_update_cmp_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4683,7 +4886,23 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_llcp_feats_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_llcp_length_req_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_length_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_length_rsp_to_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_length_send_req_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4691,7 +4910,35 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_llcp_phy_req_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_phy_req_conflict_act_c",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_phy_req_conflict_act_p",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_llcp_phy_req_pre_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_phy_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_phy_upd_rej_ext_wait_ind_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_phy_upd_rej_ext_wait_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_phy_upd_unknown_rsp_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4703,11 +4950,19 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_llcp_reject_when_wait_update_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_llcp_terminate_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "lm_ble_llcp_unknown_rsp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_llcp_unknown_when_wait_update_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4719,7 +4974,47 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_local_phy_req_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_map_ind_ack_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_map_ind_ack_instant_past_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_map_ind_ack_to_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_map_instant_cmp_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_map_instant_cmp_no_ack_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_phy_upd_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_phy_upd_ind_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_phy_wait_rsp_to_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_req_map_upd_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_req_map_upd_srv_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {

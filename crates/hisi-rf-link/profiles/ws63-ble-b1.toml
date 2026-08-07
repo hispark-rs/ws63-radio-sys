@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v54"
+revision = "ws63-ble-b3-gatt-closure-v55"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -122,10 +122,20 @@ callback_roots = [
   "hw_em_tx_desc_get_txpd_free_list",
   "hw_em_tx_desc_get_txpd_node",
   "is_sleep_prevent",
+  "lm_ble_acl_conn_update_get_sta_tbl",
   "lm_ble_acl_create_desc",
+  "lm_ble_acl_enable_encryption_get_sta_tbl",
+  "lm_ble_acl_feats_get_sta_tbl",
+  "lm_ble_acl_get_exception_hci_tbl",
+  "lm_ble_acl_get_llcp_reject_ext_tbl",
+  "lm_ble_acl_get_llcp_unknown_tbl",
   "lm_ble_acl_get_pre_tbl",
   "lm_ble_acl_get_sta_tbl",
   "lm_ble_acl_init_desc_for_pwr_ctrl",
+  "lm_ble_acl_map_get_sta_tbl",
+  "lm_ble_acl_phy_upd_get_sta_tbl",
+  "lm_ble_acl_srv_data_length_get_pre_tbl",
+  "lm_ble_acl_srv_data_length_get_sta_tbl",
   "lm_ble_acl_start",
   "lm_ble_acl_ver_get_sta_tbl",
   "lm_ble_adv_clear_assigned_adv_act",
