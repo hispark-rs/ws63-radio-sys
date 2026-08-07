@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b2-discovery-closure-v39"
+revision = "ws63-ble-b2-discovery-closure-v40"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -31,9 +31,12 @@ callback_roots = [
   "coex_ble_scan_start_coex_process",
   "coex_ble_scan_state_set",
   "coex_if_btstate_set",
+  "dts_bg_veto_sys_sleep",
+  "dts_bg_veto_sys_wakeup",
   "dts_ble_int_clear_pending_irq",
   "dts_ble_intc_delete",
   "dts_ble_intc_init",
+  "dts_coex_exit_bgle_lowpower_process",
   "dts_disable_int",
   "dts_enable_int",
   "dts_gle_int_clear_pending_irq",
@@ -42,6 +45,8 @@ callback_roots = [
   "dts_hci_write_to_self",
   "dts_interrupt_init",
   "dts_lowpower_feature_get",
+  "dts_task_create",
+  "dts_task_destroy",
   "dm_ble_get_dft_data_ext_global_val",
   "dm_ble_get_local_feats",
   "dm_ble_get_local_states",

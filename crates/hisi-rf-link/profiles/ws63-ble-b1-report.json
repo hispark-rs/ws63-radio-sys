@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v39",
+  "revision": "ws63-ble-b2-discovery-closure-v40",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -32,9 +32,12 @@
     "coex_ble_scan_start_coex_process",
     "coex_ble_scan_state_set",
     "coex_if_btstate_set",
+    "dts_bg_veto_sys_sleep",
+    "dts_bg_veto_sys_wakeup",
     "dts_ble_int_clear_pending_irq",
     "dts_ble_intc_delete",
     "dts_ble_intc_init",
+    "dts_coex_exit_bgle_lowpower_process",
     "dts_disable_int",
     "dts_enable_int",
     "dts_gle_int_clear_pending_irq",
@@ -43,6 +46,8 @@
     "dts_hci_write_to_self",
     "dts_interrupt_init",
     "dts_lowpower_feature_get",
+    "dts_task_create",
+    "dts_task_destroy",
     "dm_ble_get_dft_data_ext_global_val",
     "dm_ble_get_local_feats",
     "dm_ble_get_local_states",
@@ -230,10 +235,24 @@
     },
     {
       "archive": "libbgtp.a",
+      "member": "dts_lowpower.c.obj",
+      "selected_by": "dts_bg_veto_sys_sleep",
+      "defined_symbols": 5,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
       "member": "dts_interrupt_itcm.c.obj",
       "selected_by": "dts_ble_int_clear_pending_irq",
       "defined_symbols": 17,
       "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "dts_coex.c.obj",
+      "selected_by": "dts_coex_exit_bgle_lowpower_process",
+      "defined_symbols": 16,
+      "undefined_symbols": 6
     },
     {
       "archive": "libbgtp.a",
@@ -244,10 +263,10 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "dts_lowpower.c.obj",
-      "selected_by": "dts_lowpower_feature_get",
-      "defined_symbols": 5,
-      "undefined_symbols": 1
+      "member": "dts_task.c.obj",
+      "selected_by": "dts_task_create",
+      "defined_symbols": 8,
+      "undefined_symbols": 5
     },
     {
       "archive": "libbgtp.a",
@@ -759,13 +778,6 @@
       "selected_by": "dts_bg_osc_en_intc_delete",
       "defined_symbols": 4,
       "undefined_symbols": 9
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "dts_coex.c.obj",
-      "selected_by": "dts_coex_enter_bgle_lowpower_process",
-      "defined_symbols": 16,
-      "undefined_symbols": 6
     },
     {
       "archive": "libbgtp.a",
@@ -4336,6 +4348,10 @@
     },
     {
       "name": "osal_kthread_create",
+      "owner": "hisi-rf-rtos-driver"
+    },
+    {
+      "name": "osal_kthread_destroy",
       "owner": "hisi-rf-rtos-driver"
     },
     {

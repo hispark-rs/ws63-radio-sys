@@ -516,7 +516,7 @@ fn main() {
 
     if env::var_os("CARGO_FEATURE_BLE").is_some() {
         const BLE_PROFILE_REVISION: &str = "ws63-ble-b0-archive-abi-v1";
-        const BLE_INIT_PROFILE_REVISION: &str = "ws63-ble-b2-discovery-closure-v39";
+        const BLE_INIT_PROFILE_REVISION: &str = "ws63-ble-b2-discovery-closure-v40";
         let revision = env::var("DEP_WS63_RADIO_BLOB_BLE_PROFILE_REVISION")
             .expect("ws63-radio-blob did not export its BLE profile revision");
         assert_eq!(
