@@ -1,9 +1,9 @@
-//! Raw WS63 SLE announce/seek ABI.
+//! Raw WS63 SLE discovery and connection ABI.
 //!
 //! The layout is derived from the pinned WS63 SDK's
-//! `sle_device_discovery.h`. This module intentionally exposes only the S1
-//! discovery slice; connection and SSAP declarations are added only with their
-//! own archive and silicon evidence.
+//! `sle_device_discovery.h` and `sle_connection_manager.h`. This module exposes
+//! the bounded S1 discovery and S2 connect/disconnect slices; SSAP declarations
+//! remain out of scope until their own archive and silicon evidence exists.
 
 use core::ffi::c_void;
 
@@ -12,6 +12,13 @@ pub type ErrorCode = u32;
 
 /// Maximum number of PHY parameter entries in one seek request.
 pub const SEEK_PHY_COUNT: usize = 3;
+
+pub const CONNECTION_STATE_NONE: u32 = 0;
+pub const CONNECTION_STATE_CONNECTED: u32 = 1;
+pub const CONNECTION_STATE_DISCONNECTED: u32 = 2;
+pub const PAIR_STATE_NONE: u32 = 1;
+pub const DISCONNECT_BY_REMOTE: u32 = 0x10;
+pub const DISCONNECT_BY_LOCAL: u32 = 0x11;
 
 /// Raw WS63 SLE device address.
 #[repr(C)]
@@ -80,6 +87,20 @@ pub struct SeekResult {
     pub data: *mut u8,
 }
 
+/// Default parameters used while establishing an SLE connection.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DefaultConnectionParameters {
+    pub enable_filter_policy: u8,
+    pub initiate_phys: u8,
+    pub gt_negotiate: u8,
+    pub scan_interval: u16,
+    pub scan_window: u16,
+    pub min_interval: u16,
+    pub max_interval: u16,
+    pub timeout: u16,
+}
+
 pub type EnableCallback = unsafe extern "C" fn(status: ErrorCode);
 pub type DisableCallback = unsafe extern "C" fn(status: ErrorCode);
 pub type AnnounceEnableCallback = unsafe extern "C" fn(announce_id: u32, status: ErrorCode);
@@ -90,6 +111,30 @@ pub type SeekEnableCallback = unsafe extern "C" fn(status: ErrorCode);
 pub type SeekDisableCallback = unsafe extern "C" fn(status: ErrorCode);
 pub type SeekResultCallback = unsafe extern "C" fn(result: *mut SeekResult);
 pub type DfrCallback = unsafe extern "C" fn();
+pub type ConnectionStateChangedCallback = unsafe extern "C" fn(
+    connection_id: u16,
+    address: *const Address,
+    connection_state: u32,
+    pair_state: u32,
+    disconnect_reason: u32,
+);
+pub type ConnectionParameterUpdateRequestCallback =
+    unsafe extern "C" fn(connection_id: u16, status: ErrorCode, parameters: *const c_void);
+pub type ConnectionParameterUpdateCallback =
+    unsafe extern "C" fn(connection_id: u16, status: ErrorCode, parameters: *const c_void);
+pub type AuthenticationCompleteCallback = unsafe extern "C" fn(
+    connection_id: u16,
+    address: *const Address,
+    status: ErrorCode,
+    event: *const c_void,
+);
+pub type PairCompleteCallback =
+    unsafe extern "C" fn(connection_id: u16, address: *const Address, status: ErrorCode);
+pub type ReadRssiCallback = unsafe extern "C" fn(connection_id: u16, rssi: i8, status: ErrorCode);
+pub type LowLatencyCallback = unsafe extern "C" fn(status: u8, address: *mut Address, rate: u8);
+pub type SetPhyCallback =
+    unsafe extern "C" fn(connection_id: u16, status: ErrorCode, parameters: *const c_void);
+pub type PairRemoveCallback = unsafe extern "C" fn(address: *const Address, status: ErrorCode);
 
 /// Raw callback table registered with the WS63 SLE discovery service.
 #[repr(C)]
@@ -107,6 +152,21 @@ pub struct AnnounceSeekCallbacks {
     pub dfr: Option<DfrCallback>,
 }
 
+/// Raw callback table registered with the WS63 SLE connection manager.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct ConnectionCallbacks {
+    pub connection_state_changed: Option<ConnectionStateChangedCallback>,
+    pub connection_parameter_update_request: Option<ConnectionParameterUpdateRequestCallback>,
+    pub connection_parameter_update: Option<ConnectionParameterUpdateCallback>,
+    pub authentication_complete: Option<AuthenticationCompleteCallback>,
+    pub pair_complete: Option<PairCompleteCallback>,
+    pub read_rssi: Option<ReadRssiCallback>,
+    pub low_latency: Option<LowLatencyCallback>,
+    pub set_phy: Option<SetPhyCallback>,
+    pub pair_remove: Option<PairRemoveCallback>,
+}
+
 unsafe extern "C" {
     pub fn enable_sle() -> ErrorCode;
     pub fn disable_sle() -> ErrorCode;
@@ -122,6 +182,13 @@ unsafe extern "C" {
     pub fn sle_set_seek_param(parameters: *mut SeekParameters) -> ErrorCode;
     pub fn sle_start_seek() -> ErrorCode;
     pub fn sle_stop_seek() -> ErrorCode;
+    pub fn sle_set_local_addr(address: *mut Address) -> ErrorCode;
+    pub fn sle_default_connection_param_set(
+        parameters: *mut DefaultConnectionParameters,
+    ) -> ErrorCode;
+    pub fn sle_connection_register_callbacks(callbacks: *mut ConnectionCallbacks) -> ErrorCode;
+    pub fn sle_connect_remote_device(address: *const Address) -> ErrorCode;
+    pub fn sle_disconnect_remote_device(address: *const Address) -> ErrorCode;
 }
 
 #[cfg(target_pointer_width = "32")]
@@ -135,6 +202,9 @@ const _: () = {
     assert!(core::mem::size_of::<SeekResult>() == 24);
     assert!(core::mem::offset_of!(SeekResult, data) == 20);
     assert!(core::mem::size_of::<AnnounceSeekCallbacks>() == 40);
+    assert!(core::mem::size_of::<DefaultConnectionParameters>() == 14);
+    assert!(core::mem::offset_of!(DefaultConnectionParameters, scan_interval) == 4);
+    assert!(core::mem::size_of::<ConnectionCallbacks>() == 36);
 };
 
 #[cfg(test)]
@@ -153,5 +223,18 @@ mod tests {
         assert_eq!(core::mem::offset_of!(SeekParameters, seek_type), 4);
         assert_eq!(core::mem::offset_of!(SeekParameters, interval), 8);
         assert_eq!(core::mem::offset_of!(SeekParameters, window), 14);
+    }
+
+    #[test]
+    fn connection_parameters_match_vendor_alignment() {
+        assert_eq!(core::mem::size_of::<DefaultConnectionParameters>(), 14);
+        assert_eq!(
+            core::mem::offset_of!(DefaultConnectionParameters, scan_interval),
+            4
+        );
+        assert_eq!(
+            core::mem::offset_of!(DefaultConnectionParameters, timeout),
+            12
+        );
     }
 }
