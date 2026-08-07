@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v29",
+  "revision": "ws63-ble-b2-discovery-closure-v30",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -45,6 +45,12 @@
     "encrypt_clear_sm3_tasks",
     "encrypt_init_sm3",
     "evt_prog_init",
+    "evt_task_ble_adv_create",
+    "evt_task_ble_adv_get_dur_tbl_val",
+    "evt_task_ble_adv_get_intv_tbl_val",
+    "evt_task_ble_adv_set_adv_en",
+    "evt_task_ble_scan_get_sta_tbl",
+    "evt_task_ble_scan_start",
     "hci_bt_send_evt_msg",
     "hw_em_get_ble_tx_buff_free_list",
     "hw_em_get_ble_tx_buff_node",
@@ -203,6 +209,34 @@
       "selected_by": "evt_prog_init",
       "defined_symbols": 7,
       "undefined_symbols": 40
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_adv_ram.c.obj",
+      "selected_by": "evt_task_ble_adv_create",
+      "defined_symbols": 12,
+      "undefined_symbols": 41
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_adv_fsm_tbl.c.obj",
+      "selected_by": "evt_task_ble_adv_get_dur_tbl_val",
+      "defined_symbols": 14,
+      "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_scan_fsm_tbl.c.obj",
+      "selected_by": "evt_task_ble_scan_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 4
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_scan_ram.c.obj",
+      "selected_by": "evt_task_ble_scan_start",
+      "defined_symbols": 1,
+      "undefined_symbols": 12
     },
     {
       "archive": "libbgtp.a",
@@ -637,6 +671,41 @@
       "selected_by": "evt_sched_delete_link_task_check",
       "defined_symbols": 21,
       "undefined_symbols": 37
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_ble_adv_process.c.obj",
+      "selected_by": "coex_ble_adv_create_coex_process",
+      "defined_symbols": 5,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_sched_ram.c.obj",
+      "selected_by": "evt_sched_reschedule_flexible_task",
+      "defined_symbols": 20,
+      "undefined_symbols": 48
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_fsm.c.obj",
+      "selected_by": "evt_task_comm_fsm_except_handler",
+      "defined_symbols": 5,
+      "undefined_symbols": 8
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "txpd_adapter.c.obj",
+      "selected_by": "txpd_ble_adv_set_txphy",
+      "defined_symbols": 2,
+      "undefined_symbols": 1
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "coex_ble_scan_process.c.obj",
+      "selected_by": "coex_ble_scan_create_coex_process",
+      "defined_symbols": 13,
+      "undefined_symbols": 8
     },
     {
       "archive": "libbgtp.a",
@@ -1305,20 +1374,6 @@
     },
     {
       "archive": "libbgtp.a",
-      "member": "evt_sched_ram.c.obj",
-      "selected_by": "evt_sched_create_task_list_node",
-      "defined_symbols": 20,
-      "undefined_symbols": 48
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_ble_adv_ram.c.obj",
-      "selected_by": "evt_task_ble_adv_check_hdc_type",
-      "defined_symbols": 12,
-      "undefined_symbols": 41
-    },
-    {
-      "archive": "libbgtp.a",
       "member": "evt_task_ble_test_mode.c.obj",
       "selected_by": "evt_task_ble_test_mode_rx_deinit",
       "defined_symbols": 48,
@@ -1449,13 +1504,6 @@
       "selected_by": "coex_gle_acb_create_coex_process",
       "defined_symbols": 7,
       "undefined_symbols": 4
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_fsm.c.obj",
-      "selected_by": "evt_task_comm_fsm_except_handler",
-      "defined_symbols": 5,
-      "undefined_symbols": 8
     },
     {
       "archive": "libbgtp.a",
@@ -1813,27 +1861,6 @@
       "selected_by": "cali_backup_regs",
       "defined_symbols": 3,
       "undefined_symbols": 2
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "coex_ble_adv_process.c.obj",
-      "selected_by": "coex_ble_adv_create_coex_process",
-      "defined_symbols": 5,
-      "undefined_symbols": 1
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "evt_task_ble_adv_fsm_tbl.c.obj",
-      "selected_by": "evt_task_ble_adv_get_pre_tbl",
-      "defined_symbols": 14,
-      "undefined_symbols": 2
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "txpd_adapter.c.obj",
-      "selected_by": "txpd_ble_adv_set_txphy",
-      "defined_symbols": 2,
-      "undefined_symbols": 1
     },
     {
       "archive": "libbgtp.a",
@@ -3284,7 +3311,51 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "evt_task_ble_scan_create_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_ending_event_int",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "evt_task_ble_scan_env_deinit",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_env_destroy",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_fsm_start",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_get_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_idle_event_int",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_set_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_set_es",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_set_sed",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_set_txpd",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_scan_task_end",
       "owner": "hisi-rom-sys-ws63"
     },
     {
