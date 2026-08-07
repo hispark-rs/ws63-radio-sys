@@ -184,6 +184,8 @@ def main() -> None:
             str(ORACLE),
             "--rom-symbols",
             str(ROOT / "ws63-RF" / "rom" / "ws63_acore_rom.lds"),
+            "--rom-callbacks",
+            str(ROOT / "ws63-RF" / "rom" / "ws63_acore_rom_callbacks.txt"),
             "--output",
             str(
                 ROOT
