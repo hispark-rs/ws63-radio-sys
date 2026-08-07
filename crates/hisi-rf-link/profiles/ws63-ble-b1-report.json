@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v44",
+  "revision": "ws63-ble-b3-gatt-closure-v45",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -109,6 +109,7 @@
     "hw_em_tx_desc_get_txpd_free_list",
     "hw_em_tx_desc_get_txpd_node",
     "is_sleep_prevent",
+    "lm_ble_acl_start",
     "lm_ble_adv_clear_assigned_adv_act",
     "lm_ble_adv_comm_fsm_get_sta_tbl",
     "lm_ble_adv_fsm_get_sta_tbl",
@@ -418,6 +419,13 @@
       "selected_by": "hw_em_tx_desc_get_txpd_free_list",
       "defined_symbols": 3,
       "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_acl_ram.c.obj",
+      "selected_by": "lm_ble_acl_start",
+      "defined_symbols": 4,
+      "undefined_symbols": 22
     },
     {
       "archive": "libbgtp.a",
@@ -3346,6 +3354,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "evt_task_ble_acl_create",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "evt_task_ble_acl_env_deinit",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -3359,6 +3371,10 @@
     },
     {
       "name": "evt_task_ble_acl_handle_return_tx_data",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_acl_start",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4038,11 +4054,23 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_acl_calc_first_packet_peripheral",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_acl_close",
       "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "lm_ble_acl_conn_upd_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_fsm_create",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_fsm_delete",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4054,7 +4082,27 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_acl_get_transmit_window_delay",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_init_desc",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_save_parameter",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_sed_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_acl_srv_enc_get_fsm_id",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_acl_start_init_map",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -4211,6 +4259,10 @@
     },
     {
       "name": "lm_ble_comm_send_con_cmp_evt",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_data_length_update_effective_value",
       "owner": "hisi-rom-sys-ws63"
     },
     {
