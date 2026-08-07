@@ -16,6 +16,7 @@ struct Manifest {
     native_supplicant: NativeSupplicant,
     native_authenticator: NativeSupplicant,
     ble_profile: BleProfile,
+    sle_profile: SleProfile,
 }
 
 #[derive(Deserialize)]
@@ -24,6 +25,12 @@ struct BleProfile {
     archives: Vec<String>,
     init_revision: String,
     controller_archives: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct SleProfile {
+    revision: String,
+    archives: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -189,5 +196,24 @@ fn main() {
     println!(
         "cargo:ble_init_profile_revision={}",
         manifest.ble_profile.init_revision
+    );
+    for archive in &manifest.sle_profile.archives {
+        assert!(
+            manifest
+                .artifacts
+                .iter()
+                .any(|artifact| artifact.archive == *archive),
+            "SLE profile references an unknown archive: {archive}"
+        );
+        let path = output.join(archive);
+        let key = archive
+            .strip_prefix("lib")
+            .and_then(|name| name.strip_suffix(".a"))
+            .expect("SLE artifact must be named lib*.a");
+        println!("cargo:sle_{key}_archive={}", path.display());
+    }
+    println!(
+        "cargo:sle_profile_revision={}",
+        manifest.sle_profile.revision
     );
 }

@@ -50,6 +50,15 @@ jobs:
           --rom-callbacks ws63-RF/rom/ws63_acore_rom_callbacks.txt
           --output crates/hisi-rf-link/profiles/ws63-ble-b1-report.json
           --check
+      - name: Check SLE archive and ABI profile
+        run: >-
+          cargo run -p hisi-rf-link --locked --target x86_64-unknown-linux-gnu --
+          sle-profile
+          --profile crates/hisi-rf-link/profiles/ws63-sle-s0.toml
+          --archive-root ws63-RF/lib
+          --rom-symbols ws63-RF/rom/ws63_acore_rom.lds
+          --output crates/hisi-rf-link/profiles/ws63-sle-s0-report.json
+          --check
       - name: Rebuild normalized release artifacts
         run: uv run scripts/check-release-artifacts.py
       - name: Check supplicant C ABI

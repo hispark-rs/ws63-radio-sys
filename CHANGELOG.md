@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add the hash-bound WS63 SLE S0 archive/ABI inventory, including explicit
+  external-capability ownership, a conservative allocatable-section memory
+  envelope, and fail-closed vendor-relocation checks.
+- Package normalized `libbth_gle.a` with the shared BT archives and export an
+  exact Cargo metadata contract for the `sle` feature. Consumer builds remain
+  independent of the vendor SDK, Python, shell scripts, GCC, and GNU binutils.
+
 ## [0.1.0-alpha.16] - 2026-08-07
 
 ### Fixed

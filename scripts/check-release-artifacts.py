@@ -18,6 +18,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63.toml"
 BLE_PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63-ble-b0.toml"
 BLE_INIT_PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63-ble-b1.toml"
+SLE_PROFILE = ROOT / "crates" / "hisi-rf-link" / "profiles" / "ws63-sle-s0.toml"
 PAYLOAD = ROOT / "crates" / "ws63-radio-blob" / "artifacts"
 ORACLE = ROOT / "ws63-RF" / "lib"
 
@@ -51,6 +52,7 @@ def main() -> None:
     profile = tomllib.loads(PROFILE.read_text())
     ble_profile = tomllib.loads(BLE_PROFILE.read_text())
     ble_init_profile = tomllib.loads(BLE_INIT_PROFILE.read_text())
+    sle_profile = tomllib.loads(SLE_PROFILE.read_text())
     committed = json.loads((PAYLOAD / "manifest.json").read_text())
     committed_by_name = {
         artifact["archive"]: artifact for artifact in committed["artifacts"]
@@ -60,6 +62,9 @@ def main() -> None:
         if entry["archive"] not in archive_names:
             archive_names.append(entry["archive"])
     for entry in ble_init_profile["controller_archives"]:
+        if entry["archive"] not in archive_names:
+            archive_names.append(entry["archive"])
+    for entry in sle_profile["archives"]:
         if entry["archive"] not in archive_names:
             archive_names.append(entry["archive"])
     inputs = [ORACLE / name for name in archive_names]
@@ -158,6 +163,37 @@ def main() -> None:
                 / "hisi-rf-link"
                 / "profiles"
                 / "ws63-ble-b0-report.json"
+            ),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+    subprocess.run(
+        [
+            "cargo",
+            "run",
+            "--quiet",
+            "-p",
+            "hisi-rf-link",
+            "--target",
+            host_target(),
+            "--locked",
+            "--",
+            "sle-profile",
+            "--profile",
+            str(SLE_PROFILE),
+            "--archive-root",
+            str(ORACLE),
+            "--rom-symbols",
+            str(ROOT / "ws63-RF" / "rom" / "ws63_acore_rom.lds"),
+            "--output",
+            str(
+                ROOT
+                / "crates"
+                / "hisi-rf-link"
+                / "profiles"
+                / "ws63-sle-s0-report.json"
             ),
             "--check",
         ],

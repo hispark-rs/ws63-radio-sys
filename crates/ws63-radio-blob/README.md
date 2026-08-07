@@ -11,9 +11,10 @@ The BLE B0 payload contains normalized `libbt_host.a`, `libbt_app.a`, and
 and generated external-symbol ownership report are versioned with the payload.
 The B1 initialization contract additionally carries normalized `libbgtp.a` and
 `libbgtp_rom_data.a`, a rooted object closure, and the four-task/stack resource
-inventory. The SLE/GLE archive is deliberately excluded. Packaging the
-controller is a prerequisite, not evidence that controller/host initialization
-has run on silicon.
+inventory. The separate SLE S0 contract adds normalized `libbth_gle.a` alongside
+the shared BT archives, with a hash-bound ABI, external-symbol, relocation, and
+memory-envelope report. Packaging either protocol stack is a prerequisite, not
+evidence that its controller/host behavior has run on silicon.
 
 The package stores each deterministic archive as a Zstandard payload to stay
 within registry limits. Its pure Rust build script expands the archives only

@@ -139,7 +139,6 @@
       "output_sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
       "input_size": 77076,
       "output_size": 77076,
-      "kind": "rom-callback-archive",
       "transformations": {
         "llui48_to_riscv32": 0,
         "branchi_same_section_encoded": 0,
@@ -239,6 +238,19 @@
         "relax_markers_removed_from_branchi_sections": 0,
         "llui_rep_markers_removed": 0
       }
+    },
+    {
+      "archive": "libbth_gle.a",
+      "input_sha256": "e661741923073fb9a0b9e75b7cec8ac1da5b2b1b9a08bd05f384e127d4f51ff7",
+      "output_sha256": "dd87f79e276daf05f3996e33157d808612c9571fd44ec40df30d448db909d627",
+      "input_size": 821178,
+      "output_size": 821178,
+      "transformations": {
+        "llui48_to_riscv32": 797,
+        "branchi_same_section_encoded": 458,
+        "relax_markers_removed_from_branchi_sections": 1511,
+        "llui_rep_markers_removed": 2287
+      }
     }
   ],
   "native_supplicant": {
@@ -335,5 +347,17 @@
       "librom_callback.a"
     ],
     "init_required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b1-report.json"
+  },
+  "sle_profile": {
+    "revision": "ws63-sle-s0-archive-abi-v1",
+    "normalization_revision": "ws63-sle-s0-normalized-v1",
+    "archives": [
+      "libbth_gle.a",
+      "libbt_host.a",
+      "libbt_app.a",
+      "libbth_sdk.a",
+      "libbg_common.a"
+    ],
+    "required_symbol_report": "hisi-rf-link/profiles/ws63-sle-s0-report.json"
   }
 }

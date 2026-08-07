@@ -349,6 +349,8 @@ fn main() {
     let ble_report_path = out_dir.join("ws63-ble-b0-report.json");
     let ble_init_profile_path = out_dir.join("ws63-ble-b1.toml");
     let ble_init_report_path = out_dir.join("ws63-ble-b1-report.json");
+    let sle_profile_path = out_dir.join("ws63-sle-s0.toml");
+    let sle_report_path = out_dir.join("ws63-sle-s0-report.json");
     for (path, contents) in [
         (&profile_path, hisi_rf_link::WS63_ARCHIVE_PROFILE),
         (
@@ -367,6 +369,8 @@ fn main() {
         (&ble_report_path, hisi_rf_link::WS63_BLE_B0_REPORT),
         (&ble_init_profile_path, hisi_rf_link::WS63_BLE_B1_PROFILE),
         (&ble_init_report_path, hisi_rf_link::WS63_BLE_B1_REPORT),
+        (&sle_profile_path, hisi_rf_link::WS63_SLE_S0_PROFILE),
+        (&sle_report_path, hisi_rf_link::WS63_SLE_S0_REPORT),
     ] {
         fs::write(path, contents)
             .unwrap_or_else(|error| panic!("write {}: {error}", path.display()));
@@ -447,6 +451,8 @@ fn main() {
         ("ble_report", ble_report_path),
         ("ble_init_profile", ble_init_profile_path),
         ("ble_init_report", ble_init_report_path),
+        ("sle_profile", sle_profile_path),
+        ("sle_report", sle_report_path),
         ("nvs_linker", nvs_linker),
     ] {
         if !path.exists() {
@@ -597,6 +603,42 @@ fn main() {
         );
     }
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_BLE");
+
+    if env::var_os("CARGO_FEATURE_SLE").is_some() {
+        const SLE_PROFILE_REVISION: &str = "ws63-sle-s0-archive-abi-v1";
+        let revision = env::var("DEP_WS63_RADIO_BLOB_SLE_PROFILE_REVISION")
+            .expect("ws63-radio-blob did not export its SLE profile revision");
+        assert_eq!(
+            revision, SLE_PROFILE_REVISION,
+            "SLE artifact/profile revision mismatch"
+        );
+        let archives = [
+            "DEP_WS63_RADIO_BLOB_SLE_BTH_GLE_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_SLE_BT_HOST_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_SLE_BT_APP_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_SLE_BTH_SDK_ARCHIVE",
+            "DEP_WS63_RADIO_BLOB_SLE_BG_COMMON_ARCHIVE",
+        ]
+        .map(|variable| {
+            let path = PathBuf::from(
+                env::var_os(variable)
+                    .unwrap_or_else(|| panic!("ws63-radio-blob did not export {variable}")),
+            );
+            assert!(path.is_file(), "SLE archive is missing: {}", path.display());
+            println!("cargo:rerun-if-env-changed={variable}");
+            path
+        });
+        println!("cargo:sle_profile_revision={revision}");
+        println!(
+            "cargo:sle_archives={}",
+            archives
+                .iter()
+                .map(|path| path.display().to_string())
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+    }
+    println!("cargo:rerun-if-env-changed=CARGO_FEATURE_SLE");
 
     if env::var_os("CARGO_FEATURE_UPSTREAM_SUPPLICANT_PORT").is_some() {
         let (archive_variable, revision_variable, expected_revision) = if native_wpa3 {
