@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b0-archive-abi-v1",
+  "revision": "ws63-sle-s0-archive-abi-v1",
   "target": {
     "class": "ELF32",
     "endian": "little",
@@ -9,10 +9,27 @@
   },
   "archives": [
     {
+      "archive": "libbth_gle.a",
+      "sha256": "e661741923073fb9a0b9e75b7cec8ac1da5b2b1b9a08bd05f384e127d4f51ff7",
+      "size": 821178,
+      "role": "SLE host: GAP/SSAP application services and host state",
+      "members": 99,
+      "defined_global_symbols": 1102,
+      "undefined_global_symbols": 698,
+      "vendor_relocations": 3542,
+      "alloc_section_bytes": {
+        "text": 109138,
+        "rodata": 9780,
+        "data": 1671,
+        "bss": 1059,
+        "total": 121648
+      }
+    },
+    {
       "archive": "libbt_host.a",
       "sha256": "5e74634a15bf348436de991fa9585bb198ae67ad7a22ed659af7586c8a6e62f3",
       "size": 1126496,
-      "role": "BLE host: ATT/GATT/GAP/L2CAP/SMP and controller-facing host state",
+      "role": "Shared Bluetooth host transport, L2CAP and security state",
       "members": 87,
       "defined_global_symbols": 1795,
       "undefined_global_symbols": 1137,
@@ -29,7 +46,7 @@
       "archive": "libbt_app.a",
       "sha256": "6fe84ddea4e02a444afe6d7b1ef1e63cd15e8d2b8d8ad648ea2525062308c9fc",
       "size": 285718,
-      "role": "BLE application service and connection-management adapter",
+      "role": "Shared Bluetooth application service and connection-management adapter",
       "members": 28,
       "defined_global_symbols": 287,
       "undefined_global_symbols": 213,
@@ -46,7 +63,7 @@
       "archive": "libbth_sdk.a",
       "sha256": "dc3aef21864a97c6c053cb67654ea363e8e83aed4d07fcb2a60cd05054670378",
       "size": 89886,
-      "role": "Public BLE SDK entry points and utilities",
+      "role": "Shared public Bluetooth SDK entry points and utilities",
       "members": 9,
       "defined_global_symbols": 102,
       "undefined_global_symbols": 67,
@@ -77,35 +94,27 @@
       }
     }
   ],
-  "excluded_sibling_archives": [
-    {
-      "archive": "libbth_gle.a",
-      "sha256": "e661741923073fb9a0b9e75b7cec8ac1da5b2b1b9a08bd05f384e127d4f51ff7",
-      "size": 821178,
-      "reason": "SLE/GLE host stack; kept out of the BLE-only B0 profile",
-      "vendor_relocations": 3542
-    }
-  ],
+  "excluded_sibling_archives": [],
   "aggregate": {
-    "defined_global_symbols": 2573,
-    "undefined_global_symbols": 1435,
-    "required_external_symbols": 120,
+    "defined_global_symbols": 3663,
+    "undefined_global_symbols": 2056,
+    "required_external_symbols": 124,
     "vendor_relocations": {
-      "total": 5358,
+      "total": 8900,
       "by_type": {
-        "R_RISCV_48_LLUI": 1404,
-        "R_RISCV_BRANCHI": 1298,
-        "R_RISCV_LLUI_REP": 2656
+        "R_RISCV_48_LLUI": 2201,
+        "R_RISCV_BRANCHI": 1756,
+        "R_RISCV_LLUI_REP": 4943
       },
-      "branchi_same_section": 1298,
+      "branchi_same_section": 1756,
       "branchi_cross_section": 0
     },
     "alloc_section_bytes": {
-      "text": 224384,
-      "rodata": 13943,
-      "data": 1015,
-      "bss": 3213,
-      "total": 242555
+      "text": 333522,
+      "rodata": 23723,
+      "data": 2686,
+      "bss": 4272,
+      "total": 364203
     }
   },
   "required_symbols": [
@@ -186,10 +195,6 @@
       "owner": "compiler-builtins-or-core"
     },
     {
-      "name": "disable_sle",
-      "owner": "explicit-sle-boundary"
-    },
-    {
       "name": "dts_free",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -200,10 +205,6 @@
     {
       "name": "dts_thread_set_sem",
       "owner": "hisi-rom-sys-ws63"
-    },
-    {
-      "name": "enable_sle",
-      "owner": "explicit-sle-boundary"
     },
     {
       "name": "fsm_msg_alloc",
@@ -228,6 +229,14 @@
     {
       "name": "gap_create_connectiona",
       "owner": "ble-application-hook"
+    },
+    {
+      "name": "gle_glp_reg_cbk",
+      "owner": "sle-glp-application-hook"
+    },
+    {
+      "name": "gle_glp_unreg_cbk",
+      "owner": "sle-glp-application-hook"
     },
     {
       "name": "global_isr_time_statistics_get",
@@ -414,6 +423,10 @@
       "owner": "hisi-rf-rtos-driver"
     },
     {
+      "name": "osal_printk",
+      "owner": "platform-diagnostics"
+    },
+    {
       "name": "osal_sem_destroy",
       "owner": "hisi-rf-rtos-driver"
     },
@@ -456,6 +469,18 @@
     {
       "name": "sapi_ble_low_latency_set_em_data",
       "owner": "ble-application-hook"
+    },
+    {
+      "name": "sle_at_chba_register",
+      "owner": "sle-chba-application-hook"
+    },
+    {
+      "name": "sle_low_latency_dongle_enable",
+      "owner": "sle-low-latency-application-hook"
+    },
+    {
+      "name": "sle_low_latency_mouse_enable",
+      "owner": "sle-low-latency-application-hook"
     },
     {
       "name": "smp_aes128reverse",

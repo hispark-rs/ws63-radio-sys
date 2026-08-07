@@ -1,0 +1,34 @@
+schema_version = 1
+revision = "ws63-sle-s0-archive-abi-v1"
+excluded_sibling_archives = []
+
+[target]
+class = "ELF32"
+endian = "little"
+machine = "RISC-V"
+e_flags = 3
+
+[[archives]]
+archive = "libbth_gle.a"
+sha256 = "e661741923073fb9a0b9e75b7cec8ac1da5b2b1b9a08bd05f384e127d4f51ff7"
+role = "SLE host: GAP/SSAP application services and host state"
+
+[[archives]]
+archive = "libbt_host.a"
+sha256 = "5e74634a15bf348436de991fa9585bb198ae67ad7a22ed659af7586c8a6e62f3"
+role = "Shared Bluetooth host transport, L2CAP and security state"
+
+[[archives]]
+archive = "libbt_app.a"
+sha256 = "6fe84ddea4e02a444afe6d7b1ef1e63cd15e8d2b8d8ad648ea2525062308c9fc"
+role = "Shared Bluetooth application service and connection-management adapter"
+
+[[archives]]
+archive = "libbth_sdk.a"
+sha256 = "dc3aef21864a97c6c053cb67654ea363e8e83aed4d07fcb2a60cd05054670378"
+role = "Shared public Bluetooth SDK entry points and utilities"
+
+[[archives]]
+archive = "libbg_common.a"
+sha256 = "40c671a542c3d1a9be413786f1d75b7dcd9635d7985b507c64efa7b3ff713dcd"
+role = "Shared Bluetooth transport, memory, task, crypto and diagnostics support"

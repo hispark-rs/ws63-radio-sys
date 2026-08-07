@@ -26,3 +26,7 @@ pub const WS63_BLE_B0_REPORT: &str = include_str!("../profiles/ws63-ble-b0-repor
 pub const WS63_BLE_B1_PROFILE: &str = include_str!("../profiles/ws63-ble-b1.toml");
 /// Generated rooted member closure and required BLE runtime capabilities.
 pub const WS63_BLE_B1_REPORT: &str = include_str!("../profiles/ws63-ble-b1-report.json");
+/// Hash-bound SLE host archive and external-capability ownership contract.
+pub const WS63_SLE_S0_PROFILE: &str = include_str!("../profiles/ws63-sle-s0.toml");
+/// Generated SLE archive, ABI, relocation, and external-symbol inventory.
+pub const WS63_SLE_S0_REPORT: &str = include_str!("../profiles/ws63-sle-s0-report.json");

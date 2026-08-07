@@ -9,6 +9,8 @@ hisi-rf-link normalize --profile-revision <revision> --out-dir <dir> \
 hisi-rf-link verify-normalized --manifest <manifest.json> --archive-dir <dir>
 hisi-rf-link verify-guarded-sites --manifest <guarded.jsonl> \
   --final-elf <elf> --archive-dir <original-archive-dir>
+hisi-rf-link ble-profile --profile <profile.toml> ...
+hisi-rf-link sle-profile --profile <profile.toml> ...
 hisi-rf-link patch-reloc ...
 hisi-rf-link verify-layout ...
 hisi-rf-link generate-rom-patch ...
@@ -20,6 +22,11 @@ hisi-rf-link task-profile --elf <final-elf> --log <uart-log>
 vendor relocations to standard ELF semantics, fails closed on unknown forms,
 and emits a deterministic hash manifest. The resulting archives can be linked
 by stock `rust-lld`; no final addresses are encoded in the distributed archive.
+
+`ble-profile` and `sle-profile` bind archive hashes, target ABI, external-symbol
+owners, relocation inventories, and a conservative sum of every member's
+allocatable sections. That memory envelope is an archive upper bound; the final
+reachable ELF remains the runtime admission fact.
 
 The post-link commands remain migration-oracle tools. They embed the reviewed
 legacy Python implementations and execute them through `uv`; they are not part

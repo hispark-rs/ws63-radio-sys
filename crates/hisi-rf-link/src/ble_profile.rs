@@ -1,4 +1,4 @@
-//! Hash-bound WS63 BLE archive and external-capability inventory.
+//! Hash-bound WS63 radio archive and external-capability inventory.
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -8,7 +8,7 @@ use std::{
     path::Path,
 };
 
-use crate::normalize::{self, RelocationSummary};
+use crate::normalize::{self, ArchiveMemory, RelocationSummary};
 
 #[derive(Debug, Deserialize)]
 struct Profile {
@@ -62,6 +62,7 @@ struct ArchiveReport {
     defined_global_symbols: usize,
     undefined_global_symbols: usize,
     vendor_relocations: usize,
+    alloc_section_bytes: MemoryEnvelope,
 }
 
 #[derive(Debug, Serialize, PartialEq, Eq)]
@@ -79,6 +80,38 @@ struct AggregateReport {
     undefined_global_symbols: usize,
     required_external_symbols: usize,
     vendor_relocations: RelocationCounts,
+    alloc_section_bytes: MemoryEnvelope,
+}
+
+#[derive(Debug, Clone, Copy, Default, Serialize, PartialEq, Eq)]
+struct MemoryEnvelope {
+    text: usize,
+    rodata: usize,
+    data: usize,
+    bss: usize,
+    total: usize,
+}
+
+impl MemoryEnvelope {
+    fn add_assign(&mut self, other: Self) {
+        self.text += other.text;
+        self.rodata += other.rodata;
+        self.data += other.data;
+        self.bss += other.bss;
+        self.total += other.total;
+    }
+}
+
+impl From<ArchiveMemory> for MemoryEnvelope {
+    fn from(memory: ArchiveMemory) -> Self {
+        Self {
+            text: memory.text,
+            rodata: memory.rodata,
+            data: memory.data,
+            bss: memory.bss,
+            total: memory.total(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, PartialEq, Eq)]
@@ -183,7 +216,7 @@ pub(crate) fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'stat
         || name.starts_with("global_")
         || matches!(
             name,
-            "panic" | "print_str" | "uapi_at_print" | "uapi_at_bt_register_cmd"
+            "osal_printk" | "panic" | "print_str" | "uapi_at_print" | "uapi_at_bt_register_cmd"
         )
     {
         return Some("platform-diagnostics");
@@ -215,6 +248,18 @@ pub(crate) fn owner(name: &str, rom_symbols: &BTreeSet<String>) -> Option<&'stat
             | "sapi_ble_low_latency_set_em_data"
     ) {
         return Some("ble-application-hook");
+    }
+    if matches!(name, "gle_glp_reg_cbk" | "gle_glp_unreg_cbk") {
+        return Some("sle-glp-application-hook");
+    }
+    if name == "sle_at_chba_register" {
+        return Some("sle-chba-application-hook");
+    }
+    if matches!(
+        name,
+        "sle_low_latency_dongle_enable" | "sle_low_latency_mouse_enable"
+    ) {
+        return Some("sle-low-latency-application-hook");
     }
     None
 }
@@ -253,7 +298,8 @@ fn generate(
         })
     {
         return Err(
-            "BLE profile target ABI must remain ELF32 little-endian RISC-V ilp32f+RVC".to_owned(),
+            "radio archive profile target ABI must remain ELF32 little-endian RISC-V ilp32f+RVC"
+                .to_owned(),
         );
     }
 
@@ -262,6 +308,7 @@ fn generate(
     let mut all_undefined = BTreeSet::new();
     let mut inventories = Vec::new();
     let mut archives = Vec::new();
+    let mut aggregate_memory = MemoryEnvelope::default();
     for entry in &profile.archives {
         let path = archive_root.join(&entry.archive);
         let bytes = fs::read(&path).map_err(|error| format!("read {}: {error}", path.display()))?;
@@ -274,6 +321,10 @@ fn generate(
             ));
         }
         let (members, defined, undefined) = archive_symbols(&path)?;
+        let memory = MemoryEnvelope::from(
+            normalize::inspect_archive_memory(&path).map_err(|error| error.to_string())?,
+        );
+        aggregate_memory.add_assign(memory);
         let inventory = normalize::inspect_archive(&path).map_err(|error| error.to_string())?;
         archives.push(ArchiveReport {
             archive: entry.archive.clone(),
@@ -284,6 +335,7 @@ fn generate(
             defined_global_symbols: defined.len(),
             undefined_global_symbols: undefined.len(),
             vendor_relocations: inventory.vendor_relocations.len(),
+            alloc_section_bytes: memory,
         });
         all_defined.extend(defined);
         all_undefined.extend(undefined);
@@ -330,14 +382,14 @@ fn generate(
     }
     if !unowned.is_empty() {
         return Err(format!(
-            "unowned BLE external symbols: {}",
+            "unowned radio external symbols: {}",
             unowned.join(", ")
         ));
     }
     let summary = normalize::summarize(&inventories);
     if summary.branchi_cross_section != 0 {
         return Err(format!(
-            "BLE profile contains {} cross-section R_RISCV_BRANCHI relocations",
+            "radio archive profile contains {} cross-section R_RISCV_BRANCHI relocations",
             summary.branchi_cross_section
         ));
     }
@@ -352,6 +404,7 @@ fn generate(
             undefined_global_symbols: all_undefined.len(),
             required_external_symbols: required_symbols.len(),
             vendor_relocations: counts(summary),
+            alloc_section_bytes: aggregate_memory,
         },
         required_symbols,
     })
@@ -366,7 +419,7 @@ pub fn write_or_check(
 ) -> Result<(), String> {
     let report = generate(profile, archive_root, rom_symbols)?;
     let encoded = serde_json::to_vec_pretty(&report)
-        .map_err(|error| format!("serialize BLE profile: {error}"))?;
+        .map_err(|error| format!("serialize radio archive profile: {error}"))?;
     if check {
         let expected = fs::read(output)
             .map_err(|error| format!("read committed report {}: {error}", output.display()))?;
@@ -404,6 +457,22 @@ mod tests {
         assert_eq!(
             owner("uapi_drv_cipher_trng_get_random", &rom_symbols),
             Some("hisi-crypto-ws63")
+        );
+        assert_eq!(
+            owner("osal_printk", &rom_symbols),
+            Some("platform-diagnostics")
+        );
+        assert_eq!(
+            owner("gle_glp_reg_cbk", &rom_symbols),
+            Some("sle-glp-application-hook")
+        );
+        assert_eq!(
+            owner("sle_at_chba_register", &rom_symbols),
+            Some("sle-chba-application-hook")
+        );
+        assert_eq!(
+            owner("sle_low_latency_mouse_enable", &rom_symbols),
+            Some("sle-low-latency-application-hook")
         );
         assert_eq!(owner("unexpected_external", &rom_symbols), None);
     }

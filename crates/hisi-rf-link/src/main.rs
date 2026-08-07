@@ -38,7 +38,7 @@ const COMMANDS: &[(&str, &str)] = &[
 
 fn usage() -> ! {
     eprintln!(
-        "usage: hisi-rf-link <inspect|normalize|verify-normalized|verify-guarded-sites|ble-profile|ble-init-profile|rebuild-native-supplicant|archive-paths|task-profile|{}> [arguments...]",
+        "usage: hisi-rf-link <inspect|normalize|verify-normalized|verify-guarded-sites|ble-profile|sle-profile|ble-init-profile|rebuild-native-supplicant|archive-paths|task-profile|{}> [arguments...]",
         COMMANDS
             .iter()
             .map(|(name, _)| *name)
@@ -198,7 +198,7 @@ fn inspect(mut args: impl Iterator<Item = std::ffi::OsString>) {
     println!();
 }
 
-fn ble_profile(args: impl Iterator<Item = std::ffi::OsString>) {
+fn archive_profile(args: impl Iterator<Item = std::ffi::OsString>, label: &str) {
     let mut arguments = args.collect::<Vec<_>>();
     let profile = PathBuf::from(required_option(&mut arguments, "--profile"));
     let archive_root = PathBuf::from(required_option(&mut arguments, "--archive-root"));
@@ -222,7 +222,7 @@ fn ble_profile(args: impl Iterator<Item = std::ffi::OsString>) {
         check,
     )
     .unwrap_or_else(|error| {
-        eprintln!("BLE B0 profile: {error}");
+        eprintln!("{label}: {error}");
         std::process::exit(1);
     });
 }
@@ -345,7 +345,11 @@ fn main() {
         return;
     }
     if command == "ble-profile" {
-        ble_profile(args);
+        archive_profile(args, "BLE archive profile");
+        return;
+    }
+    if command == "sle-profile" {
+        archive_profile(args, "SLE archive profile");
         return;
     }
     if command == "ble-init-profile" {

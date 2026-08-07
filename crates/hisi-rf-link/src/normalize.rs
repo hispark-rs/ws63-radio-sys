@@ -11,6 +11,10 @@ const AR_MAGIC: &[u8; 8] = b"!<arch>\n";
 const AR_HEADER_SIZE: usize = 60;
 const SHT_SYMTAB: u32 = 2;
 const SHT_RELA: u32 = 4;
+const SHT_NOBITS: u32 = 8;
+const SHF_WRITE: u32 = 0x1;
+const SHF_ALLOC: u32 = 0x2;
+const SHF_EXECINSTR: u32 = 0x4;
 const SHF_MERGE: u32 = 0x10;
 const SHF_STRINGS: u32 = 0x20;
 const SHN_UNDEF: u16 = 0;
@@ -65,6 +69,30 @@ pub struct ArchiveSymbols {
     pub members: usize,
     pub defined_global: BTreeSet<String>,
     pub undefined_global: BTreeSet<String>,
+}
+
+/// Conservative sum of all allocatable sections in every archive member.
+///
+/// This is an archive envelope, not a final-link reachability measurement.
+#[derive(Debug, Clone, Copy, Default, Serialize, PartialEq, Eq)]
+pub struct ArchiveMemory {
+    pub text: usize,
+    pub rodata: usize,
+    pub data: usize,
+    pub bss: usize,
+}
+
+impl ArchiveMemory {
+    pub fn total(self) -> usize {
+        self.text + self.rodata + self.data + self.bss
+    }
+
+    fn add_assign(&mut self, other: Self) {
+        self.text += other.text;
+        self.rodata += other.rodata;
+        self.data += other.data;
+        self.bss += other.bss;
+    }
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -690,6 +718,41 @@ pub fn inspect_archive_symbols(path: &Path) -> Result<ArchiveSymbols, Error> {
         defined_global,
         undefined_global,
     })
+}
+
+pub fn inspect_archive_memory(path: &Path) -> Result<ArchiveMemory, Error> {
+    let data =
+        fs::read(path).map_err(|error| Error::new(format!("read {}: {error}", path.display())))?;
+    let archive = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("<archive>")
+        .to_owned();
+    let mut memory = ArchiveMemory::default();
+    for (member, start, end) in archive_members(&data, &archive)? {
+        let member_data = &data[start..end];
+        if member_data.get(..4) != Some(ELF_MAGIC) {
+            continue;
+        }
+        let context = format!("{archive}({member})");
+        let mut member_memory = ArchiveMemory::default();
+        for section in parse_sections(member_data, &context)? {
+            if section.flags & SHF_ALLOC == 0 {
+                continue;
+            }
+            if section.flags & SHF_EXECINSTR != 0 {
+                member_memory.text += section.size;
+            } else if section.flags & SHF_WRITE == 0 {
+                member_memory.rodata += section.size;
+            } else if section.section_type == SHT_NOBITS {
+                member_memory.bss += section.size;
+            } else {
+                member_memory.data += section.size;
+            }
+        }
+        memory.add_assign(member_memory);
+    }
+    Ok(memory)
 }
 
 pub fn inspect_archive_member_symbols(path: &Path) -> Result<Vec<ArchiveMemberSymbols>, Error> {
