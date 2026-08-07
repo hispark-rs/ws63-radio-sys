@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v41",
+  "revision": "ws63-ble-b3-gatt-closure-v42",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -85,6 +85,7 @@
     "evt_task_ble_ext_adv_config_extheader_syncinfo",
     "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
     "evt_task_ble_ext_adv_set_adv_en",
+    "evt_task_ble_initiate_get_sta_tbl",
     "evt_task_ble_scan_get_sta_tbl",
     "evt_task_ble_scan_start",
     "evt_task_comm_create_intv",
@@ -345,6 +346,13 @@
       "selected_by": "evt_task_ble_ext_adv_config_extheader_syncinfo",
       "defined_symbols": 11,
       "undefined_symbols": 25
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_initiate_fsm_tbl.c.obj",
+      "selected_by": "evt_task_ble_initiate_get_sta_tbl",
+      "defined_symbols": 4,
+      "undefined_symbols": 4
     },
     {
       "archive": "libbgtp.a",
@@ -3461,6 +3469,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "evt_task_ble_initiate_ending_event_int",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "evt_task_ble_initiate_env_deinit",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -3469,7 +3481,15 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "evt_task_ble_initiate_fsm_start",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "evt_task_ble_initiate_get_env",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_idle_event_int",
       "owner": "hisi-rom-sys-ws63"
     },
     {
@@ -3494,6 +3514,10 @@
     },
     {
       "name": "evt_task_ble_initiate_set_txpd",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_initiate_task_end",
       "owner": "hisi-rom-sys-ws63"
     },
     {

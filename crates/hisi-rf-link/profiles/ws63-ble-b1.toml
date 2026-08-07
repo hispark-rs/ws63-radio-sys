@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v41"
+revision = "ws63-ble-b3-gatt-closure-v42"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -84,6 +84,7 @@ callback_roots = [
   "evt_task_ble_ext_adv_config_extheader_syncinfo",
   "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
   "evt_task_ble_ext_adv_set_adv_en",
+  "evt_task_ble_initiate_get_sta_tbl",
   "evt_task_ble_scan_get_sta_tbl",
   "evt_task_ble_scan_start",
   "evt_task_comm_create_intv",
