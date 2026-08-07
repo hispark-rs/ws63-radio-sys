@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.17] - 2026-08-07
+
 ### Added
 
 - Add the hash-bound WS63 SLE S0 archive/ABI inventory, including explicit
@@ -10,6 +12,9 @@
 - Package normalized `libbth_gle.a` with the shared BT archives and export an
   exact Cargo metadata contract for the `sle` feature. Consumer builds remain
   independent of the vendor SDK, Python, shell scripts, GCC, and GNU binutils.
+- Define the bounded SLE init, discovery, connection, pairing-state, SSAP
+  exchange, service discovery, read, write, descriptor, and notification ABI
+  used by the S3 migration fixture.
 
 ## [0.1.0-alpha.16] - 2026-08-07
 
