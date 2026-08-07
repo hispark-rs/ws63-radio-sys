@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b1-init-closure-v28",
+  "revision": "ws63-ble-b2-discovery-closure-v29",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -9,6 +9,12 @@
     "btsrv_task_body",
     "btsdk_init",
     "enable_ble",
+    "gap_ble_register_callbacks",
+    "gap_ble_set_adv_data",
+    "gap_ble_set_adv_param",
+    "gap_ble_start_adv",
+    "gap_ble_set_scan_parameters",
+    "gap_ble_start_scan",
     "g_systick_clock"
   ],
   "callback_roots": [
@@ -50,6 +56,8 @@
     "hw_em_tx_desc_get_txpd_node",
     "is_sleep_prevent",
     "lm_ble_adv_comm_fsm_get_sta_tbl",
+    "lm_ble_adv_fsm_get_sta_tbl",
+    "lm_ble_scan_fsm_get_sta_tbl",
     "uapi_drv_cipher_trng_get_random"
   ],
   "controller_archives": [
@@ -223,6 +231,13 @@
       "selected_by": "lm_ble_adv_comm_fsm_get_sta_tbl",
       "defined_symbols": 13,
       "undefined_symbols": 42
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "lm_ble_scan_fsm_tbl.c.obj",
+      "selected_by": "lm_ble_scan_fsm_get_sta_tbl",
+      "defined_symbols": 5,
+      "undefined_symbols": 11
     },
     {
       "archive": "libbgtp.a",
@@ -3901,6 +3916,14 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_ext_scan_off_restart",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_ext_scanning_duration_to_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_initiate_close",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -3917,11 +3940,47 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "lm_ble_scan_event_sched_stop_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "lm_ble_scan_get_fsm_id",
       "owner": "hisi-rom-sys-ws63"
     },
     {
       "name": "lm_ble_scan_init",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_off_hci_set_ext_scan_enable_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_off_hci_set_ext_scan_params_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_off_hci_set_scan_enable_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_off_hci_set_scan_params_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_off_stopping_recv_data",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scan_scanning_recv_data",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scanning_hci_set_ext_scan_enable_act",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "lm_ble_scanning_hci_set_scan_enable_act",
       "owner": "hisi-rom-sys-ws63"
     },
     {

@@ -22,7 +22,7 @@ pub const WS63_SUPPLICANT_BOUNDARY_PROFILE: &str =
 pub const WS63_BLE_B0_PROFILE: &str = include_str!("../profiles/ws63-ble-b0.toml");
 /// Generated BLE archive, ABI, relocation, and external-symbol inventory.
 pub const WS63_BLE_B0_REPORT: &str = include_str!("../profiles/ws63-ble-b0-report.json");
-/// Hash-bound BLE controller/host initialization roots and task resources.
+/// Hash-bound BLE initialization/discovery roots and task resources.
 pub const WS63_BLE_B1_PROFILE: &str = include_str!("../profiles/ws63-ble-b1.toml");
-/// Generated rooted member closure and required B1 runtime capabilities.
+/// Generated rooted member closure and required BLE runtime capabilities.
 pub const WS63_BLE_B1_REPORT: &str = include_str!("../profiles/ws63-ble-b1-report.json");

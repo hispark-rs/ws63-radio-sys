@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b1-init-closure-v28"
+revision = "ws63-ble-b2-discovery-closure-v29"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
 roots = [
   "bt_thread_handle",
@@ -8,6 +8,12 @@ roots = [
   "btsrv_task_body",
   "btsdk_init",
   "enable_ble",
+  "gap_ble_register_callbacks",
+  "gap_ble_set_adv_data",
+  "gap_ble_set_adv_param",
+  "gap_ble_start_adv",
+  "gap_ble_set_scan_parameters",
+  "gap_ble_start_scan",
   "g_systick_clock",
 ]
 callback_roots = [
@@ -49,6 +55,8 @@ callback_roots = [
   "hw_em_tx_desc_get_txpd_node",
   "is_sleep_prevent",
   "lm_ble_adv_comm_fsm_get_sta_tbl",
+  "lm_ble_adv_fsm_get_sta_tbl",
+  "lm_ble_scan_fsm_get_sta_tbl",
   "uapi_drv_cipher_trng_get_random",
 ]
 
