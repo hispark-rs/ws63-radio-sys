@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b2-discovery-closure-v32",
+  "revision": "ws63-ble-b2-discovery-closure-v33",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v1",
   "roots": [
     "bt_thread_handle",
@@ -49,6 +49,9 @@
     "evt_task_ble_adv_get_dur_tbl_val",
     "evt_task_ble_adv_get_intv_tbl_val",
     "evt_task_ble_adv_set_adv_en",
+    "evt_task_ble_ext_adv_config_extheader_syncinfo",
+    "evt_task_ble_ext_adv_config_txpld_get_extheader_flag",
+    "evt_task_ble_ext_adv_set_adv_en",
     "evt_task_ble_scan_get_sta_tbl",
     "evt_task_ble_scan_start",
     "evt_task_comm_create_intv",
@@ -232,6 +235,13 @@
       "selected_by": "evt_task_ble_adv_get_dur_tbl_val",
       "defined_symbols": 14,
       "undefined_symbols": 2
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "evt_task_ble_ext_adv_ram.c.obj",
+      "selected_by": "evt_task_ble_ext_adv_config_extheader_syncinfo",
+      "defined_symbols": 11,
+      "undefined_symbols": 25
     },
     {
       "archive": "libbgtp.a",
@@ -2408,6 +2418,14 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "ble_ext_adv_get_aux_extheader_flag",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "ble_ext_adv_get_prim_extheader_flag",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "ble_isr_cb_register",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -3244,6 +3262,10 @@
       "owner": "hisi-rom-sys-ws63"
     },
     {
+      "name": "evt_task_ble_adv_config_aux_es",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
       "name": "evt_task_ble_adv_config_es",
       "owner": "hisi-rom-sys-ws63"
     },
@@ -3309,6 +3331,30 @@
     },
     {
       "name": "evt_task_ble_adv_stop_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_ext_adv_aux_isr_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_ext_adv_config_mac",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_ext_adv_hci_phy_to_air_phy",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_ext_adv_init_txnode",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_ext_adv_prim_isr_cbk",
+      "owner": "hisi-rom-sys-ws63"
+    },
+    {
+      "name": "evt_task_ble_ext_adv_prim_start_cbk",
       "owner": "hisi-rom-sys-ws63"
     },
     {
