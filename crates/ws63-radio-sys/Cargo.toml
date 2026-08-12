@@ -20,6 +20,7 @@ toml = { version = "0.9", default-features = false, features = ["parse", "serde"
 [dependencies]
 hisi-rom-sys-ws63 = "=0.1.0-alpha.2"
 ws63-radio-blob = { path = "../ws63-radio-blob", version = "=0.1.0-alpha.18" }
+zeroize = { version = "1", default-features = false }
 
 [features]
 default = ["wifi"]

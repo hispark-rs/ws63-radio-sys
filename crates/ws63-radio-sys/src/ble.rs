@@ -7,6 +7,7 @@
 //! names or semantics for every secret field.
 
 use core::fmt;
+use zeroize::Zeroize;
 
 /// Size of one record accepted by the pinned BLE restore entry point.
 pub const SMP_RECORD_BYTES: usize = 71;
@@ -82,8 +83,7 @@ impl SmpRecord {
 
     /// Zero all copied secret bytes.
     pub fn zeroize(&mut self) {
-        self.0.fill(0);
-        core::hint::black_box(&mut self.0);
+        self.0.zeroize();
     }
 }
 
