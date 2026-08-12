@@ -45,6 +45,15 @@ pub enum SmpRestoreError {
     UnsupportedTarget,
 }
 
+/// Failure returned while reading the vendor-managed SMP table.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SmpSnapshotError {
+    /// The vendor returned a count larger than the pinned table capacity.
+    InvalidCount { reported: usize, capacity: usize },
+    /// Host builds cannot inspect the target vendor table.
+    UnsupportedTarget,
+}
+
 /// Opaque, byte-exact SMP record owned by the WS63 vendor ABI.
 ///
 /// The bytes contain secret key material. `Debug` is deliberately redacted and
@@ -110,6 +119,92 @@ impl Drop for SmpRecord {
     fn drop(&mut self) {
         self.zeroize();
     }
+}
+
+/// Fixed-capacity snapshot of the vendor-managed SMP table.
+///
+/// This chip integration type owns complete secret records and zeroizes every
+/// slot on drop. It deliberately exposes only a bounded record slice for an
+/// immediate restore call; ordinary applications should consume secret-free
+/// peer/count observations from the safe radio facade instead.
+pub struct SmpRecordSet {
+    records: [SmpRecord; SMP_RECORD_CAPACITY],
+    len: usize,
+}
+
+impl SmpRecordSet {
+    #[cfg_attr(not(any(target_arch = "riscv32", test)), allow(dead_code))]
+    fn empty() -> Self {
+        Self {
+            records: core::array::from_fn(|_| SmpRecord([0; SMP_RECORD_BYTES])),
+            len: 0,
+        }
+    }
+
+    /// Number of complete records in this snapshot.
+    pub const fn len(&self) -> usize {
+        self.len
+    }
+
+    /// Whether the vendor table contained no records.
+    pub const fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    /// Borrow the initialized prefix for an immediate chip integration call.
+    #[doc(hidden)]
+    pub fn records(&self) -> &[SmpRecord] {
+        &self.records[..self.len]
+    }
+
+    /// Restore this exact snapshot into the running vendor host.
+    pub fn restore(&self) -> Result<(), SmpRestoreError> {
+        restore_smp_records(self.records())
+    }
+}
+
+impl fmt::Debug for SmpRecordSet {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SmpRecordSet")
+            .field("len", &self.len)
+            .field("records", &"[REDACTED]")
+            .finish()
+    }
+}
+
+#[cfg_attr(not(any(target_arch = "riscv32", test)), allow(dead_code))]
+fn validate_snapshot_count(reported: u8) -> Result<usize, SmpSnapshotError> {
+    let reported = usize::from(reported);
+    if reported > SMP_RECORD_CAPACITY {
+        return Err(SmpSnapshotError::InvalidCount {
+            reported,
+            capacity: SMP_RECORD_CAPACITY,
+        });
+    }
+    Ok(reported)
+}
+
+/// Copy the complete vendor-managed SMP table into zeroizing bounded storage.
+///
+/// The pinned archive writes at most [`SMP_RECORD_CAPACITY`] records and reports
+/// the initialized count through an out parameter. A count outside that ABI
+/// envelope fails closed.
+#[cfg(target_arch = "riscv32")]
+pub fn snapshot_smp_records() -> Result<SmpRecordSet, SmpSnapshotError> {
+    let mut snapshot = SmpRecordSet::empty();
+    let mut count = 0;
+    // SAFETY: the fixed output array holds exactly the eight 71-byte records
+    // expected by the pinned archive, and count remains valid for the call.
+    unsafe { ble_get_all_smp_keys(snapshot.records.as_mut_ptr(), &raw mut count) };
+    snapshot.len = validate_snapshot_count(count)?;
+    Ok(snapshot)
+}
+
+/// Host-side counterpart that does not pretend the target table is available.
+#[cfg(not(target_arch = "riscv32"))]
+pub fn snapshot_smp_records() -> Result<SmpRecordSet, SmpSnapshotError> {
+    Err(SmpSnapshotError::UnsupportedTarget)
 }
 
 fn restore_length(records: &[SmpRecord]) -> Result<u32, SmpRestoreError> {
@@ -240,5 +335,27 @@ mod tests {
             restore_smp_records(core::slice::from_ref(&record)),
             Err(SmpRestoreError::UnsupportedTarget)
         );
+    }
+
+    #[test]
+    fn snapshot_count_and_debug_are_bounded_and_redacted() {
+        assert_eq!(validate_snapshot_count(0), Ok(0));
+        assert_eq!(validate_snapshot_count(8), Ok(8));
+        assert_eq!(
+            validate_snapshot_count(9),
+            Err(SmpSnapshotError::InvalidCount {
+                reported: 9,
+                capacity: SMP_RECORD_CAPACITY,
+            })
+        );
+        let snapshot = SmpRecordSet::empty();
+        assert_eq!(
+            format!("{snapshot:?}"),
+            "SmpRecordSet { len: 0, records: \"[REDACTED]\" }"
+        );
+        assert!(matches!(
+            snapshot_smp_records(),
+            Err(SmpSnapshotError::UnsupportedTarget)
+        ));
     }
 }
