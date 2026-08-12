@@ -12,6 +12,10 @@ use core::fmt;
 pub const SMP_RECORD_BYTES: usize = 71;
 /// Maximum number of records in the vendor ACPU persistence table.
 pub const SMP_RECORD_CAPACITY: usize = 8;
+/// Internal GAP callback group used by the pinned BLE service manager.
+pub const INTERNAL_GAP_CALLBACK_GROUP: u16 = 1;
+/// Internal GAP event carrying the complete SMP record.
+pub const INTERNAL_GAP_SMP_RECORD_EVENT: u16 = 19;
 
 /// Vendor save-mode value.
 ///
@@ -95,6 +99,9 @@ impl Drop for SmpRecord {
     }
 }
 
+/// Internal GAP callback used only by the chip integration layer.
+pub type InternalGapCallback = unsafe extern "C" fn(event: u16, payload: *const SmpRecord);
+
 unsafe extern "C" {
     /// Read all vendor-persisted records into `records` and write their count.
     pub fn ble_get_all_smp_keys(records: *mut SmpRecord, count: *mut u8);
@@ -104,6 +111,15 @@ unsafe extern "C" {
     pub fn sapi_ble_recover_smp_keys(records: *const SmpRecord, length: u32) -> u32;
     pub fn ble_get_save_smp_keys_mode() -> SmpSaveMode;
     pub fn ble_set_save_smp_keys_mode(mode: SmpSaveMode);
+    /// Add a callback to the vendor internal GAP callback list.
+    ///
+    /// This registration is additive. Registering an observer for event 19
+    /// does not remove the vendor service manager's automatic-save callback.
+    pub fn ble_gap_internal_callback_regist(
+        group: u16,
+        event: u16,
+        callback: Option<InternalGapCallback>,
+    ) -> u32;
 }
 
 const _: () = assert!(core::mem::size_of::<SmpRecord>() == SMP_RECORD_BYTES);
