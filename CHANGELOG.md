@@ -13,6 +13,9 @@
 - Add a bounded restore adapter that accepts only complete, non-empty record
   lists within the pinned eight-record vendor capacity and preserves target
   error status without changing persistence ownership.
+- Advance the BLE archive ABI profile to v2 and fail closed unless the pinned
+  app, host, and SDK archives define the six enumerated SMP persistence and
+  internal callback symbols used by the Rust integration.
 
 ## [0.1.0-alpha.17] - 2026-08-07
 

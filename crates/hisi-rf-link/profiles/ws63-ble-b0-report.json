@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b0-archive-abi-v1",
+  "revision": "ws63-ble-b0-archive-abi-v2",
   "target": {
     "class": "ELF32",
     "endian": "little",
@@ -75,6 +75,32 @@
         "bss": 1136,
         "total": 27510
       }
+    }
+  ],
+  "contract_symbols": [
+    {
+      "name": "ble_get_all_smp_keys",
+      "archive": "libbt_app.a"
+    },
+    {
+      "name": "ble_get_smp_keys",
+      "archive": "libbt_app.a"
+    },
+    {
+      "name": "ble_get_save_smp_keys_mode",
+      "archive": "libbt_app.a"
+    },
+    {
+      "name": "ble_set_save_smp_keys_mode",
+      "archive": "libbt_app.a"
+    },
+    {
+      "name": "sapi_ble_recover_smp_keys",
+      "archive": "libbt_host.a"
+    },
+    {
+      "name": "ble_gap_internal_callback_regist",
+      "archive": "libbth_sdk.a"
     }
   ],
   "excluded_sibling_archives": [

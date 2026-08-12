@@ -1,6 +1,6 @@
 schema_version = 1
 revision = "ws63-ble-b3-gatt-closure-v55"
-b0_profile_revision = "ws63-ble-b0-archive-abi-v1"
+b0_profile_revision = "ws63-ble-b0-archive-abi-v2"
 roots = [
   "bt_thread_handle",
   "bt_acore_task_main",

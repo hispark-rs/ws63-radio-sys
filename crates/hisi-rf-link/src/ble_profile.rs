@@ -16,6 +16,8 @@ struct Profile {
     revision: String,
     target: TargetAbi,
     archives: Vec<ProfileArchive>,
+    #[serde(default)]
+    contract_symbols: Vec<ContractSymbol>,
     excluded_sibling_archives: Vec<ExcludedArchive>,
 }
 
@@ -34,6 +36,12 @@ struct ProfileArchive {
     role: String,
 }
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+struct ContractSymbol {
+    name: String,
+    archive: String,
+}
+
 #[derive(Debug, Deserialize)]
 struct ExcludedArchive {
     archive: String,
@@ -47,6 +55,8 @@ struct Report {
     revision: String,
     target: TargetAbi,
     archives: Vec<ArchiveReport>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    contract_symbols: Vec<ContractSymbol>,
     excluded_sibling_archives: Vec<ExcludedArchiveReport>,
     aggregate: AggregateReport,
     required_symbols: Vec<RequiredSymbol>,
@@ -308,6 +318,7 @@ fn generate(
     let mut all_undefined = BTreeSet::new();
     let mut inventories = Vec::new();
     let mut archives = Vec::new();
+    let mut definitions_by_archive = BTreeMap::new();
     let mut aggregate_memory = MemoryEnvelope::default();
     for entry in &profile.archives {
         let path = archive_root.join(&entry.archive);
@@ -321,6 +332,7 @@ fn generate(
             ));
         }
         let (members, defined, undefined) = archive_symbols(&path)?;
+        definitions_by_archive.insert(entry.archive.clone(), defined.clone());
         let memory = MemoryEnvelope::from(
             normalize::inspect_archive_memory(&path).map_err(|error| error.to_string())?,
         );
@@ -340,6 +352,21 @@ fn generate(
         all_defined.extend(defined);
         all_undefined.extend(undefined);
         inventories.push(inventory);
+    }
+
+    for symbol in &profile.contract_symbols {
+        let definitions = definitions_by_archive.get(&symbol.archive).ok_or_else(|| {
+            format!(
+                "contract symbol {} names archive {} outside the profile",
+                symbol.name, symbol.archive
+            )
+        })?;
+        if !definitions.contains(&symbol.name) {
+            return Err(format!(
+                "contract symbol {} is not defined by {}",
+                symbol.name, symbol.archive
+            ));
+        }
     }
 
     let mut excluded_sibling_archives = Vec::new();
@@ -398,6 +425,7 @@ fn generate(
         revision: profile.revision,
         target: profile.target,
         archives,
+        contract_symbols: profile.contract_symbols,
         excluded_sibling_archives,
         aggregate: AggregateReport {
             defined_global_symbols: all_defined.len(),

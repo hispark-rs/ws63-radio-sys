@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b0-archive-abi-v1"
+revision = "ws63-ble-b0-archive-abi-v2"
 
 [target]
 class = "ELF32"
@@ -26,6 +26,30 @@ role = "Public BLE SDK entry points and utilities"
 archive = "libbg_common.a"
 sha256 = "40c671a542c3d1a9be413786f1d75b7dcd9635d7985b507c64efa7b3ff713dcd"
 role = "Shared Bluetooth transport, memory, task, crypto and diagnostics support"
+
+[[contract_symbols]]
+name = "ble_get_all_smp_keys"
+archive = "libbt_app.a"
+
+[[contract_symbols]]
+name = "ble_get_smp_keys"
+archive = "libbt_app.a"
+
+[[contract_symbols]]
+name = "ble_get_save_smp_keys_mode"
+archive = "libbt_app.a"
+
+[[contract_symbols]]
+name = "ble_set_save_smp_keys_mode"
+archive = "libbt_app.a"
+
+[[contract_symbols]]
+name = "sapi_ble_recover_smp_keys"
+archive = "libbt_host.a"
+
+[[contract_symbols]]
+name = "ble_gap_internal_callback_regist"
+archive = "libbth_sdk.a"
 
 [[excluded_sibling_archives]]
 archive = "libbth_gle.a"

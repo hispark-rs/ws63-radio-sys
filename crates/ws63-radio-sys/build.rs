@@ -521,7 +521,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_WPA3_PERSONAL");
 
     if env::var_os("CARGO_FEATURE_BLE").is_some() {
-        const BLE_PROFILE_REVISION: &str = "ws63-ble-b0-archive-abi-v1";
+        const BLE_PROFILE_REVISION: &str = "ws63-ble-b0-archive-abi-v2";
         const BLE_INIT_PROFILE_REVISION: &str = "ws63-ble-b3-gatt-closure-v55";
         let revision = env::var("DEP_WS63_RADIO_BLOB_BLE_PROFILE_REVISION")
             .expect("ws63-radio-blob did not export its BLE profile revision");

@@ -330,7 +330,7 @@
     ]
   },
   "ble_profile": {
-    "revision": "ws63-ble-b0-archive-abi-v1",
+    "revision": "ws63-ble-b0-archive-abi-v2",
     "normalization_revision": "ws63-ble-b0-normalized-v1",
     "archives": [
       "libbt_host.a",
