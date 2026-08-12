@@ -157,6 +157,21 @@ impl SmpRecordSet {
         &self.records[..self.len]
     }
 
+    /// Move one initialized record out of this zeroizing snapshot.
+    ///
+    /// The vacated slot is replaced with a zero record so ownership of the
+    /// secret bytes transfers exactly once to the caller.
+    #[doc(hidden)]
+    pub fn take(&mut self, index: usize) -> Option<SmpRecord> {
+        if index >= self.len {
+            return None;
+        }
+        Some(core::mem::replace(
+            &mut self.records[index],
+            SmpRecord([0; SMP_RECORD_BYTES]),
+        ))
+    }
+
     /// Restore this exact snapshot into the running vendor host.
     pub fn restore(&self) -> Result<(), SmpRestoreError> {
         restore_smp_records(self.records())
@@ -261,10 +276,12 @@ unsafe extern "C" {
     pub fn sapi_ble_recover_smp_keys(records: *const SmpRecord, length: u32) -> u32;
     pub fn ble_get_save_smp_keys_mode() -> SmpSaveMode;
     pub fn ble_set_save_smp_keys_mode(mode: SmpSaveMode);
-    /// Add a callback to the vendor internal GAP callback list.
+    /// Register one callback for a vendor internal GAP group/event pair.
     ///
-    /// This registration is additive. Registering an observer for event 19
-    /// does not remove the vendor service manager's automatic-save callback.
+    /// The pinned implementation replaces the callback pointer when the same
+    /// group/event is registered again. It is not a multicast subscription;
+    /// callers must not use event 19 to observe vendor persistence because that
+    /// would replace the service manager's automatic-save callback.
     pub fn ble_gap_internal_callback_regist(
         group: u16,
         event: u16,
@@ -357,5 +374,16 @@ mod tests {
             snapshot_smp_records(),
             Err(SmpSnapshotError::UnsupportedTarget)
         ));
+    }
+
+    #[test]
+    fn snapshot_record_can_be_taken_once() {
+        let mut snapshot = SmpRecordSet::empty();
+        snapshot.records[0].0[..6].copy_from_slice(&[1, 2, 3, 4, 5, 6]);
+        snapshot.len = 1;
+
+        assert_eq!(snapshot.take(0).unwrap().peer_address(), [1, 2, 3, 4, 5, 6]);
+        assert_eq!(snapshot.records[0].peer_address(), [0; 6]);
+        assert_eq!(snapshot.take(1), None);
     }
 }
