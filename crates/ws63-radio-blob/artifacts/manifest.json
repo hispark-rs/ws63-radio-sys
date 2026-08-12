@@ -339,7 +339,7 @@
       "libbg_common.a"
     ],
     "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json",
-    "init_revision": "ws63-ble-b3-gatt-closure-v55",
+    "init_revision": "ws63-ble-b3-gatt-closure-v56",
     "init_normalization_revision": "ws63-ble-b1-normalized-v2",
     "controller_archives": [
       "libbgtp.a",

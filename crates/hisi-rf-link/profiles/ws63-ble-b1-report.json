@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v55",
+  "revision": "ws63-ble-b3-gatt-closure-v56",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v2",
   "roots": [
     "bt_thread_handle",
@@ -26,6 +26,8 @@
     "ble_acl_calc_drift",
     "ble_sca_get_cfg",
     "bt_rf_cali_rx_content",
+    "chnl_calc_ble_chnl_cls_to_chnl_map",
+    "chnl_calc_get_valid_map_num",
     "coex_ble_acl_create_coex_process",
     "coex_ble_acl_end_coex_process",
     "coex_ble_acl_evt_coex_process",
@@ -265,6 +267,20 @@
       "selected_by": "bt_rf_cali_rx_content",
       "defined_symbols": 8,
       "undefined_symbols": 13
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "chnl_calc_ble.c.obj",
+      "selected_by": "chnl_calc_ble_chnl_cls_to_chnl_map",
+      "defined_symbols": 1,
+      "undefined_symbols": 0
+    },
+    {
+      "archive": "libbgtp.a",
+      "member": "chnl_calc_util.c.obj",
+      "selected_by": "chnl_calc_get_valid_map_num",
+      "defined_symbols": 1,
+      "undefined_symbols": 0
     },
     {
       "archive": "libbgtp.a",
@@ -1763,13 +1779,6 @@
       "selected_by": "lm_ble_acl_bsle_feat_get_sta_tbl",
       "defined_symbols": 4,
       "undefined_symbols": 4
-    },
-    {
-      "archive": "libbgtp.a",
-      "member": "chnl_calc_util.c.obj",
-      "selected_by": "chnl_calc_get_valid_map_num",
-      "defined_symbols": 1,
-      "undefined_symbols": 0
     },
     {
       "archive": "libbgtp.a",

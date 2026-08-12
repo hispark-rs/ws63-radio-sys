@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v55"
+revision = "ws63-ble-b3-gatt-closure-v56"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v2"
 roots = [
   "bt_thread_handle",
@@ -25,6 +25,8 @@ callback_roots = [
   "ble_acl_calc_drift",
   "ble_sca_get_cfg",
   "bt_rf_cali_rx_content",
+  "chnl_calc_ble_chnl_cls_to_chnl_map",
+  "chnl_calc_get_valid_map_num",
   "coex_ble_acl_create_coex_process",
   "coex_ble_acl_end_coex_process",
   "coex_ble_acl_evt_coex_process",
