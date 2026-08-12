@@ -9,6 +9,10 @@
 - Add the byte-exact, Debug-redacted 71-byte BLE SMP persistence record and
   raw enumerate/restore/internal-event ABI. The save-mode byte is explicitly
   not treated as proof that vendor automatic persistence has been disabled.
+- Zeroize copied SMP records through the dedicated `zeroize` contract on drop.
+- Add a bounded restore adapter that accepts only complete, non-empty record
+  lists within the pinned eight-record vendor capacity and preserves target
+  error status without changing persistence ownership.
 
 ## [0.1.0-alpha.17] - 2026-08-07
 
