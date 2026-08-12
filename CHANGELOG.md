@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Add the byte-exact, Debug-redacted 71-byte BLE SMP persistence record and
+  raw enumerate/restore ABI. The save-mode byte is explicitly not treated as
+  proof that vendor automatic persistence has been disabled.
+
 ## [0.1.0-alpha.17] - 2026-08-07
 
 ### Added

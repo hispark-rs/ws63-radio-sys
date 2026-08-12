@@ -35,6 +35,8 @@ compile_error!("select exactly one AP authenticator security profile");
     feature = "upstream-authenticator-wpa3"
 ))]
 pub mod authenticator;
+#[cfg(feature = "ble")]
+pub mod ble;
 #[cfg(feature = "sle")]
 pub mod sle;
 #[cfg(feature = "sle")]
