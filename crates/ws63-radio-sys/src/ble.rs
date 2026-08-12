@@ -32,6 +32,19 @@ pub enum SmpSaveMode {
     Manual = 1,
 }
 
+/// Failure returned by the bounded SMP restore adapter.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SmpRestoreError {
+    /// The vendor restore entry point requires at least one complete record.
+    Empty,
+    /// The request exceeds the pinned vendor persistence-table capacity.
+    Capacity { requested: usize, capacity: usize },
+    /// The vendor restore entry point rejected the records.
+    Vendor(u32),
+    /// Host builds can validate records but cannot invoke the WS63 archive.
+    UnsupportedTarget,
+}
+
 /// Opaque, byte-exact SMP record owned by the WS63 vendor ABI.
 ///
 /// The bytes contain secret key material. `Debug` is deliberately redacted and
@@ -99,6 +112,48 @@ impl Drop for SmpRecord {
     }
 }
 
+fn restore_length(records: &[SmpRecord]) -> Result<u32, SmpRestoreError> {
+    if records.is_empty() {
+        return Err(SmpRestoreError::Empty);
+    }
+    if records.len() > SMP_RECORD_CAPACITY {
+        return Err(SmpRestoreError::Capacity {
+            requested: records.len(),
+            capacity: SMP_RECORD_CAPACITY,
+        });
+    }
+    u32::try_from(records.len() * SMP_RECORD_BYTES).map_err(|_| SmpRestoreError::Capacity {
+        requested: records.len(),
+        capacity: SMP_RECORD_CAPACITY,
+    })
+}
+
+/// Restore a bounded list of complete, opaque records into the WS63 BLE host.
+///
+/// This only invokes the archive restore entry point. It does not change the
+/// vendor save mode or transfer persistence ownership to Rust.
+#[cfg(target_arch = "riscv32")]
+pub fn restore_smp_records(records: &[SmpRecord]) -> Result<(), SmpRestoreError> {
+    let length = restore_length(records)?;
+    // SAFETY: SmpRecord is a byte-exact transparent 71-byte record, the slice
+    // remains valid for the synchronous call, and restore_length bounds the
+    // complete-record byte length accepted by the pinned ABI.
+    let status = unsafe { sapi_ble_recover_smp_keys(records.as_ptr(), length) };
+    if status == 0 {
+        Ok(())
+    } else {
+        Err(SmpRestoreError::Vendor(status))
+    }
+}
+
+/// Host-side counterpart that retains validation behavior without pretending
+/// the target archive can run on the build host.
+#[cfg(not(target_arch = "riscv32"))]
+pub fn restore_smp_records(records: &[SmpRecord]) -> Result<(), SmpRestoreError> {
+    restore_length(records)?;
+    Err(SmpRestoreError::UnsupportedTarget)
+}
+
 /// Internal GAP callback used only by the chip integration layer.
 pub type InternalGapCallback = unsafe extern "C" fn(event: u16, payload: *const SmpRecord);
 
@@ -154,5 +209,36 @@ mod tests {
     fn null_callback_record_is_rejected() {
         // SAFETY: null is accepted specifically to exercise rejection.
         assert_eq!(unsafe { SmpRecord::copy_from_ptr(core::ptr::null()) }, None);
+    }
+
+    #[test]
+    fn restore_rejects_empty_and_over_capacity_requests() {
+        assert_eq!(restore_smp_records(&[]), Err(SmpRestoreError::Empty));
+
+        let mut records = std::vec::Vec::new();
+        for _ in 0..=SMP_RECORD_CAPACITY {
+            // SAFETY: the local array is exactly one readable SMP record.
+            records.push(
+                unsafe { SmpRecord::copy_from_ptr([0u8; SMP_RECORD_BYTES].as_ptr()) }.unwrap(),
+            );
+        }
+        assert_eq!(
+            restore_smp_records(&records),
+            Err(SmpRestoreError::Capacity {
+                requested: SMP_RECORD_CAPACITY + 1,
+                capacity: SMP_RECORD_CAPACITY,
+            })
+        );
+    }
+
+    #[test]
+    fn host_restore_validates_then_reports_unsupported_target() {
+        let bytes = [0u8; SMP_RECORD_BYTES];
+        // SAFETY: the local array is exactly one readable SMP record.
+        let record = unsafe { SmpRecord::copy_from_ptr(bytes.as_ptr()) }.unwrap();
+        assert_eq!(
+            restore_smp_records(core::slice::from_ref(&record)),
+            Err(SmpRestoreError::UnsupportedTarget)
+        );
     }
 }
