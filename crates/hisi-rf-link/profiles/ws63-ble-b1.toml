@@ -1,5 +1,5 @@
 schema_version = 1
-revision = "ws63-ble-b3-gatt-closure-v56"
+revision = "ws63-ble-b3-gatt-closure-v57"
 b0_profile_revision = "ws63-ble-b0-archive-abi-v2"
 roots = [
   "bt_thread_handle",
@@ -66,6 +66,11 @@ callback_roots = [
   "dm_co_get_pre_tbl",
   "dm_co_init",
   "dm_co_reset",
+  "new0fun",
+  "smp_aes128",
+  "smp_cmac_reverse",
+  "smp_reverse_octets",
+  "smp_xor",
   "encrypt_clear_sm3_tasks",
   "encrypt_init_sm3",
   "es_finetimer_get_first_target_time",

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": "ws63-ble-b3-gatt-closure-v56",
+  "revision": "ws63-ble-b3-gatt-closure-v57",
   "b0_profile_revision": "ws63-ble-b0-archive-abi-v2",
   "roots": [
     "bt_thread_handle",
@@ -67,6 +67,11 @@
     "dm_co_get_pre_tbl",
     "dm_co_init",
     "dm_co_reset",
+    "new0fun",
+    "smp_aes128",
+    "smp_cmac_reverse",
+    "smp_reverse_octets",
+    "smp_xor",
     "encrypt_clear_sm3_tasks",
     "encrypt_init_sm3",
     "es_finetimer_get_first_target_time",
@@ -365,6 +370,20 @@
       "selected_by": "dm_co_init",
       "defined_symbols": 11,
       "undefined_symbols": 17
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "global_ram.c.obj",
+      "selected_by": "new0fun",
+      "defined_symbols": 25,
+      "undefined_symbols": 17
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "smp_aes_comm.c.obj",
+      "selected_by": "smp_aes128",
+      "defined_symbols": 13,
+      "undefined_symbols": 5
     },
     {
       "archive": "libbgtp.a",
@@ -1046,6 +1065,20 @@
       "undefined_symbols": 4
     },
     {
+      "archive": "libbg_common.a",
+      "member": "buff.c.obj",
+      "selected_by": "_buff_new",
+      "defined_symbols": 4,
+      "undefined_symbols": 7
+    },
+    {
+      "archive": "libbg_common.a",
+      "member": "random.c.obj",
+      "selected_by": "bth_random",
+      "defined_symbols": 1,
+      "undefined_symbols": 1
+    },
+    {
       "archive": "libbgtp.a",
       "member": "dts_crypto_ram.c.obj",
       "selected_by": "dts_aes_cmac",
@@ -1387,13 +1420,6 @@
       "selected_by": "smp_passkey_entry_input",
       "defined_symbols": 24,
       "undefined_symbols": 34
-    },
-    {
-      "archive": "libbg_common.a",
-      "member": "global_ram.c.obj",
-      "selected_by": "mem_frees",
-      "defined_symbols": 25,
-      "undefined_symbols": 17
     },
     {
       "archive": "libbt_host.a",
@@ -2026,25 +2052,11 @@
       "undefined_symbols": 0
     },
     {
-      "archive": "libbg_common.a",
-      "member": "smp_aes_comm.c.obj",
-      "selected_by": "smp_cmac_reverse",
-      "defined_symbols": 13,
-      "undefined_symbols": 5
-    },
-    {
       "archive": "libbt_host.a",
       "member": "smp_fsm.c.obj",
       "selected_by": "smp_link_find_by_remote_addr",
       "defined_symbols": 94,
       "undefined_symbols": 77
-    },
-    {
-      "archive": "libbg_common.a",
-      "member": "buff.c.obj",
-      "selected_by": "_buff_new",
-      "defined_symbols": 4,
-      "undefined_symbols": 7
     },
     {
       "archive": "libbt_host.a",
@@ -2423,13 +2435,6 @@
       "selected_by": "lm_ble_test_mode_fsm_get_sta_tbl",
       "defined_symbols": 5,
       "undefined_symbols": 9
-    },
-    {
-      "archive": "libbg_common.a",
-      "member": "random.c.obj",
-      "selected_by": "bth_random",
-      "defined_symbols": 1,
-      "undefined_symbols": 1
     },
     {
       "archive": "libbt_host.a",

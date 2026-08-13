@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.19] - 2026-08-13
+
+### Fixed
+
+- Root the BLE SMP allocation, SHA/AES helper, and byte-order callbacks in the
+  v57 archive profile so stock rust-lld resolves each indirect callback to its
+  real Rust provider instead of the fail-closed missing-callback sentinel.
+- Regenerate the hash-bound BLE closure report and advance the packaged
+  artifact manifest and consumer revision gate together.
+
 ## [0.1.0-alpha.18] - 2026-08-12
 
 ### Added
