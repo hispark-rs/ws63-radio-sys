@@ -23,10 +23,14 @@ pub const UPPER_GAP_PASSKEY_REQUEST_EVENT: u16 = 4;
 pub const UPPER_GAP_PASSKEY_DISPLAY_EVENT: u16 = 5;
 
 /// Callback payload used by the pinned archive for passkey display event 5.
+///
+/// Archive disassembly shows that the first word is copied from the SMP
+/// request context. It is pointer-shaped on silicon and is not the public GAP
+/// connection id delivered by connection callbacks.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PasskeyDisplayPayload {
-    connection_handle: u32,
+    pairing_context: u32,
     passkey: u32,
 }
 
@@ -43,9 +47,12 @@ impl PasskeyDisplayPayload {
         unsafe { payload.cast::<Self>().as_ref().copied() }
     }
 
-    /// Return the vendor connection handle used only for event correlation.
-    pub const fn connection_handle(self) -> u32 {
-        self.connection_handle
+    /// Return the opaque SMP pairing context carried by the vendor event.
+    ///
+    /// This value is not the GAP connection id and must not be compared with
+    /// one. The vendor host retains it internally when accepting the reply.
+    pub const fn pairing_context(self) -> u32 {
+        self.pairing_context
     }
 
     /// Return the raw six-digit field for validation by the safe facade.
@@ -401,7 +408,7 @@ mod tests {
         // SAFETY: `words` is a readable, aligned two-word payload for this test.
         let payload =
             unsafe { PasskeyDisplayPayload::copy_from_ptr(words.as_ptr().cast()) }.unwrap();
-        assert_eq!(payload.connection_handle(), words[0]);
+        assert_eq!(payload.pairing_context(), words[0]);
         assert_eq!(payload.passkey(), words[1]);
         // SAFETY: null is accepted specifically to exercise rejection.
         assert!(unsafe { PasskeyDisplayPayload::copy_from_ptr(core::ptr::null()) }.is_none());
