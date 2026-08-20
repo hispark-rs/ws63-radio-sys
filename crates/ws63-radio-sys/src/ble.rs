@@ -6,7 +6,7 @@
 //! disassembly proves its size and the peer-address fields, but does not prove
 //! names or semantics for every secret field.
 
-use core::fmt;
+use core::{ffi::c_void, fmt};
 use zeroize::Zeroize;
 
 /// Size of one record accepted by the pinned BLE restore entry point.
@@ -17,6 +17,51 @@ pub const SMP_RECORD_CAPACITY: usize = 8;
 pub const INTERNAL_GAP_CALLBACK_GROUP: u16 = 1;
 /// Internal GAP event carrying the complete SMP record.
 pub const INTERNAL_GAP_SMP_RECORD_EVENT: u16 = 19;
+/// Upper GAP event requesting a six-digit passkey from the application.
+pub const UPPER_GAP_PASSKEY_REQUEST_EVENT: u16 = 4;
+/// Upper GAP event asking the application to display a generated passkey.
+pub const UPPER_GAP_PASSKEY_DISPLAY_EVENT: u16 = 5;
+
+/// Callback payload used by the pinned archive for passkey display event 5.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PasskeyDisplayPayload {
+    connection_handle: u32,
+    passkey: u32,
+}
+
+impl PasskeyDisplayPayload {
+    /// Copy a callback-owned passkey display payload.
+    ///
+    /// # Safety
+    ///
+    /// `payload` must point to a readable two-word event-5 payload for the
+    /// duration of this call.
+    pub unsafe fn copy_from_ptr(payload: *const c_void) -> Option<Self> {
+        // SAFETY: the caller promises the pointer is readable and correctly
+        // aligned for the pinned event-5 ABI; null is rejected first.
+        unsafe { payload.cast::<Self>().as_ref().copied() }
+    }
+
+    /// Return the vendor connection handle used only for event correlation.
+    pub const fn connection_handle(self) -> u32 {
+        self.connection_handle
+    }
+
+    /// Return the raw six-digit field for validation by the safe facade.
+    pub const fn passkey(self) -> u32 {
+        self.passkey
+    }
+}
+
+/// Failure returned by the narrow passkey reply adapter.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PasskeyReplyError {
+    /// The pinned BLE host rejected the reply.
+    Vendor(i8),
+    /// Host builds cannot invoke the target archive.
+    UnsupportedTarget,
+}
 
 /// Vendor save-mode value.
 ///
@@ -266,6 +311,27 @@ pub fn restore_smp_records(records: &[SmpRecord]) -> Result<(), SmpRestoreError>
 
 /// Internal GAP callback used only by the chip integration layer.
 pub type InternalGapCallback = unsafe extern "C" fn(event: u16, payload: *const SmpRecord);
+/// Upper GAP callback used for application-owned prompt events 4 and 5.
+pub type UpperGapCallback = unsafe extern "C" fn(event: u16, payload: *const c_void);
+
+/// Submit one already validated passkey to the pending WS63 SMP request.
+#[cfg(target_arch = "riscv32")]
+pub fn submit_passkey(passkey: u32) -> Result<(), PasskeyReplyError> {
+    // SAFETY: the call consumes only the scalar value. Range validation belongs
+    // to the chip-neutral safe facade before this raw adapter is reached.
+    let status = unsafe { uapi_ble_smp_send_passkey_number(passkey) };
+    if status == 0 {
+        Ok(())
+    } else {
+        Err(PasskeyReplyError::Vendor(status))
+    }
+}
+
+/// Host-side counterpart that never pretends the target archive is present.
+#[cfg(not(target_arch = "riscv32"))]
+pub fn submit_passkey(_: u32) -> Result<(), PasskeyReplyError> {
+    Err(PasskeyReplyError::UnsupportedTarget)
+}
 
 unsafe extern "C" {
     /// Read all vendor-persisted records into `records` and write their count.
@@ -287,9 +353,15 @@ unsafe extern "C" {
         event: u16,
         callback: Option<InternalGapCallback>,
     ) -> u32;
+    /// Register one application callback for an upper GAP event.
+    pub fn ble_gap_callback_regist(event: u16, callback: Option<UpperGapCallback>) -> u32;
+    /// Reply to the single pending passkey-input request.
+    #[cfg(target_arch = "riscv32")]
+    fn uapi_ble_smp_send_passkey_number(passkey: u32) -> i8;
 }
 
 const _: () = assert!(core::mem::size_of::<SmpRecord>() == SMP_RECORD_BYTES);
+const _: () = assert!(core::mem::size_of::<PasskeyDisplayPayload>() == 8);
 
 #[cfg(test)]
 mod tests {
@@ -321,6 +393,18 @@ mod tests {
     fn null_callback_record_is_rejected() {
         // SAFETY: null is accepted specifically to exercise rejection.
         assert_eq!(unsafe { SmpRecord::copy_from_ptr(core::ptr::null()) }, None);
+    }
+
+    #[test]
+    fn passkey_display_payload_layout_is_stable() {
+        let words = [0x1234_5678u32, 654_321];
+        // SAFETY: `words` is a readable, aligned two-word payload for this test.
+        let payload =
+            unsafe { PasskeyDisplayPayload::copy_from_ptr(words.as_ptr().cast()) }.unwrap();
+        assert_eq!(payload.connection_handle(), words[0]);
+        assert_eq!(payload.passkey(), words[1]);
+        // SAFETY: null is accepted specifically to exercise rejection.
+        assert!(unsafe { PasskeyDisplayPayload::copy_from_ptr(core::ptr::null()) }.is_none());
     }
 
     #[test]
