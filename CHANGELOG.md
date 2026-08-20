@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.20] - 2026-08-20
+
+### Added
+
+- Add the narrow WS63 BLE passkey request/display callback ABI and passkey
+  reply adapter required by the authenticated-pairing facade. Raw vendor
+  status remains bounded inside the integration layer.
+
 ## [0.1.0-alpha.19] - 2026-08-13
 
 ### Fixed
