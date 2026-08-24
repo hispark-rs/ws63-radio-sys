@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.21] - 2026-08-24
+
+### Fixed
+
+- Model the vendor pairing context carried by BLE passkey request and display
+  callbacks, so the safe integration layer can bind each response to the exact
+  controller pairing procedure instead of treating the connection handle as
+  the response context.
+
 ## [0.1.0-alpha.20] - 2026-08-20
 
 ### Added
