@@ -592,6 +592,14 @@ int32_t hisi_wpa_feed_scan_result(struct hisi_wpa_context *context,
         result);
 }
 
+int32_t hisi_wpa_begin_scan_capture(struct hisi_wpa_context *context)
+{
+    if (context == NULL || context->interface == NULL ||
+        context->interface->drv_priv == NULL)
+        return -1;
+    return hisi_wpa_driver_begin_scan_capture(context->interface->drv_priv);
+}
+
 int32_t hisi_wpa_feed_scan_done(struct hisi_wpa_context *context,
     int32_t status)
 {

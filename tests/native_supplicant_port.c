@@ -541,6 +541,12 @@ static void test_ws63_driver_bridge(void)
     scan_result.ie_len = sizeof(scan_ies);
     scan_result.ies = scan_ies;
     assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) == 0);
+    assert(hisi_wpa_driver_begin_scan_capture(driver) == 0);
+    results = wpa_driver_ws63_ops.get_scan_results2(driver);
+    assert(results != NULL && results->num == 0);
+    os_free(results);
+
+    assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) == 0);
     assert(hisi_wpa_driver_feed_scan_done(driver, 0) == 0);
     results = wpa_driver_ws63_ops.get_scan_results2(driver);
     assert(results != NULL && results->num == 1);

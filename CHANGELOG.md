@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.22] - 2026-08-29
+
+### Fixed
+
+- Add a versioned external-scan capture boundary that clears hostap's previous
+  deep-copied scan results before a new vendor scan is fed into the native
+  supplicant. This prevents repeated coexistence scans from exhausting the
+  bounded result cache while keeping scan ownership in the Rust runner.
+
 ## [0.1.0-alpha.21] - 2026-08-24
 
 ### Fixed

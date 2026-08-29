@@ -295,6 +295,7 @@ int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
 int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,
     uint32_t frequency_mhz, int32_t rssi_dbm,
     const uint8_t *frame, size_t frame_len);
+int32_t hisi_wpa_begin_scan_capture(struct hisi_wpa_context *context);
 int32_t hisi_wpa_feed_scan_result(struct hisi_wpa_context *context,
     const struct hisi_wpa_scan_result *result);
 int32_t hisi_wpa_feed_scan_done(struct hisi_wpa_context *context,

@@ -351,6 +351,7 @@ unsafe extern "C" {
         frame: *const u8,
         frame_len: usize,
     ) -> c_int;
+    pub fn hisi_wpa_begin_scan_capture(context: *mut Context) -> c_int;
     pub fn hisi_wpa_feed_scan_result(
         context: *mut Context,
         result: *const NativeScanResult,

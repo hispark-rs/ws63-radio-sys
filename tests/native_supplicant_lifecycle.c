@@ -335,6 +335,8 @@ int main(void)
         &driver_hooks);
     assert(context != NULL);
     assert(hisi_wpa_init(context) == 0);
+    assert(hisi_wpa_begin_scan_capture(NULL) == -1);
+    assert(hisi_wpa_begin_scan_capture(context) == 0);
 
     state.install_count = 0;
     state.remove_count = 0;

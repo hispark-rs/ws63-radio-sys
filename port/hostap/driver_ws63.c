@@ -379,6 +379,15 @@ int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
     return 0;
 }
 
+int32_t hisi_wpa_driver_begin_scan_capture(void *private_data)
+{
+    struct ws63_driver_data *driver = private_data;
+    if (driver == NULL)
+        return -1;
+    clear_scan_results(driver);
+    return 0;
+}
+
 int32_t hisi_wpa_driver_feed_scan_done(void *private_data, int32_t status)
 {
     struct ws63_driver_data *driver = private_data;

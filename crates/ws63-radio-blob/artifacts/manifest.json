@@ -1,356 +1,354 @@
 {
-  "schema_version": 1,
-  "normalizer": "hisi-rf-link 0.1.0-alpha.4",
-  "profile_revision": "ws63-wifi-base-v1",
   "artifacts": [
     {
       "archive": "libwifi_driver_hmac.a",
       "input_sha256": "7207440084992ccd14c56c3c291ae0cebc915459deed9300911e4adbaf71169f",
-      "output_sha256": "79642b77d90b3a8524b39818210c97bfac9ed6a9c0a2cd2f73a03abdd0de3dc6",
       "input_size": 33027332,
+      "output_sha256": "79642b77d90b3a8524b39818210c97bfac9ed6a9c0a2cd2f73a03abdd0de3dc6",
       "output_size": 33027332,
       "transformations": {
-        "llui48_to_riscv32": 908,
         "branchi_same_section_encoded": 2190,
-        "relax_markers_removed_from_branchi_sections": 4812,
-        "llui_rep_markers_removed": 3005
+        "llui48_to_riscv32": 908,
+        "llui_rep_markers_removed": 3005,
+        "relax_markers_removed_from_branchi_sections": 4812
       }
     },
     {
       "archive": "libwifi_driver_dmac.a",
       "input_sha256": "7dc4f56cf236f9003a0f3080c188dcfd71dd72ffc3d9596233cc8eafac4c096e",
-      "output_sha256": "3960b6285e3cd801baf216d7a5c3e886d525e94c8fd74fa68824b9bc870c0c3c",
       "input_size": 629262,
+      "output_sha256": "3960b6285e3cd801baf216d7a5c3e886d525e94c8fd74fa68824b9bc870c0c3c",
       "output_size": 629262,
       "transformations": {
-        "llui48_to_riscv32": 380,
         "branchi_same_section_encoded": 521,
-        "relax_markers_removed_from_branchi_sections": 1077,
-        "llui_rep_markers_removed": 302
+        "llui48_to_riscv32": 380,
+        "llui_rep_markers_removed": 302,
+        "relax_markers_removed_from_branchi_sections": 1077
       }
     },
     {
       "archive": "libwifi_driver_tcm.a",
       "input_sha256": "89a6c999c51740ea947f79573edd82a988432fa32c9fe12afb56d638b4d6de86",
-      "output_sha256": "d0563f779957eb6df24cb27e102806105b09414991e60efcbe96f8e392a356e0",
       "input_size": 6272746,
+      "output_sha256": "d0563f779957eb6df24cb27e102806105b09414991e60efcbe96f8e392a356e0",
       "output_size": 6272746,
       "transformations": {
-        "llui48_to_riscv32": 123,
         "branchi_same_section_encoded": 282,
-        "relax_markers_removed_from_branchi_sections": 612,
-        "llui_rep_markers_removed": 263
+        "llui48_to_riscv32": 123,
+        "llui_rep_markers_removed": 263,
+        "relax_markers_removed_from_branchi_sections": 612
       }
     },
     {
       "archive": "libbg_common.a",
       "input_sha256": "40c671a542c3d1a9be413786f1d75b7dcd9635d7985b507c64efa7b3ff713dcd",
-      "output_sha256": "1fec27bb80d62fee6e9497a5494d5574318fd82e81c0b075711a3cfa8209ac3d",
       "input_size": 218616,
+      "output_sha256": "1fec27bb80d62fee6e9497a5494d5574318fd82e81c0b075711a3cfa8209ac3d",
       "output_size": 218616,
       "transformations": {
-        "llui48_to_riscv32": 229,
         "branchi_same_section_encoded": 145,
-        "relax_markers_removed_from_branchi_sections": 308,
-        "llui_rep_markers_removed": 244
+        "llui48_to_riscv32": 229,
+        "llui_rep_markers_removed": 244,
+        "relax_markers_removed_from_branchi_sections": 308
       }
     },
     {
       "archive": "libwifi_alg_anti_interference.a",
       "input_sha256": "dce096f1572cfe0809d4b2a7ad9224fdebc524c969fcb8ce6b3bfe865feee44f",
-      "output_sha256": "f8a9cb9379a1fd014424304ab75b81b9d70052bad9038f3b986c7a70ea358bd5",
       "input_size": 510752,
+      "output_sha256": "f8a9cb9379a1fd014424304ab75b81b9d70052bad9038f3b986c7a70ea358bd5",
       "output_size": 510752,
       "transformations": {
-        "llui48_to_riscv32": 17,
         "branchi_same_section_encoded": 65,
-        "relax_markers_removed_from_branchi_sections": 106,
-        "llui_rep_markers_removed": 57
+        "llui48_to_riscv32": 17,
+        "llui_rep_markers_removed": 57,
+        "relax_markers_removed_from_branchi_sections": 106
       }
     },
     {
       "archive": "libwifi_alg_cca_opt.a",
       "input_sha256": "c7285766f72f0eb9eb544d7d3d64cb807b8a1726ad86330eb92ee14a22e4ca7c",
-      "output_sha256": "18a3b80432049ce46124ae67f44d52a1bc47c6f3b32c403cadb23dc0e3b27e40",
       "input_size": 484266,
+      "output_sha256": "18a3b80432049ce46124ae67f44d52a1bc47c6f3b32c403cadb23dc0e3b27e40",
       "output_size": 484266,
       "transformations": {
-        "llui48_to_riscv32": 17,
         "branchi_same_section_encoded": 44,
-        "relax_markers_removed_from_branchi_sections": 48,
-        "llui_rep_markers_removed": 14
+        "llui48_to_riscv32": 17,
+        "llui_rep_markers_removed": 14,
+        "relax_markers_removed_from_branchi_sections": 48
       }
     },
     {
       "archive": "libwifi_alg_edca_opt.a",
       "input_sha256": "e4b74cd3f0188f522611b904197e2a470763424720202f21c181cb63186a6c1d",
-      "output_sha256": "8798f3e61525e7d93d756861b8d447a88162543d929e77a6e123eb41ee204fbb",
       "input_size": 829656,
+      "output_sha256": "8798f3e61525e7d93d756861b8d447a88162543d929e77a6e123eb41ee204fbb",
       "output_size": 829656,
       "transformations": {
-        "llui48_to_riscv32": 14,
         "branchi_same_section_encoded": 68,
-        "relax_markers_removed_from_branchi_sections": 68,
-        "llui_rep_markers_removed": 38
+        "llui48_to_riscv32": 14,
+        "llui_rep_markers_removed": 38,
+        "relax_markers_removed_from_branchi_sections": 68
       }
     },
     {
       "archive": "libwifi_alg_temp_protect.a",
       "input_sha256": "df67d93de7364fcb53984430c6a64a99ebe7019b4552bd810282d90c0ea072c8",
-      "output_sha256": "ff79eadcaa9793d059e391bf2c814006d375cbf782035f26589c1dd162930620",
       "input_size": 394340,
+      "output_sha256": "ff79eadcaa9793d059e391bf2c814006d375cbf782035f26589c1dd162930620",
       "output_size": 394340,
       "transformations": {
-        "llui48_to_riscv32": 18,
         "branchi_same_section_encoded": 40,
-        "relax_markers_removed_from_branchi_sections": 72,
-        "llui_rep_markers_removed": 40
+        "llui48_to_riscv32": 18,
+        "llui_rep_markers_removed": 40,
+        "relax_markers_removed_from_branchi_sections": 72
       }
     },
     {
       "archive": "libwifi_alg_txbf.a",
       "input_sha256": "8bc118e3dd701b94e133aa9fde15356661cc0109ead850e6e471b29a38e68a4c",
-      "output_sha256": "8fe8609662e73a05d340cb222a525929484fa316821d1f4ffdbc0d75d2c9ef57",
       "input_size": 383526,
+      "output_sha256": "8fe8609662e73a05d340cb222a525929484fa316821d1f4ffdbc0d75d2c9ef57",
       "output_size": 383526,
       "transformations": {
-        "llui48_to_riscv32": 12,
         "branchi_same_section_encoded": 10,
-        "relax_markers_removed_from_branchi_sections": 18,
-        "llui_rep_markers_removed": 7
+        "llui48_to_riscv32": 12,
+        "llui_rep_markers_removed": 7,
+        "relax_markers_removed_from_branchi_sections": 18
       }
     },
     {
       "archive": "libwifi_rom_data.a",
       "input_sha256": "a45480c15a1ae3a138a13d1dd86575a6eaa0a07ce08d3de8ae2c1975c3834d3c",
-      "output_sha256": "a45480c15a1ae3a138a13d1dd86575a6eaa0a07ce08d3de8ae2c1975c3834d3c",
       "input_size": 3056,
+      "output_sha256": "a45480c15a1ae3a138a13d1dd86575a6eaa0a07ce08d3de8ae2c1975c3834d3c",
       "output_size": 3056,
       "transformations": {
-        "llui48_to_riscv32": 0,
         "branchi_same_section_encoded": 0,
-        "relax_markers_removed_from_branchi_sections": 0,
-        "llui_rep_markers_removed": 0
+        "llui48_to_riscv32": 0,
+        "llui_rep_markers_removed": 0,
+        "relax_markers_removed_from_branchi_sections": 0
       }
     },
     {
       "archive": "librom_callback.a",
       "input_sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
-      "output_sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
       "input_size": 77076,
+      "output_sha256": "1cae5876aa4798bf3b56c2fafc3ced5bf1f1a87b655d80b40c66b732d8b365be",
       "output_size": 77076,
       "transformations": {
-        "llui48_to_riscv32": 0,
         "branchi_same_section_encoded": 0,
-        "relax_markers_removed_from_branchi_sections": 0,
-        "llui_rep_markers_removed": 0
+        "llui48_to_riscv32": 0,
+        "llui_rep_markers_removed": 0,
+        "relax_markers_removed_from_branchi_sections": 0
       }
     },
     {
       "archive": "libhisi_wpa_native_port_wpa2.a",
-      "output_sha256": "1e0986159bbf25f45031c4e9f5a7a453e589900f5a75d6ec6f95cc0e3dca1c75",
-      "output_size": 1028876,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-personal-v5"
+      "output_sha256": "e2bd7527f70f7fa0547981a2f8a75052cf2abc2dfbee3a421b099ba1b49ce536",
+      "output_size": 1029750,
+      "profile_revision": "hostap-2.11-security-2026-07-personal-v6"
     },
     {
       "archive": "libhisi_wpa_native_port_wpa3.a",
-      "output_sha256": "3b8c17b75e82d0ed072ab4ed5542b6e2422103f389dd34569b5728cdf8f4d983",
-      "output_size": 1117984,
       "kind": "upstream-hostap-target-archive",
-      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v5"
+      "output_sha256": "9f907b8400f3a7a0bbcc03ad8d860b56ea0137b30c125df9893630e5a699458b",
+      "output_size": 1118866,
+      "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v6"
     },
     {
       "archive": "libhisi_wpa_native_authenticator_wpa2.a",
+      "kind": "upstream-hostap-target-archive",
       "output_sha256": "f1ca6c17d32cf8004e852fe8023eb7aa607dc891c5bf669b41b2fa70f5efd540",
       "output_size": 1017308,
-      "kind": "upstream-hostap-target-archive",
       "profile_revision": "hostap-2.11-security-2026-07-ap-personal-v4"
     },
     {
       "archive": "libhisi_wpa_native_authenticator_wpa3.a",
+      "kind": "upstream-hostap-target-archive",
       "output_sha256": "70dc9e3de464cd706e6000e99829a9ad476352b2a60db6a94a9b6d892764153e",
       "output_size": 1109560,
-      "kind": "upstream-hostap-target-archive",
       "profile_revision": "hostap-2.11-security-2026-08-ap-personal-wpa3-v1"
     },
     {
       "archive": "libbt_host.a",
       "input_sha256": "5e74634a15bf348436de991fa9585bb198ae67ad7a22ed659af7586c8a6e62f3",
-      "output_sha256": "a76fc6958aeaeb3ac8fb695b8bde02ba954c8fefef01e8bd345a70fa0ffdb702",
       "input_size": 1126496,
+      "output_sha256": "a76fc6958aeaeb3ac8fb695b8bde02ba954c8fefef01e8bd345a70fa0ffdb702",
       "output_size": 1126496,
       "transformations": {
-        "llui48_to_riscv32": 714,
         "branchi_same_section_encoded": 969,
-        "relax_markers_removed_from_branchi_sections": 2570,
-        "llui_rep_markers_removed": 1396
+        "llui48_to_riscv32": 714,
+        "llui_rep_markers_removed": 1396,
+        "relax_markers_removed_from_branchi_sections": 2570
       }
     },
     {
       "archive": "libbt_app.a",
       "input_sha256": "6fe84ddea4e02a444afe6d7b1ef1e63cd15e8d2b8d8ad648ea2525062308c9fc",
-      "output_sha256": "7f52c92bdf1b5fc58a486d8a34895104f9cd3c0fd82f3ec90b02be2005b346de",
       "input_size": 285718,
+      "output_sha256": "7f52c92bdf1b5fc58a486d8a34895104f9cd3c0fd82f3ec90b02be2005b346de",
       "output_size": 285718,
       "transformations": {
-        "llui48_to_riscv32": 402,
         "branchi_same_section_encoded": 109,
-        "relax_markers_removed_from_branchi_sections": 443,
-        "llui_rep_markers_removed": 768
+        "llui48_to_riscv32": 402,
+        "llui_rep_markers_removed": 768,
+        "relax_markers_removed_from_branchi_sections": 443
       }
     },
     {
       "archive": "libbth_sdk.a",
       "input_sha256": "dc3aef21864a97c6c053cb67654ea363e8e83aed4d07fcb2a60cd05054670378",
-      "output_sha256": "740195f7fcb885b8602fc7b891f756a290a0cd73a09b922950217b213cf1e1dd",
       "input_size": 89886,
+      "output_sha256": "740195f7fcb885b8602fc7b891f756a290a0cd73a09b922950217b213cf1e1dd",
       "output_size": 89886,
       "transformations": {
-        "llui48_to_riscv32": 59,
         "branchi_same_section_encoded": 75,
-        "relax_markers_removed_from_branchi_sections": 237,
-        "llui_rep_markers_removed": 248
+        "llui48_to_riscv32": 59,
+        "llui_rep_markers_removed": 248,
+        "relax_markers_removed_from_branchi_sections": 237
       }
     },
     {
       "archive": "libbgtp.a",
       "input_sha256": "017a773c3cb4aad449f2da059de2b1ff3a806c8019e249977760dd3b6e6ddc7f",
-      "output_sha256": "2f556e4c3df4ae5b1b72a6a78e6df70f6b3a201afe0695427eef19e0f2a2df3f",
       "input_size": 1480206,
+      "output_sha256": "2f556e4c3df4ae5b1b72a6a78e6df70f6b3a201afe0695427eef19e0f2a2df3f",
       "output_size": 1480206,
       "transformations": {
-        "llui48_to_riscv32": 816,
         "branchi_same_section_encoded": 823,
-        "relax_markers_removed_from_branchi_sections": 2321,
-        "llui_rep_markers_removed": 1123
+        "llui48_to_riscv32": 816,
+        "llui_rep_markers_removed": 1123,
+        "relax_markers_removed_from_branchi_sections": 2321
       }
     },
     {
       "archive": "libbgtp_rom_data.a",
       "input_sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
-      "output_sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
       "input_size": 17902,
+      "output_sha256": "9d2afa16ae12104218b325949340e2ae7fb7a2cdda231c1dbbb366fadf7faeac",
       "output_size": 17902,
       "transformations": {
-        "llui48_to_riscv32": 0,
         "branchi_same_section_encoded": 0,
-        "relax_markers_removed_from_branchi_sections": 0,
-        "llui_rep_markers_removed": 0
+        "llui48_to_riscv32": 0,
+        "llui_rep_markers_removed": 0,
+        "relax_markers_removed_from_branchi_sections": 0
       }
     },
     {
       "archive": "libbth_gle.a",
       "input_sha256": "e661741923073fb9a0b9e75b7cec8ac1da5b2b1b9a08bd05f384e127d4f51ff7",
-      "output_sha256": "dd87f79e276daf05f3996e33157d808612c9571fd44ec40df30d448db909d627",
       "input_size": 821178,
+      "output_sha256": "dd87f79e276daf05f3996e33157d808612c9571fd44ec40df30d448db909d627",
       "output_size": 821178,
       "transformations": {
-        "llui48_to_riscv32": 797,
         "branchi_same_section_encoded": 458,
-        "relax_markers_removed_from_branchi_sections": 1511,
-        "llui_rep_markers_removed": 2287
+        "llui48_to_riscv32": 797,
+        "llui_rep_markers_removed": 2287,
+        "relax_markers_removed_from_branchi_sections": 1511
       }
     }
   ],
-  "native_supplicant": {
-    "upstream": {
-      "version": "2.11",
-      "tag": "hostap_2_11",
-      "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
-      "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
-      "security_advisories": [
-        "2026-1",
-        "2026-2",
-        "2026-3"
-      ],
-      "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
-    },
-    "target": "riscv32imfc-unknown-none-elf",
-    "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
-    "builder": {
-      "cc_rs": "1.2.67",
-      "compiler_first_line": "riscv64-unknown-elf-gcc (g1b306039a) 15.1.0",
-      "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
-      "canonical_runner": "macos-15",
-      "homebrew_tap": "riscv-software-src/riscv",
-      "homebrew_tap_commit": "2434aac00803d570c1b04190c76f647e7d1661e7",
-      "arm64_sequoia_bottle_sha256": "95917aa644e53aba86f8d6e840e281e4cb8b782153e5c6e3fd5788f19a572ada"
-    },
-    "profiles": [
-      {
-        "id": "wpa2",
-        "revision": "hostap-2.11-security-2026-07-personal-v5",
-        "archive": "libhisi_wpa_native_port_wpa2.a"
-      },
-      {
-        "id": "wpa3",
-        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v5",
-        "archive": "libhisi_wpa_native_port_wpa3.a"
-      }
-    ]
-  },
-  "native_authenticator": {
-    "upstream": {
-      "version": "2.11",
-      "tag": "hostap_2_11",
-      "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
-      "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
-      "security_advisories": [
-        "2026-1",
-        "2026-2",
-        "2026-3"
-      ],
-      "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a"
-    },
-    "target": "riscv32imfc-unknown-none-elf",
-    "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
-    "builder": {
-      "cc_rs": "1.2.67",
-      "compiler_first_line": "riscv64-unknown-elf-gcc (g1b306039a) 15.1.0",
-      "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
-      "canonical_runner": "macos-15",
-      "homebrew_tap": "riscv-software-src/riscv",
-      "homebrew_tap_commit": "2434aac00803d570c1b04190c76f647e7d1661e7",
-      "arm64_sequoia_bottle_sha256": "95917aa644e53aba86f8d6e840e281e4cb8b782153e5c6e3fd5788f19a572ada"
-    },
-    "profiles": [
-      {
-        "id": "wpa2",
-        "revision": "hostap-2.11-security-2026-07-ap-personal-v4",
-        "archive": "libhisi_wpa_native_authenticator_wpa2.a",
-        "source_profile": "ap-personal.toml"
-      },
-      {
-        "id": "wpa3",
-        "revision": "hostap-2.11-security-2026-08-ap-personal-wpa3-v1",
-        "archive": "libhisi_wpa_native_authenticator_wpa3.a",
-        "source_profile": "ap-personal-wpa3.toml"
-      }
-    ]
-  },
   "ble_profile": {
-    "revision": "ws63-ble-b0-archive-abi-v2",
-    "normalization_revision": "ws63-ble-b0-normalized-v1",
     "archives": [
       "libbt_host.a",
       "libbt_app.a",
       "libbth_sdk.a",
       "libbg_common.a"
     ],
-    "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json",
-    "init_revision": "ws63-ble-b3-gatt-closure-v57",
-    "init_normalization_revision": "ws63-ble-b1-normalized-v2",
     "controller_archives": [
       "libbgtp.a",
       "libbgtp_rom_data.a",
       "librom_callback.a"
     ],
-    "init_required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b1-report.json"
+    "init_normalization_revision": "ws63-ble-b1-normalized-v2",
+    "init_required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b1-report.json",
+    "init_revision": "ws63-ble-b3-gatt-closure-v57",
+    "normalization_revision": "ws63-ble-b0-normalized-v1",
+    "required_symbol_report": "hisi-rf-link/profiles/ws63-ble-b0-report.json",
+    "revision": "ws63-ble-b0-archive-abi-v2"
   },
+  "native_authenticator": {
+    "builder": {
+      "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
+      "arm64_sequoia_bottle_sha256": "95917aa644e53aba86f8d6e840e281e4cb8b782153e5c6e3fd5788f19a572ada",
+      "canonical_runner": "macos-15",
+      "cc_rs": "1.2.67",
+      "compiler_first_line": "riscv64-unknown-elf-gcc (g1b306039a) 15.1.0",
+      "homebrew_tap": "riscv-software-src/riscv",
+      "homebrew_tap_commit": "2434aac00803d570c1b04190c76f647e7d1661e7"
+    },
+    "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
+    "profiles": [
+      {
+        "archive": "libhisi_wpa_native_authenticator_wpa2.a",
+        "id": "wpa2",
+        "revision": "hostap-2.11-security-2026-07-ap-personal-v4",
+        "source_profile": "ap-personal.toml"
+      },
+      {
+        "archive": "libhisi_wpa_native_authenticator_wpa3.a",
+        "id": "wpa3",
+        "revision": "hostap-2.11-security-2026-08-ap-personal-wpa3-v1",
+        "source_profile": "ap-personal-wpa3.toml"
+      }
+    ],
+    "target": "riscv32imfc-unknown-none-elf",
+    "upstream": {
+      "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+      "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
+      "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a",
+      "security_advisories": [
+        "2026-1",
+        "2026-2",
+        "2026-3"
+      ],
+      "tag": "hostap_2_11",
+      "version": "2.11"
+    }
+  },
+  "native_supplicant": {
+    "builder": {
+      "archiver_first_line": "GNU ar (GNU Binutils) 2.45",
+      "arm64_sequoia_bottle_sha256": "95917aa644e53aba86f8d6e840e281e4cb8b782153e5c6e3fd5788f19a572ada",
+      "canonical_runner": "macos-15",
+      "cc_rs": "1.2.67",
+      "compiler_first_line": "riscv64-unknown-elf-gcc (g1b306039a) 15.1.0",
+      "homebrew_tap": "riscv-software-src/riscv",
+      "homebrew_tap_commit": "2434aac00803d570c1b04190c76f647e7d1661e7"
+    },
+    "compiler": "riscv64-unknown-elf-gcc 15.1.0 (g1b306039a)",
+    "profiles": [
+      {
+        "archive": "libhisi_wpa_native_port_wpa2.a",
+        "id": "wpa2",
+        "revision": "hostap-2.11-security-2026-07-personal-v6"
+      },
+      {
+        "archive": "libhisi_wpa_native_port_wpa3.a",
+        "id": "wpa3",
+        "revision": "hostap-2.11-security-2026-07-personal-wpa3-v6"
+      }
+    ],
+    "target": "riscv32imfc-unknown-none-elf",
+    "upstream": {
+      "base_commit": "d945ddd368085f255e68328f2d3b020ceea359af",
+      "commit": "f735d907a3fdc423747db1e7fa4aaf61676baa82",
+      "release_archive_sha256": "912ea06f74e30a8e36fbb68064d6cdff218d8d591db0fc5d75dee6c81ac7fc0a",
+      "security_advisories": [
+        "2026-1",
+        "2026-2",
+        "2026-3"
+      ],
+      "tag": "hostap_2_11",
+      "version": "2.11"
+    }
+  },
+  "normalizer": "hisi-rf-link 0.1.0-alpha.4",
+  "profile_revision": "ws63-wifi-base-v1",
+  "schema_version": 1,
   "sle_profile": {
-    "revision": "ws63-sle-s0-archive-abi-v1",
-    "normalization_revision": "ws63-sle-s0-normalized-v1",
     "archives": [
       "libbth_gle.a",
       "libbt_host.a",
@@ -358,12 +356,14 @@
       "libbth_sdk.a",
       "libbg_common.a"
     ],
-    "init_revision": "ws63-sle-s3-ssap-v1",
     "controller_archives": [
       "libbgtp.a",
       "libbgtp_rom_data.a",
       "librom_callback.a"
     ],
-    "required_symbol_report": "hisi-rf-link/profiles/ws63-sle-s0-report.json"
+    "init_revision": "ws63-sle-s3-ssap-v1",
+    "normalization_revision": "ws63-sle-s0-normalized-v1",
+    "required_symbol_report": "hisi-rf-link/profiles/ws63-sle-s0-report.json",
+    "revision": "ws63-sle-s0-archive-abi-v1"
   }
 }
