@@ -290,6 +290,9 @@ uint32_t hisi_wpa_recovery_diagnostic_word(
 uint32_t hisi_wpa_temporary_reject_recovery_diagnostic_word(
     const struct hisi_wpa_context *context);
 uint32_t hisi_wpa_driver_diagnostic_word(void);
+/* Diagnostic-only BSS cache ownership at the last scan-capture boundary.
+ * Bytes encode before-flush, after-flush, last-scan, and WPA state. */
+uint32_t hisi_wpa_scan_cache_diagnostic_word(void);
 int32_t hisi_wpa_feed_eapol(struct hisi_wpa_context *context,
     const uint8_t source[6], const uint8_t *frame, size_t frame_len);
 int32_t hisi_wpa_feed_mgmt(struct hisi_wpa_context *context,

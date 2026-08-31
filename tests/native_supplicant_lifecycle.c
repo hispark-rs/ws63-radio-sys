@@ -229,6 +229,15 @@ static void exercise_repeated_scan_cache(struct hisi_wpa_context *context)
     for (round = 0; round < 3; round++) {
         assert(hisi_wpa_begin_scan_capture(context) == 0);
         assert(context->interface->num_bss == 0);
+        if (round == 0) {
+            assert(hisi_wpa_scan_cache_diagnostic_word() ==
+                ((uint32_t) WPA_DISCONNECTED << 24));
+        } else {
+            uint32_t diagnostic = hisi_wpa_scan_cache_diagnostic_word();
+            assert((diagnostic & 0xffu) != 0);
+            assert((diagnostic & 0x00ffff00u) == 0);
+            assert((diagnostic >> 24) == WPA_DISCONNECTED);
+        }
         for (index = 0; index < 18; index++) {
             memset(result.bssid, 0, sizeof(result.bssid));
             result.bssid[0] = 0x02;

@@ -3,6 +3,18 @@
 #include "hisi_wpa_driver_port.h"
 #include "hisi_wpa_context_internal.h"
 
+static uint32_t g_scan_cache_diagnostic;
+
+static uint32_t saturating_byte(size_t value)
+{
+    return value > UINT8_MAX ? UINT8_MAX : (uint32_t) value;
+}
+
+uint32_t hisi_wpa_scan_cache_diagnostic_word(void)
+{
+    return g_scan_cache_diagnostic;
+}
+
 #include "common/defs.h"
 #include "common/wpa_common.h"
 #include "drivers/driver.h"
@@ -600,6 +612,7 @@ int32_t hisi_wpa_feed_scan_result(struct hisi_wpa_context *context,
 
 int32_t hisi_wpa_begin_scan_capture(struct hisi_wpa_context *context)
 {
+    size_t before;
     if (context == NULL || context->interface == NULL ||
         context->interface->drv_priv == NULL)
         return -1;
@@ -607,7 +620,12 @@ int32_t hisi_wpa_begin_scan_capture(struct hisi_wpa_context *context)
      * bounded scan batch. wpa_bss_flush() preserves configured and in-use
      * entries, so reconnect state survives while the fixed RF arena avoids a
      * retained-cache plus fresh-results allocation peak. */
+    before = context->interface->num_bss;
     wpa_bss_flush(context->interface);
+    g_scan_cache_diagnostic = saturating_byte(before) |
+        (saturating_byte(context->interface->num_bss) << 8) |
+        (saturating_byte(context->interface->last_scan_res_used) << 16) |
+        (saturating_byte(context->interface->wpa_state) << 24);
     return hisi_wpa_driver_begin_scan_capture(context->interface->drv_priv);
 }
 
