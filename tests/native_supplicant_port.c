@@ -438,6 +438,21 @@ static void test_ws63_driver_bridge(void)
     static const uint8_t management[4] = { 0xb0, 0, 0, 0 };
     static const uint8_t ssid[] = "test";
     static const uint8_t scan_ies[] = { 0, 4, 't', 'e', 's', 't' };
+    static const uint8_t noisy_scan_ies[] = {
+        WLAN_EID_SSID, 4, 't', 'e', 's', 't',
+        WLAN_EID_SUPP_RATES, 2, 0x82, 0x84,
+        WLAN_EID_RSN, 2, 1, 0,
+        WLAN_EID_VENDOR_SPECIFIC, 4, 0x00, 0x50, 0xf2, 0x01,
+        WLAN_EID_VENDOR_SPECIFIC, 4, 0x12, 0x34, 0x56, 0x78,
+        WLAN_EID_RSNX, 1, 0x20,
+    };
+    static const uint8_t filtered_scan_ies[] = {
+        WLAN_EID_SSID, 4, 't', 'e', 's', 't',
+        WLAN_EID_RSN, 2, 1, 0,
+        WLAN_EID_VENDOR_SPECIFIC, 4, 0x00, 0x50, 0xf2, 0x01,
+        WLAN_EID_RSNX, 1, 0x20,
+    };
+    static const uint8_t malformed_scan_ies[] = { WLAN_EID_RSN, 4, 1, 0 };
     static const uint8_t rsn_ie[] = { 48, 2, 1, 0 };
     int frequencies[] = { 2412, 0 };
     struct wpa_driver_set_key_params params = { 0 };
@@ -556,6 +571,25 @@ static void test_ws63_driver_bridge(void)
     os_free(results->res[0]);
     os_free(results->res);
     os_free(results);
+
+    scan_result.ie_len = sizeof(noisy_scan_ies);
+    scan_result.ies = noisy_scan_ies;
+    assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) == 0);
+    results = wpa_driver_ws63_ops.get_scan_results2(driver);
+    assert(results != NULL && results->num == 1);
+    assert(results->res[0]->ie_len == sizeof(filtered_scan_ies));
+    assert(memcmp(results->res[0] + 1, filtered_scan_ies,
+        sizeof(filtered_scan_ies)) == 0);
+    os_free(results->res[0]);
+    os_free(results->res);
+    os_free(results);
+
+    scan_result.ie_len = sizeof(malformed_scan_ies);
+    scan_result.ies = malformed_scan_ies;
+    assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) ==
+        HISI_WPA_SCAN_FEED_INVALID);
+    scan_result.ie_len = sizeof(scan_ies);
+    scan_result.ies = scan_ies;
 
     scan_result.frequency_mhz = 0;
     assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) ==

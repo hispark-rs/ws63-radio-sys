@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.25] - 2026-08-31
+
+### Fixed
+
+- Normalize external scan IEs at the WS63 native hostap boundary before
+  allocating the deep-copied scan result. WPA2/WPA3 Personal keeps SSID, RSN,
+  RSNXE, and legacy WPA selectors while unrelated telemetry and rate elements
+  no longer consume the fixed coexistence RF arena twice.
+- Reject malformed probe and beacon IE streams before they enter hostap's BSS
+  cache, with host tests covering both the retained protocol elements and the
+  fail-closed path.
+
 ## [0.1.0-alpha.24] - 2026-08-31
 
 ### Fixed

@@ -33,6 +33,57 @@ static void clear_scan_results(struct ws63_driver_data *driver)
     driver->scan_result_count = 0;
 }
 
+static int keep_scan_ie(const uint8_t *ie)
+{
+    switch (ie[0]) {
+    case WLAN_EID_SSID:
+    case WLAN_EID_RSN:
+    case WLAN_EID_RSNX:
+        return 1;
+    case WLAN_EID_VENDOR_SPECIFIC:
+        /* Preserve only the legacy WPA selector 00:50:f2:01. The native
+         * profile supports WPA2/WPA3 Personal and does not need unrelated
+         * vendor telemetry duplicated in both the Rust callback queue and the
+         * hostap BSS cache. */
+        return ie[1] >= 4 && ie[2] == 0x00 && ie[3] == 0x50 &&
+            ie[4] == 0xf2 && ie[5] == 0x01;
+    default:
+        return 0;
+    }
+}
+
+static size_t filtered_scan_ies_len(const uint8_t *ies, size_t len)
+{
+    size_t offset = 0;
+    size_t kept = 0;
+    while (offset < len) {
+        size_t element_len;
+        if (len - offset < 2)
+            return SIZE_MAX;
+        element_len = (size_t) ies[offset + 1] + 2;
+        if (element_len > len - offset)
+            return SIZE_MAX;
+        if (keep_scan_ie(&ies[offset]))
+            kept += element_len;
+        offset += element_len;
+    }
+    return kept;
+}
+
+static void copy_filtered_scan_ies(uint8_t *output, const uint8_t *ies,
+    size_t len)
+{
+    size_t offset = 0;
+    while (offset < len) {
+        size_t element_len = (size_t) ies[offset + 1] + 2;
+        if (keep_scan_ie(&ies[offset])) {
+            os_memcpy(output, &ies[offset], element_len);
+            output += element_len;
+        }
+        offset += element_len;
+    }
+}
+
 static int map_cipher(enum wpa_alg algorithm, uint8_t *cipher)
 {
     switch (algorithm) {
@@ -350,6 +401,8 @@ int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
 {
     struct ws63_driver_data *driver = private_data;
     struct wpa_scan_res *stored;
+    size_t filtered_beacon_ie_len;
+    size_t filtered_ie_len;
     size_t ies_len;
     if (driver == NULL || result == NULL ||
         result->abi_version != HISI_WPA_ABI_VERSION ||
@@ -361,6 +414,13 @@ int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
     ies_len = result->ie_len + result->beacon_ie_len;
     if (ies_len != 0 && result->ies == NULL)
         return HISI_WPA_SCAN_FEED_INVALID;
+    filtered_ie_len = filtered_scan_ies_len(result->ies, result->ie_len);
+    filtered_beacon_ie_len = filtered_scan_ies_len(
+        result->ies == NULL ? NULL : result->ies + result->ie_len,
+        result->beacon_ie_len);
+    if (filtered_ie_len == SIZE_MAX || filtered_beacon_ie_len == SIZE_MAX)
+        return HISI_WPA_SCAN_FEED_INVALID;
+    ies_len = filtered_ie_len + filtered_beacon_ie_len;
     stored = os_zalloc(sizeof(*stored) + ies_len);
     if (stored == NULL)
         return HISI_WPA_SCAN_FEED_ALLOCATION;
@@ -372,10 +432,14 @@ int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
     stored->qual = result->quality;
     stored->level = result->level_mbm;
     stored->age = result->age_ms;
-    stored->ie_len = result->ie_len;
-    stored->beacon_ie_len = result->beacon_ie_len;
-    if (ies_len != 0)
-        os_memcpy(stored + 1, result->ies, ies_len);
+    stored->ie_len = filtered_ie_len;
+    stored->beacon_ie_len = filtered_beacon_ie_len;
+    if (filtered_ie_len != 0)
+        copy_filtered_scan_ies((uint8_t *) (stored + 1), result->ies,
+            result->ie_len);
+    if (filtered_beacon_ie_len != 0)
+        copy_filtered_scan_ies((uint8_t *) (stored + 1) + filtered_ie_len,
+            result->ies + result->ie_len, result->beacon_ie_len);
     driver->scan_results[driver->scan_result_count++] = stored;
     return HISI_WPA_SCAN_FEED_OK;
 }
