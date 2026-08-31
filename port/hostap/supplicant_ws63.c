@@ -603,6 +603,11 @@ int32_t hisi_wpa_begin_scan_capture(struct hisi_wpa_context *context)
     if (context == NULL || context->interface == NULL ||
         context->interface->drv_priv == NULL)
         return -1;
+    /* Release stale, unused BSS entries before the driver allocates the next
+     * bounded scan batch. wpa_bss_flush() preserves configured and in-use
+     * entries, so reconnect state survives while the fixed RF arena avoids a
+     * retained-cache plus fresh-results allocation peak. */
+    wpa_bss_flush(context->interface);
     return hisi_wpa_driver_begin_scan_capture(context->interface->drv_priv);
 }
 

@@ -228,6 +228,7 @@ static void exercise_repeated_scan_cache(struct hisi_wpa_context *context)
 
     for (round = 0; round < 3; round++) {
         assert(hisi_wpa_begin_scan_capture(context) == 0);
+        assert(context->interface->num_bss == 0);
         for (index = 0; index < 18; index++) {
             memset(result.bssid, 0, sizeof(result.bssid));
             result.bssid[0] = 0x02;

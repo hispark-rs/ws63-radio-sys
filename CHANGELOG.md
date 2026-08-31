@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.24] - 2026-08-31
+
+### Fixed
+
+- Flush unused upstream BSS entries at the external scan-capture boundary
+  before allocating the next driver result batch. Configured and in-use BSS
+  entries remain protected by upstream hostap, while repeated scans no longer
+  require the fixed RF arena to hold a retained cache and a fresh batch at the
+  same time.
+
 ## [0.1.0-alpha.23] - 2026-08-31
 
 ### Fixed
