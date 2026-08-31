@@ -10,6 +10,7 @@ struct wpa_supplicant;
 struct wpa_ssid;
 
 #define HISI_WPA_EVENT_CAPACITY 8u
+#define HISI_WPA_BSS_CACHE_CAPACITY 16u
 
 struct hisi_wpa_context {
     struct wpa_global *global;

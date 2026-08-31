@@ -354,15 +354,16 @@ int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
     if (driver == NULL || result == NULL ||
         result->abi_version != HISI_WPA_ABI_VERSION ||
         result->frequency_mhz <= 0 || result->ie_len > HISI_WPA_MAX_SCAN_IE_LEN ||
-        result->beacon_ie_len > HISI_WPA_MAX_SCAN_IE_LEN - result->ie_len ||
-        driver->scan_result_count == WS63_MAX_SCAN_RESULTS)
-        return -1;
+        result->beacon_ie_len > HISI_WPA_MAX_SCAN_IE_LEN - result->ie_len)
+        return HISI_WPA_SCAN_FEED_INVALID;
+    if (driver->scan_result_count == WS63_MAX_SCAN_RESULTS)
+        return HISI_WPA_SCAN_FEED_CAPACITY;
     ies_len = result->ie_len + result->beacon_ie_len;
     if (ies_len != 0 && result->ies == NULL)
-        return -1;
+        return HISI_WPA_SCAN_FEED_INVALID;
     stored = os_zalloc(sizeof(*stored) + ies_len);
     if (stored == NULL)
-        return -1;
+        return HISI_WPA_SCAN_FEED_ALLOCATION;
     stored->flags = result->flags;
     os_memcpy(stored->bssid, result->bssid, sizeof(stored->bssid));
     stored->freq = result->frequency_mhz;
@@ -376,7 +377,7 @@ int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
     if (ies_len != 0)
         os_memcpy(stored + 1, result->ies, ies_len);
     driver->scan_results[driver->scan_result_count++] = stored;
-    return 0;
+    return HISI_WPA_SCAN_FEED_OK;
 }
 
 int32_t hisi_wpa_driver_begin_scan_capture(void *private_data)

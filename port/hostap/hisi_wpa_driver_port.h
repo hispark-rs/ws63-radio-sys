@@ -13,6 +13,13 @@ const struct hisi_wpa_driver_hooks *hisi_wpa_driver_acquire(void);
 void hisi_wpa_driver_release(void);
 int hisi_wpa_l2_is_active(void);
 
+enum hisi_wpa_scan_feed_status {
+    HISI_WPA_SCAN_FEED_OK = 0,
+    HISI_WPA_SCAN_FEED_INVALID = -2,
+    HISI_WPA_SCAN_FEED_CAPACITY = -3,
+    HISI_WPA_SCAN_FEED_ALLOCATION = -4,
+};
+
 int32_t hisi_wpa_driver_begin_scan_capture(void *private_data);
 int32_t hisi_wpa_driver_feed_scan_result(void *private_data,
     const struct hisi_wpa_scan_result *result);

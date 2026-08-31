@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.23] - 2026-08-31
+
+### Fixed
+
+- Bound the upstream hostap BSS cache to the WS63 native profile instead of
+  inheriting the host-oriented 200-entry default. Repeated scans now retain at
+  most 16 BSS entries and cannot exhaust the caller-owned RF arena merely by
+  accumulating stale access points across scan rounds.
+- Split native scan-result feed failures into invalid input, bounded capacity,
+  and allocation failure statuses so target diagnostics identify the failed
+  ownership boundary instead of collapsing every failure to `-1`.
+
 ## [0.1.0-alpha.22] - 2026-08-29
 
 ### Fixed

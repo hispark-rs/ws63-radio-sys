@@ -266,6 +266,12 @@ int32_t hisi_wpa_init(struct hisi_wpa_context *context)
         context->global = NULL;
         return -3;
     }
+    /* Upstream defaults to 200 cached BSS entries, which is appropriate for
+     * a host OS but can exhaust the caller-owned WS63 RF arena after only a
+     * few scans. Keep one bounded cache owned by the native profile; the
+     * upstream eviction policy preserves configured and in-use entries. */
+    context->interface->conf->bss_max_count =
+        HISI_WPA_BSS_CACHE_CAPACITY;
     context->observed_state = context->interface->wpa_state;
     context->initialized = 1;
     return 0;

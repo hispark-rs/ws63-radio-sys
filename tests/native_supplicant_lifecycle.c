@@ -209,6 +209,38 @@ static int32_t send_external_auth_status(void *driver,
     return 0;
 }
 
+static void exercise_repeated_scan_cache(struct hisi_wpa_context *context)
+{
+    static const uint8_t ssid_ie[] = {
+        WLAN_EID_SSID, 3, 'a', 'p', '1'
+    };
+    struct hisi_wpa_scan_result result = { 0 };
+    unsigned int round;
+    unsigned int index;
+
+    context->interface->disconnected = 1;
+    result.abi_version = HISI_WPA_ABI_VERSION;
+    result.frequency_mhz = 2412;
+    result.beacon_interval = 100;
+    result.level_mbm = -4200;
+    result.ie_len = sizeof(ssid_ie);
+    result.ies = ssid_ie;
+
+    for (round = 0; round < 3; round++) {
+        assert(hisi_wpa_begin_scan_capture(context) == 0);
+        for (index = 0; index < 18; index++) {
+            memset(result.bssid, 0, sizeof(result.bssid));
+            result.bssid[0] = 0x02;
+            result.bssid[4] = (uint8_t) round;
+            result.bssid[5] = (uint8_t) index;
+            assert(hisi_wpa_feed_scan_result(context, &result) == 0);
+        }
+        assert(hisi_wpa_feed_scan_done(context, 0) == 0);
+        assert(context->interface->num_bss <=
+            HISI_WPA_BSS_CACHE_CAPACITY);
+    }
+}
+
 /*
  * The lifecycle under test does not perform a handshake. These stubs satisfy
  * the explicit crypto ABI of the complete hostap profile so the host test
@@ -337,6 +369,7 @@ int main(void)
     assert(hisi_wpa_init(context) == 0);
     assert(hisi_wpa_begin_scan_capture(NULL) == -1);
     assert(hisi_wpa_begin_scan_capture(context) == 0);
+    exercise_repeated_scan_cache(context);
 
     state.install_count = 0;
     state.remove_count = 0;

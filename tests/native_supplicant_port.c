@@ -557,6 +557,17 @@ static void test_ws63_driver_bridge(void)
     os_free(results->res);
     os_free(results);
 
+    scan_result.frequency_mhz = 0;
+    assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) ==
+        HISI_WPA_SCAN_FEED_INVALID);
+    scan_result.frequency_mhz = 2412;
+    for (size_t index = 0; index < 32; index++)
+        assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) ==
+            HISI_WPA_SCAN_FEED_OK);
+    assert(hisi_wpa_driver_feed_scan_result(driver, &scan_result) ==
+        HISI_WPA_SCAN_FEED_CAPACITY);
+    assert(hisi_wpa_driver_begin_scan_capture(driver) == 0);
+
     association.bssid = peer;
     association.ssid = ssid;
     association.ssid_len = sizeof(ssid) - 1;
