@@ -146,15 +146,15 @@
     {
       "archive": "libhisi_wpa_native_port_wpa2.a",
       "kind": "upstream-hostap-target-archive",
-      "output_sha256": "7f4e118b84d585c1b07e33874b75f72f2fa702385fe7d4f3c6e89b83c7ca7f61",
-      "output_size": 1031834,
+      "output_sha256": "ef40d2de8c69b4ff16b95ca1a49b0a63e42a92f6cb5da74a3c5859849909dd2a",
+      "output_size": 1032734,
       "profile_revision": "hostap-2.11-security-2026-07-personal-v6"
     },
     {
       "archive": "libhisi_wpa_native_port_wpa3.a",
       "kind": "upstream-hostap-target-archive",
-      "output_sha256": "65a23696eff541bcef5d0c3036b8d47fc737866bce9ae6f54cfe8f01067174c0",
-      "output_size": 1120950,
+      "output_sha256": "8f20adc7aaae71b48441144703b9340c3071893350f09036f7e48a458618fd2a",
+      "output_size": 1121846,
       "profile_revision": "hostap-2.11-security-2026-07-personal-wpa3-v6"
     },
     {
