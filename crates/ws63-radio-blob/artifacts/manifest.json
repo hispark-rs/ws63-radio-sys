@@ -304,6 +304,18 @@
         "2026-2",
         "2026-3"
       ],
+      "security_dispositions": [
+        {
+          "advisory": "2026-4",
+          "reviewed_on": "2026-09-07",
+          "status": "not-affected"
+        },
+        {
+          "advisory": "2026-5",
+          "reviewed_on": "2026-09-07",
+          "status": "not-affected"
+        }
+      ],
       "tag": "hostap_2_11",
       "version": "2.11"
     }
@@ -340,6 +352,18 @@
         "2026-1",
         "2026-2",
         "2026-3"
+      ],
+      "security_dispositions": [
+        {
+          "advisory": "2026-4",
+          "reviewed_on": "2026-09-07",
+          "status": "not-affected"
+        },
+        {
+          "advisory": "2026-5",
+          "reviewed_on": "2026-09-07",
+          "status": "not-affected"
+        }
       ],
       "tag": "hostap_2_11",
       "version": "2.11"

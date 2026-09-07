@@ -66,6 +66,25 @@ jobs:
       - name: Fetch auditable hostap history
         run: git -C third-party/hostap fetch --unshallow --tags origin
       - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: '**/*.py'
+      - name: Check live hostap security decisions
+        id: hostap_security
+        continue-on-error: true
+        run: >-
+          uv run --script scripts/check-hostap-security-radar.py
+          --report target/hostap-security-radar.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hostap-security-release-gate
+          path: target/hostap-security-radar.md
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce live hostap security decisions
+        if: steps.hostap_security.outcome == 'failure'
+        run: exit 1
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2026-07-09
@@ -78,7 +97,7 @@ jobs:
       - name: Check release-unit version
         env:
           RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || '' }}
-        run: uv run scripts/check-release-unit.py --tag "$RELEASE_TAG"
+        run: uv run --script scripts/check-release-unit.py --tag "$RELEASE_TAG"
 
       - name: Check committed lockfile
         run: |
@@ -93,14 +112,15 @@ jobs:
             --target x86_64-unknown-linux-gnu --locked -- -D warnings
           cargo test --workspace \
             --target x86_64-unknown-linux-gnu --locked
-          uv run scripts/check-upstream-hostap.py
-          uv run scripts/check-runtime-compat-profile.py
-          uv run scripts/check-supplicant-boundary-profile.py
-          uv run scripts/check-release-artifacts.py
-          uv run scripts/check-native-supplicant-port.py
-          uv run scripts/check-native-authenticator-port.py
-          uv run scripts/check-upstream-personal-vectors.py
-          uv run crates/hisi-rf-link/python/test_relocations.py
+          uv run --script scripts/check-upstream-hostap.py
+          uv run --script scripts/test-hostap-security-radar.py
+          uv run --script scripts/check-runtime-compat-profile.py
+          uv run --script scripts/check-supplicant-boundary-profile.py
+          uv run --script scripts/check-release-artifacts.py
+          uv run --script scripts/check-native-supplicant-port.py
+          uv run --script scripts/check-native-authenticator-port.py
+          uv run --script scripts/check-upstream-personal-vectors.py
+          uv run --script crates/hisi-rf-link/python/test_relocations.py
 
       - name: Check supplicant C ABI
         run: |
@@ -144,7 +164,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          version="$(uv run scripts/check-release-unit.py --print-version)"
+          version="$(uv run --script scripts/check-release-unit.py --print-version)"
           user_agent="ws63-radio-sys-release/${version} (https://github.com/hispark-rs/ws63-radio-sys)"
 
           crate_exists() {

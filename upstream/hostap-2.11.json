@@ -1,5 +1,5 @@
 {
-  "schema": "hispark-rs/upstream-hostap/v2",
+  "schema": "hispark-rs/upstream-hostap/v3",
   "project": "hostap",
   "version": "2.11",
   "repository": "https://github.com/hispark-rs/hostap.git",
@@ -36,6 +36,62 @@
       "url": "https://w1.fi/security/2026-3/",
       "applied_commits": [
         "f735d907a3fdc423747db1e7fa4aaf61676baa82"
+      ]
+    }
+  ],
+  "security_dispositions": [
+    {
+      "advisory": "2026-4",
+      "url": "https://w1.fi/security/2026-4/",
+      "status": "not-affected",
+      "official_fix_commit": "0ef47396926cb8ce4827b6a5a593ebfc270b8e06",
+      "affected_component": "wpa_supplicant mesh AMPE",
+      "affected_source": "wpa_supplicant/mesh_rsn.c",
+      "profile_checks": [
+        {
+          "profile": "personal.toml",
+          "source_absent": "wpa_supplicant/mesh_rsn.c",
+          "define_absent": "CONFIG_MESH"
+        },
+        {
+          "profile": "personal-wpa3.toml",
+          "source_absent": "wpa_supplicant/mesh_rsn.c",
+          "define_absent": "CONFIG_MESH"
+        }
+      ],
+      "reviewed_on": "2026-09-07",
+      "review_owner": "hispark-rs maintainers",
+      "recheck_when": [
+        "a supplicant profile adds CONFIG_MESH",
+        "a supplicant profile adds wpa_supplicant/mesh_rsn.c",
+        "the pinned hostap source or Personal profile set changes"
+      ]
+    },
+    {
+      "advisory": "2026-5",
+      "url": "https://w1.fi/security/2026-5/",
+      "status": "not-affected",
+      "official_fix_commit": "aa02cfa569477f67f3915c8b9a83d1a7ca93693d",
+      "affected_component": "hostapd RADIUS Message-Authenticator validation",
+      "affected_source": "src/radius/radius.c",
+      "profile_checks": [
+        {
+          "profile": "ap-personal.toml",
+          "source_absent": "src/radius/radius.c",
+          "define_present": "CONFIG_NO_RADIUS"
+        },
+        {
+          "profile": "ap-personal-wpa3.toml",
+          "source_absent": "src/radius/radius.c",
+          "define_present": "CONFIG_NO_RADIUS"
+        }
+      ],
+      "reviewed_on": "2026-09-07",
+      "review_owner": "hispark-rs maintainers",
+      "recheck_when": [
+        "an authenticator profile enables RADIUS",
+        "an authenticator profile adds src/radius/radius.c",
+        "the pinned hostap source or Personal profile set changes"
       ]
     }
   ],

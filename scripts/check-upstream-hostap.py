@@ -74,7 +74,7 @@ def require_ancestor(ancestor: str, descendant: str, label: str) -> None:
 
 def main() -> int:
     metadata = json.loads(MANIFEST.read_text())
-    if metadata["schema"] != "hispark-rs/upstream-hostap/v2":
+    if metadata["schema"] != "hispark-rs/upstream-hostap/v3":
         raise SystemExit("unsupported hostap source manifest schema")
     if metadata["upstream_repository"] != "https://git.w1.fi/hostap.git":
         raise SystemExit("hostap upstream repository drift")
@@ -137,6 +137,32 @@ def main() -> int:
             f"manifest={applied_commits}, actual={actual_backports}"
         )
 
+    dispositions = metadata["security_dispositions"]
+    if not isinstance(dispositions, list):
+        raise SystemExit("hostap security dispositions must be a list")
+    disposition_summary = []
+    for disposition in dispositions:
+        advisory = disposition["advisory"]
+        if not re.fullmatch(r"20[0-9]{2}-[0-9]+", advisory):
+            raise SystemExit(f"invalid hostap disposition advisory: {advisory!r}")
+        if advisory in advisories:
+            raise SystemExit(f"duplicate hostap security decision: {advisory}")
+        advisories.add(advisory)
+        if disposition["url"] != f"https://w1.fi/security/{advisory}/":
+            raise SystemExit(f"hostap disposition URL drift: {advisory}")
+        require_commit(disposition["official_fix_commit"], f"{advisory} official fix")
+        if disposition["status"] != "not-affected":
+            raise SystemExit(
+                f"unresolved hostap disposition cannot enter artifacts: {advisory}"
+            )
+        disposition_summary.append(
+            {
+                "advisory": advisory,
+                "reviewed_on": disposition["reviewed_on"],
+                "status": disposition["status"],
+            }
+        )
+
     version_header = (
         ROOT / "third-party/hostap/src/common/version.h"
     ).read_text()
@@ -149,26 +175,36 @@ def main() -> int:
         raise SystemExit("invalid release archive SHA-256")
 
     artifact_metadata = json.loads(ARTIFACT_MANIFEST.read_text())
-    artifact_upstream = artifact_metadata["native_supplicant"]["upstream"]
+    security_backports = {
+        backport["advisory"] for backport in metadata["security_backports"]
+    }
     expected_artifact_upstream = {
         "version": metadata["version"],
         "tag": metadata["tag"],
         "base_commit": base,
         "commit": expected,
         "security_advisories": sorted(
-            advisories,
+            security_backports,
             key=lambda value: tuple(int(part) for part in value.split("-")),
+        ),
+        "security_dispositions": sorted(
+            disposition_summary,
+            key=lambda entry: tuple(
+                int(part) for part in entry["advisory"].split("-")
+            ),
         ),
         "release_archive_sha256": digest,
     }
-    if artifact_upstream != expected_artifact_upstream:
-        raise SystemExit(
-            "hostap Cargo artifact provenance drift: "
-            f"expected={expected_artifact_upstream}, actual={artifact_upstream}"
-        )
+    for artifact in ("native_supplicant", "native_authenticator"):
+        artifact_upstream = artifact_metadata[artifact]["upstream"]
+        if artifact_upstream != expected_artifact_upstream:
+            raise SystemExit(
+                f"hostap Cargo artifact provenance drift in {artifact}: "
+                f"expected={expected_artifact_upstream}, actual={artifact_upstream}"
+            )
     print(
         f"hostap {metadata['version']} base={base} patched={actual}; "
-        f"advisories={','.join(sorted(advisories))}; release sha256={digest}"
+        f"decisions={','.join(sorted(advisories))}; release sha256={digest}"
     )
     return 0
 

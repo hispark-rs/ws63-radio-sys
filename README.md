@@ -37,8 +37,8 @@ normal PR CI runs the same parser against an offline fixture.
 Local release checks do not upload artifacts:
 
 ```console
-uv run scripts/check-release-unit.py --tag v0.1.0-alpha.5
-uv run scripts/check-release-artifacts.py
+uv run --script scripts/check-release-unit.py --tag v0.1.0-alpha.5
+uv run --script scripts/check-release-artifacts.py
 cargo run -p hisi-rf-link --target <host-target> --locked -- \
   rebuild-native-supplicant \
   --repository-root . \
@@ -138,10 +138,16 @@ features during the migration window and are not the default architecture.
 
 The replacement path is pinned upstream hostap 2.11 with the official 2026-1,
 2026-2, and 2026-3 security fixes backported, not the SDK's LiteOS-derived
-2.10 fork. `include/hisi_wpa_supplicant.h` and `ws63_radio_sys::supplicant`
-define the same narrow, versioned ABI for a single runner-owned context. The
-vendor archive remains a behavior and silicon-parity oracle while the upstream
-port is brought up; it is not the long-term runtime architecture.
+2.10 fork. The 2026-4 mesh AMPE advisory does not affect the current STA
+Personal profiles because they compile neither `CONFIG_MESH` nor
+`wpa_supplicant/mesh_rsn.c`. The 2026-5 RADIUS advisory does not affect the
+current AP Personal profiles because they omit `src/radius/radius.c` and define
+`CONFIG_NO_RADIUS`. These dispositions are profile-scoped, machine-checked,
+and must be reviewed again when the source pin or profiles change.
+`include/hisi_wpa_supplicant.h` and `ws63_radio_sys::supplicant` define the same
+narrow, versioned ABI for a single runner-owned context. The vendor archive
+remains a behavior and silicon-parity oracle while the upstream port is brought
+up; it is not the long-term runtime architecture.
 
 The optional `upstream-supplicant-port` feature selects the Cargo-delivered native
 port archive. Rebuilding that archive from the pinned source is a maintainer lane;

@@ -4,7 +4,9 @@ Cargo-delivered, redistributable WS63 radio target archives normalized by
 `hisi-rf-link` for stock `rust-lld`. It also carries reproducible target
 archives for the pinned upstream hostap 2.11 WPA2/WPA3 Personal STA profiles,
 the separately selected WPA2-Personal and WPA3-SAE AP authenticators, and the official
-2026-1, 2026-2, and 2026-3 security backports.
+2026-1, 2026-2, and 2026-3 security backports. Its provenance also records the
+machine-checked, profile-scoped not-affected dispositions for advisories 2026-4
+(mesh AMPE) and 2026-5 (RADIUS); those are not represented as applied fixes.
 
 The BLE B0 payload contains normalized `libbt_host.a`, `libbt_app.a`, and
 `libbth_sdk.a` artifacts plus the shared `libbg_common.a`. Its hash-bound profile
@@ -24,7 +26,7 @@ into Cargo's package-specific `OUT_DIR`, validates their size and SHA-256 from
 
 The manifest binds every archive to a size and SHA-256. Native supplicant and
 authenticator entries additionally record the upstream tag/base commit, patched commit,
-security advisory set, release tarball hash,
+applied security advisory set, applicability dispositions, release tarball hash,
 target, compiler, archiver, exact `cc-rs` version, canonical builder source, and
 source-profile revision. CI rebuilds every native archive with that contract
 and compares its bytes with this package. Rebuilding is a maintainer/release

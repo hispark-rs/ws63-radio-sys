@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Security
+
+- Record machine-checked, profile-scoped not-affected dispositions for hostap
+  advisories 2026-4 (mesh AMPE) and 2026-5 (RADIUS). The release workflow now
+  fetches the official advisory index and blocks publication on a missing,
+  unresolved, or profile-invalid decision.
+- Add negative tests proving that enabling the affected source/configuration
+  invalidates a not-affected disposition instead of silently carrying it into
+  the Cargo artifact provenance.
+
 ## [0.1.0-alpha.25] - 2026-08-31
 
 ### Fixed
