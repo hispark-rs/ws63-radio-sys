@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.26] - 2026-09-09
+
+The three-package release unit remains version-aligned. Normalized radio and
+native hostap archive bytes are unchanged from alpha.25. This release adds an
+unsafe ABI boundary, not a NET0 producer fence or new on-silicon support claim.
+
 ### Added
 
 - Add a narrow unsafe FRW host-delivery binding from the SDK callback headers:
