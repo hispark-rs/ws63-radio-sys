@@ -37,6 +37,8 @@ compile_error!("select exactly one AP authenticator security profile");
 pub mod authenticator;
 #[cfg(feature = "ble")]
 pub mod ble;
+#[cfg(feature = "wifi")]
+pub mod frw;
 #[cfg(feature = "sle")]
 pub mod sle;
 #[cfg(feature = "sle")]

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add a narrow unsafe FRW host-delivery binding from the SDK callback headers:
+  callback 261, two full-width arguments, registration/readback, and the
+  delivered receiver. Record the ROM/ELF cross-check and explicitly exclude
+  producer-drain or packet-delivery claims from callback return status.
+
 ### Security
 
 - Record machine-checked, profile-scoped not-affected dispositions for hostap
