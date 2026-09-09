@@ -177,7 +177,9 @@ jobs:
       - name: Test the narrow FRW callback ABI on the consumer host
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
-        run: cargo test -p ws63-radio-sys --lib --target ${{ matrix.host }} --locked frw::
+        run: >-
+          cargo test -p ws63-radio-sys --lib
+          --target ${{ matrix.host }} --locked frw::
       - name: Build WPA2 Cargo consumer contract
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/ws63 consumer 构建
